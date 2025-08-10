@@ -10,27 +10,31 @@ import {
   AnimatedBackground,
   Friends,
 } from "./components/index.tsx";
+import { useDashboardData } from "../../src/hooks/useStates.ts";
+import { updateProfile } from "../../src/services/api.ts";
 
-export default function DashboardPage({ user, achievements }: { user: User | null, achievements: Achievement[] }) {
+export default function DashboardPage() {
+  const { identity, profile, gameState, social, achievements, notifications, messages } = useDashboardData();
+  
   const [activeSection, setActiveSection] = useState("tournaments");
   const [isVisible, setIsVisible] = useState(false);
   const [ballPosition, setBallPosition] = useState({ x: 90, y: 10 });
-  const [notifications, setNotifications] = useState(3);
+  const [notificationCount, setNotificationCount] = useState(3);
   const [onlineUsers, setOnlineUsers] = useState(1247);
   const [userStats, setUserStats] = useState({
-    wins: user?.gameStats.wins ?? 0,
-    losses: user?.gameStats?.losses ?? 0,
+    wins: gameState?.stats.wins ?? 0,
+    losses: gameState?.stats.losses ?? 0,
     rank: 42,
-    winRate: user?.gameStats && user.gameStats.totalGames > 0 ? ((user.gameStats.wins / user.gameStats.totalGames) * 100).toFixed(1) : 0,
+    winRate: gameState?.stats.totalGames && gameState.stats.totalGames > 0 ? ((gameState.stats.wins / gameState.stats.totalGames) * 100).toFixed(1) : 0,
   });
 
   // State for profile editing
   const [isEditMode, setIsEditMode] = useState(false);
   const [editableProfile, setEditableProfile] = useState({
-    displayName: "",
-    bio: "",
-    avatarFile: null as File | null,
-    avatarPreview: ""
+    displayName: profile?.displayName || "",
+    bio: profile?.bio || "",
+    avatarFile: profile?.avatar ? null : null as File | null, // Initially null if no avatar
+    avatarPreview: profile?.avatar ? `http://localhost:3002/${profile.avatar}` : "",
   });
 
   // Mock data
@@ -48,13 +52,23 @@ export default function DashboardPage({ user, achievements }: { user: User | nul
 
   useEffect(() => {
     setIsVisible(true);
-    // Initialize editable profile state when user data is available
-    if (user) {
+    // Initialize editable profile state when profile data is available
+    if (profile) {
       setEditableProfile({
-        displayName: user.profile?.displayName || "",
-        bio: user.profile?.bio || "",
+        displayName: profile.displayName || "",
+        bio: profile.bio || "",
         avatarFile: null,
-        avatarPreview: user.profile?.avatar ? `http://localhost:3002/${user.profile.avatar}` : ""
+        avatarPreview: profile.avatar ? `http://localhost:3002/${profile.avatar}` : ""
+      });
+    }
+
+    // Update user stats when game state changes
+    if (gameState) {
+      setUserStats({
+        wins: gameState.stats.wins,
+        losses: gameState.stats.losses,
+        rank: 42,
+        winRate: gameState.stats.totalGames > 0 ? ((gameState.stats.wins / gameState.stats.totalGames) * 100).toFixed(1) : 0,
       });
     }
 
@@ -67,26 +81,29 @@ export default function DashboardPage({ user, achievements }: { user: User | nul
     }, 4000);
 
     return () => clearInterval(ballInterval);
-  }, [user]);
+  }, [profile, gameState]);
 
   // Profile Edit Handlers
-  const handleSave = () => {
-    console.log("Saving profile:", {
+  const handleSave = async () => {
+    const success = await updateProfile({
       displayName: editableProfile.displayName,
       bio: editableProfile.bio,
-      avatar: editableProfile.avatarFile,
+      avatar: editableProfile.avatarFile ?? null
     });
-    setIsEditMode(false);
+    console.log("Profile updated:", success);
+    if (success) {
+      setIsEditMode(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditMode(false);
-    if (user) {
+    if (profile) {
       setEditableProfile({
-        displayName: user.profile?.displayName || "",
-        bio: user.profile?.bio || "",
+        displayName: profile.displayName || "",
+        bio: profile.bio || "",
         avatarFile: null,
-        avatarPreview: user.profile?.avatar ? `http://localhost:3002/${user.profile.avatar}` : ""
+        avatarPreview: profile.avatar ? `http://localhost:3002/${profile.avatar}` : ""
       });
     }
   };
@@ -114,9 +131,9 @@ export default function DashboardPage({ user, achievements }: { user: User | nul
 
       {/* Header */}
       <Header 
-        user={user} 
-        onlineUsers={onlineUsers} 
-        notifications={notifications} 
+        profile={profile} 
+        onlineUsers={social?.onlineUsers || onlineUsers} 
+        notifications={notifications?.unreadCount || notificationCount} 
       />
 
       {/* Navigation */}
@@ -131,11 +148,13 @@ export default function DashboardPage({ user, achievements }: { user: User | nul
           <div className={`transition-all duration-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
             {activeSection === "tournaments" && <TournamentsSection tournaments={tournaments} />}
             {activeSection === "chats" && <ChatsSection chats={chats} />}
-            {activeSection === "friends" && <Friends user={user} />}
+            {activeSection === "friends" && <Friends />}
             {activeSection === "profile" && (
               <ProfileSection
-                user={user}
-                achievements={achievements}
+                profile={profile}
+                gameState={gameState}
+                achievements={achievements?.allAchievements || []}
+                userAchievementIds={achievements?.userAchievementIds || []}
                 userStats={userStats}
                 isEditMode={isEditMode}
                 editableProfile={editableProfile}

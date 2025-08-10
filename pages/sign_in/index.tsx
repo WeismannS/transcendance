@@ -1,6 +1,6 @@
 import Miku, { useState, useEffect, useRef } from "Miku"
 import { redirect } from "Miku/Router"
-import { Props } from "src/types/types"
+import { Props } from "src/types/types.TS"
 
 export default function AuthPage({setIsLoggedIn} : Props) {
   const [isVisible, setIsVisible] = useState(false)

@@ -1,20 +1,21 @@
 import Miku, { useEffect, workLoop } from "Miku";
-import HomePage from "./pages/app_home/index.js";
-import DashboardPage from "./pages/dashboard/index.js";
-import UserHomePage from "./pages/profile/index.js";
+import HomePage from "./pages/app_home/index.ts";
+import DashboardPage from "./pages/dashboard/index.ts";
+import UserHomePage from "./pages/profile/index.ts";
 import { redirect, Router } from "Miku/Router";
-import SignInPage from "./pages/sign_in/index.js";
-import TournamentsPage from "./pages/tournaments/index.js";
-import LeaderboardPage from "./pages/leaderboard/index.js";
-import GamePage from "./pages/game/index.js";
-import { Achievement, User } from "./types/user.js";
+import SignInPage from "./pages/sign_in/index.ts";
+import TournamentsPage from "./pages/tournaments/index.ts";
+import LeaderboardPage from "./pages/leaderboard/index.ts";
+import GamePage from "./pages/game/index.ts";
+import { initializeUserData, initializeWebSocket } from "./src/services/api.ts";
+import { stateManager } from "./src/store/StateManager.ts";
 
 const aa = document.body.querySelector("#app");
-const ProtectedRoutes=   ({isLoggedIn, user, achievements} : {isLoggedIn: boolean, user: User | null, achievements: Achievement[]}) =>
+const ProtectedRoutes=   ({isLoggedIn} : {isLoggedIn: boolean}) =>
 {  
     return (
         <>
-            <Router path="/dashboard" Component={DashboardPage} user={user} achievements={achievements} />
+            <Router path="/dashboard" Component={DashboardPage} />
             <Router path="/app_home" Component={UserHomePage} />
             <Router path="/profile/:userid" Component={UserHomePage} />
             <Router path="/tournaments" Component={TournamentsPage} />
@@ -25,8 +26,8 @@ const ProtectedRoutes=   ({isLoggedIn, user, achievements} : {isLoggedIn: boolea
 }
 const Routing = () => {
     const [isLoggedIn, setIsLoggedIn] = Miku.useState(false);
-    const [user, setUser] = Miku.useState<User | null>(null);
-    const [achievements, setAchievements] = Miku.useState<any[]>([]);
+    const [userDataLoaded, setUserDataLoaded] = Miku.useState(false);
+
     useEffect(() => {
         const res = fetch("http://localhost:3001/verify", {
             credentials: "include",
@@ -45,36 +46,42 @@ const Routing = () => {
             }
         });
     }, [isLoggedIn]);
+
+    // Initialize user data and WebSocket when logged in
     useEffect(() => {
-        const res = fetch("http://localhost:3000/api/user-management/me", {
-            credentials: "include",
-        });
-        res.then(response => {
-            if (response.status === 200) {
-                response.json().then(data => {
-                    setUser(data);
-                    console.log("User data:", data);
-                });
-            } else {
-                setUser(null);
-            }
-        });
-    }, [isLoggedIn]);
-    useEffect(() => {
-        const res = fetch("http://localhost:3000/api/user-management/allachievements", {
-            credentials: "include",
-        });
-        res.then(response => {
-            if (response.status === 200) {
-                response.json().then(data => {
-                    setAchievements(data.achievements);
-                    console.log("User achievements:", data);
-                });
-            } else {
-                setAchievements([]);
-            }
-        });
-    }, [isLoggedIn]);
+        if (isLoggedIn && !userDataLoaded) {
+            // Initialize user data from API
+            const loadUserData = async () => {
+                try {
+                    // Use your existing endpoints
+                    const [userResponse, achievementsResponse] = await Promise.all([
+                        fetch("http://localhost:3000/api/user-management/me", { credentials: "include" }),
+                        fetch("http://localhost:3000/api/user-management/allachievements", { credentials: "include" })
+                    ]);
+
+                    if (userResponse.status === 200 && achievementsResponse.status === 200) {
+                        const userData = await userResponse.json();
+                        const achievementsData = await achievementsResponse.json();
+                        
+                        console.log("User data:", userData);
+                        console.log("Achievements data:", achievementsData);
+
+                        // Initialize state manager
+                        stateManager.initializeFromUser(userData, achievementsData.achievements || []);
+                        console.log("State initialized with user data", stateManager.getState('userProfile'));
+                        // Initialize WebSocket for real-time updates
+                        initializeWebSocket();
+                        
+                        setUserDataLoaded(true);
+                    }
+                } catch (error) {
+                    console.error("Failed to load user data:", error);
+                }
+            };
+
+            loadUserData();
+        }
+    }, [isLoggedIn, userDataLoaded]);
     return (
         <div>
             {!isLoggedIn ? (
@@ -83,7 +90,7 @@ const Routing = () => {
                     <Router path="/sign_in" setIsLoggedIn={setIsLoggedIn} Component={SignInPage} />
                 </>
             ) : (
-                <ProtectedRoutes isLoggedIn={isLoggedIn} user={user} achievements={achievements} />
+                <ProtectedRoutes isLoggedIn={isLoggedIn} />
             )}
         </div>
     )

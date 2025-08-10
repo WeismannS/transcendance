@@ -1,13 +1,13 @@
 import Miku from "Miku";
-import { User } from "../../../types/user.ts";
+import { UserProfileState } from "../../../src/store/StateManager";
 
 interface HeaderProps {
-  user: User | null;
+  profile: UserProfileState | null;
   onlineUsers: number;
   notifications: number;
 }
 
-export default function Header({ user, onlineUsers, notifications }: HeaderProps) {
+export default function Header({ profile, onlineUsers, notifications }: HeaderProps) {
   return (
     <header className="relative z-10 px-6 py-4 border-b border-gray-700/50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -30,9 +30,9 @@ export default function Header({ user, onlineUsers, notifications }: HeaderProps
           </div>
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-              {user?.profile?.avatar && <img src={`http://localhost:3002/${user.profile.avatar}`} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />}
+              {profile?.avatar && <img src={`http://localhost:3002/${profile.avatar}`} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />}
             </div>
-            <span className="text-white font-semibold">{user?.profile?.displayName || "John Doe"}</span>
+            <span className="text-white font-semibold">{profile?.displayName || "John Doe"}</span>
           </div>
         </div>
       </div>

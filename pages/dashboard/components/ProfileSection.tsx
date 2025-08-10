@@ -1,6 +1,7 @@
 import Miku from "Miku";
 import { Link } from "Miku/Router";
-import { Achievement, User } from "../../../types/user.ts";
+import { Achievement, GameHistory } from "../../../types/user.ts";
+import { UserProfileState, GameState } from "../../../src/store/StateManager";
 
 interface EditableProfile {
   displayName: string;
@@ -10,8 +11,10 @@ interface EditableProfile {
 }
 
 interface ProfileSectionProps {
-  user: User | null;
+  profile: UserProfileState | null;
+  gameState: GameState | null;
   achievements: Achievement[];
+  userAchievementIds: number[];
   userStats: {
     wins: number;
     losses: number;
@@ -28,8 +31,10 @@ interface ProfileSectionProps {
 }
 
 export default function ProfileSection({
-  user,
+  profile,
+  gameState,
   achievements,
+  userAchievementIds,
   userStats,
   isEditMode,
   editableProfile,
@@ -39,6 +44,7 @@ export default function ProfileSection({
   handleProfileChange,
   handleAvatarChange
 }: ProfileSectionProps) {
+console.log("ProfileSection Rendered", { profile, gameState, achievements, userAchievementIds, userStats });
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -167,14 +173,14 @@ export default function ProfileSection({
               <span className="text-gray-400 text-sm">Total Wins</span>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-400 font-semibold">{user?.gameStats.wins}</span>
+                <span className="text-green-400 font-semibold">{gameState?.stats.wins || 0}</span>
               </div>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-400 text-sm">Total Losses</span>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                <span className="text-red-400 font-semibold">{user?.gameStats.losses}</span>
+                <span className="text-red-400 font-semibold">{gameState?.stats.losses || 0}</span>
               </div>
             </div>
             <div className="flex justify-between items-center">
@@ -182,8 +188,8 @@ export default function ProfileSection({
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                 <span className="text-orange-400 font-semibold">
-                  {user?.gameStats?.totalGames && user.gameStats.totalGames > 0 
-                    ? `${((user.gameStats.wins / user.gameStats.totalGames) * 100).toFixed(1)}%` 
+                  {gameState?.stats?.totalGames && gameState.stats.totalGames > 0 
+                    ? `${((gameState.stats.wins / gameState.stats.totalGames) * 100).toFixed(1)}%` 
                     : "0%"}
                 </span>
               </div>
@@ -202,9 +208,9 @@ export default function ProfileSection({
             <h3 className="text-xl font-bold text-white mb-4">Recent Performance</h3>
             <div className="flex items-end space-x-2 h-32">
               {(() => {
-                const recentGames = user?.gameHistory?.slice(-10).reverse() || [];
+                const recentGames = gameState?.history?.slice(-10).reverse() || [];
                 const filledGames = Object.assign(new Array(10).fill(null), recentGames);
-                return filledGames.map((game, index) => {
+                return filledGames.map((game: any, index: number) => {
                   if (!game) { return <div key={`placeholder-${index}`} className="bg-gray-700/40 rounded-t flex-1" style={{ height: "20%" }}></div>; }
                   const scoreRatio = game.playerScore + game.opponentScore > 0 ? game.playerScore / (game.playerScore + game.opponentScore) : 0.5;
                   return <div key={game.id} className={`rounded-t flex-1 transition-all hover:opacity-80 ${game.result === "win" ? "bg-gradient-to-t from-green-500 to-green-400" : "bg-gradient-to-t from-red-500 to-red-400"}`} style={{ height: `${Math.max(20, Math.min(100, scoreRatio * 100))}%` }} title={`${game.result === "win" ? "Win" : "Loss"} - ${game.playerScore}:${game.opponentScore}`}></div>;
@@ -212,7 +218,7 @@ export default function ProfileSection({
               })()}
             </div>
             <div className="flex justify-between text-gray-400 text-sm mt-2">
-              <span>{user?.gameHistory?.length ? `${user.gameHistory.length} games ago` : "10 games ago"}</span>
+              <span>{gameState?.history?.length ? `${gameState.history.length} games ago` : "10 games ago"}</span>
               <span>Latest</span>
             </div>
           </div>
@@ -222,7 +228,7 @@ export default function ProfileSection({
             <h3 className="text-xl font-bold text-white mb-4">Achievements</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {achievements && achievements?.map((achievement, index) => {
-                const hasAchievement = user?.achievements?.includes(achievement.id);
+                const hasAchievement = userAchievementIds?.includes(achievement.id);
                 return (
                   <div key={index} className={`text-center p-4 rounded-xl border transition-all hover:scale-105 ${hasAchievement ? "bg-gradient-to-br from-orange-500/20 to-pink-500/20 border-orange-500/50 shadow-lg" : "bg-gray-700/30 border-gray-600 hover:border-gray-500"}`}>
                     <div className={`text-3xl mb-2 transition-all ${hasAchievement ? "" : "grayscale opacity-50"}`}>
