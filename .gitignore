@@ -4,3 +4,5 @@ dist
 output.css
 src/input.css
 *.js
+bun.lock
+*.lock
