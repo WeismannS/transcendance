@@ -1,9 +1,8 @@
 import Miku, { useState, useEffect, useRef } from "Miku"
 import { redirect } from "Miku/Router"
-import { Props } from "src/types/types.ts"
 import { API_URL } from "../../src/services/api.ts"
 
-export default function AuthPage({setIsLoggedIn} : Props) {
+export default function AuthPage({setIsLoggedIn} : any) {
   const [isVisible, setIsVisible] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
   const [formData, setFormData] = useState({
@@ -209,7 +208,7 @@ export default function AuthPage({setIsLoggedIn} : Props) {
     
     // Open Google OAuth popup
     const popup = window.open(
-      'http://localhost:3001/auth/google',
+      API_URL + '/auth/google',
       'google-oauth',
       'width=500,height=600,scrollbars=yes,resizable=yes'
     )
@@ -255,7 +254,7 @@ export default function AuthPage({setIsLoggedIn} : Props) {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/auth/verify-2fa', {
+      const response = await fetch(API_URL + '/auth/verify-2fa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

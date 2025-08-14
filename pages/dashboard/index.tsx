@@ -11,7 +11,7 @@ import {
   Friends,
 } from "./components/index.tsx";
 import { useDashboardData } from "../../src/hooks/useStates.ts";
-import { logOut, updateProfile } from "../../src/services/api.ts";
+import { API_URL, logOut, updateProfile } from "../../src/services/api.ts";
 
 export default function DashboardPage() {
   const { identity, profile, gameState, social, achievements, notifications, messages } = useDashboardData();
@@ -34,7 +34,7 @@ export default function DashboardPage() {
     displayName: profile?.displayName || "",
     bio: profile?.bio || "",
     avatarFile: profile?.avatar ? null : null as File | null, // Initially null if no avatar
-    avatarPreview: profile?.avatar ? `http://localhost:3002/${profile.avatar}` : "",
+    avatarPreview: profile?.avatar ? API_URL + `/${profile.avatar}` : "",
   });
 
   // Mock data
@@ -58,7 +58,7 @@ export default function DashboardPage() {
         displayName: profile.displayName || "",
         bio: profile.bio || "",
         avatarFile: null,
-        avatarPreview: profile.avatar ? `http://localhost:3002/${profile.avatar}` : ""
+        avatarPreview: profile.avatar ? API_URL + `/${profile.avatar}` : ""
       });
     }
 
@@ -103,7 +103,7 @@ export default function DashboardPage() {
         displayName: profile.displayName || "",
         bio: profile.bio || "",
         avatarFile: null,
-        avatarPreview: profile.avatar ? `http://localhost:3002/${profile.avatar}` : ""
+        avatarPreview: profile.avatar ? API_URL + `/${profile.avatar}` : ""
       });
     }
   };

@@ -7,7 +7,7 @@ import SignInPage from "./pages/sign_in/index.ts";
 import TournamentsPage from "./pages/tournaments/index.ts";
 import LeaderboardPage from "./pages/leaderboard/index.ts";
 import GamePage from "./pages/game/index.ts";
-import { initializeUserData, initializeWebSocket } from "./src/services/api.ts";
+import { API_URL, initializeUserData, initializeWebSocket } from "./src/services/api.ts";
 import { stateManager } from "./src/store/StateManager.ts";
 
 const aa = document.body.querySelector("#app");
@@ -29,7 +29,7 @@ const Routing = () => {
     const [userDataLoaded, setUserDataLoaded] = Miku.useState(false);
 
     useEffect(() => {
-        const res = fetch("http://localhost:3001/verify", {
+        const res = fetch(API_URL + "/verify", {
             credentials: "include",
         });
         res.then(response => {
@@ -55,8 +55,8 @@ const Routing = () => {
                 try {
                     // Use your existing endpoints
                     const [userResponse, achievementsResponse] = await Promise.all([
-                        fetch("http://localhost:3000/api/user-management/me", { credentials: "include" }),
-                        fetch("http://localhost:3000/api/user-management/allachievements", { credentials: "include" })
+                        fetch(API_URL + "/api/user-management/me", { credentials: "include" }),
+                        fetch(API_URL + "/api/user-management/allachievements", { credentials: "include" })
                     ]);
 
                     if (userResponse.status === 200 && achievementsResponse.status === 200) {

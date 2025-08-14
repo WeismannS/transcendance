@@ -17,6 +17,9 @@ app.use('/src', express.static(path.join(__dirname, 'src')));
 
 app.use('/Miku', express.static(path.join(__dirname, 'Miku')));
 
+app.use('/dist', express.static(path.join(__dirname, 'dist')));
+
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req: Request, res: Response) => {

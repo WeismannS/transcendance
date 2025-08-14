@@ -1,6 +1,7 @@
 import Miku, { useState, useEffect } from "Miku";
 import { API_URL, searchProfiles, sendFriendRequest } from "../../../src/services/api.ts";
 import { ProfileOverview } from "../../../types/user.ts";
+import { SocialState, stateManager } from "../../../src/store/StateManager.ts";
 
 const friends = [
   {
@@ -286,7 +287,7 @@ export default function Friends() {
                           <div className="text-orange-400 font-bold">#{user.rank}</div>
                           <div className="text-gray-400">{user.status}</div>
                         </div>
-                        {sentRequests.has(user.id) ? (
+                        {(stateManager.getState("social") as SocialState).friendRequests.sent.includes(user.id) ? (
                           <button className="px-4 py-2 bg-gray-600 text-gray-400 rounded-lg cursor-not-allowed" disabled>
                             Request Sent
                           </button>
