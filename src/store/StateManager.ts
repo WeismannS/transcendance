@@ -65,7 +65,7 @@ interface StateEvent {
   timestamp: number;
 }
 
-type StateKey = 'userIdentity' | 'userProfile' | 'gameState' | 'social' | 'achievements' | 'notifications' | 'messages';
+type StateKey = 'auth' | 'userIdentity' | 'userProfile' | 'gameState' | 'social' | 'achievements' | 'notifications' | 'messages';
 
 class StateManager {
   private states: Map<StateKey, any> = new Map();

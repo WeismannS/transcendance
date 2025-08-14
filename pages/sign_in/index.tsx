@@ -1,6 +1,7 @@
 import Miku, { useState, useEffect, useRef } from "Miku"
 import { redirect } from "Miku/Router"
-import { Props } from "src/types/types.TS"
+import { Props } from "src/types/types.ts"
+import { API_URL } from "../../src/services/api.ts"
 
 export default function AuthPage({setIsLoggedIn} : Props) {
   const [isVisible, setIsVisible] = useState(false)
@@ -158,7 +159,7 @@ export default function AuthPage({setIsLoggedIn} : Props) {
     setIsLoading(true)
 
     try {
-      const url = isSignUp ? "http://localhost:3000/api/auth/signup" : "http://localhost:3000/api/auth/login"
+      const url = isSignUp ? API_URL + "/api/auth/signup" : API_URL + "/api/auth/login"
       const payload = isSignUp
         ? {
             email: formData.email,

@@ -1,12 +1,14 @@
 import { stateManager } from "../store/StateManager.ts";
 import { User, Achievement } from "../../types/user.ts";
+import { redirect } from "Miku/Router";
 
-// Initialize user data from /me endpoint
+export const API_URL = "http://localhost:3000";
+
 export async function initializeUserData(): Promise<{ user: User | null, achievements: Achievement[] }> {
   try {
     const [userResponse, achievementsResponse] = await Promise.all([
-      fetch('/api/user/me'),
-      fetch('/api/achievements')
+      fetch(API_URL + '/api/user/me'),
+      fetch(API_URL + '/api/achievements')
     ]);
 
     if (!userResponse.ok || !achievementsResponse.ok) {
@@ -26,6 +28,26 @@ export async function initializeUserData(): Promise<{ user: User | null, achieve
   }
 }
 
+export async function logOut() {
+  try {
+    const response = await fetch(API_URL + '/api/auth/logout', {
+      method: 'POST',
+      credentials: "include"
+    });
+    if (!response.ok) {
+      throw new Error('Failed to log out');
+    }
+    const {setIsLoggedIn , setUserDataLoaded}  = stateManager.getState("auth");
+    setIsLoggedIn(false)
+    setUserDataLoaded(false)
+
+    setTimeout(()=>redirect("/sign_in"), 1000);
+    return true;
+  }   catch (error) {
+    console.error('Failed to log out:', error);
+    return false;
+  }
+}
 // Friend Request Actions
 export async function sendFriendRequest(userId: number, username: string) {
   try {
@@ -37,10 +59,11 @@ export async function sendFriendRequest(userId: number, username: string) {
     
     stateManager.emit('FRIEND_REQUEST_SENT', tempRequest);
 
-    const response = await fetch('/api/friends/request', {
+    const response = await fetch(API_URL + '/api/user-management/friendships', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId })
+      credentials: "include",
+      body: JSON.stringify({ receiverId: userId  })
     });
 
     if (!response.ok) {
@@ -64,7 +87,7 @@ export async function sendFriendRequest(userId: number, username: string) {
 
 export async function acceptFriendRequest(requestId: number, friend: any) {
   try {
-    const response = await fetch(`/api/friends/accept/${requestId}`, {
+    const response = await fetch(API_URL + `/api/friends/accept/${requestId}`, {
       method: 'POST'
     });
 
@@ -80,9 +103,11 @@ export async function acceptFriendRequest(requestId: number, friend: any) {
   }
 }
 
+
+
 export async function declineFriendRequest(requestId: number, userId: number) {
   try {
-    const response = await fetch(`/api/friends/decline/${requestId}`, {
+    const response = await fetch(API_URL + `/api/friends/decline/${requestId}`, {
       method: 'POST'
     });
 
@@ -101,7 +126,7 @@ export async function declineFriendRequest(requestId: number, userId: number) {
 // Game Actions
 export async function finishGame(gameResult: any) {
   try {
-    const response = await fetch('/api/game/finish', {
+    const response = await fetch(API_URL + '/api/game/finish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(gameResult)
@@ -140,7 +165,7 @@ export async function updateProfile(profileData: any) {
         if (!profileData.avatar)
             headers['Content-Type'] = 'application/json';
 
-        const response = await fetch('http://localhost:3000/api/user-management/profiles', {
+        const response = await fetch(API_URL + '/api/user-management/profiles', {
             method: 'PATCH',
             headers: headers,
             body: formData,
@@ -163,56 +188,74 @@ export async function updateProfile(profileData: any) {
 
 // WebSocket connection for real-time updates
 export function initializeWebSocket() {
-  const ws = new WebSocket('ws://localhost:3002/user-updates');
+  // const ws = new WebSocket('ws://localhost:3002/user-updates');
   
-  ws.onmessage = (event) => {
-    try {
-      const { type, data } = JSON.parse(event.data);
+  // ws.onmessage = (event) => {
+  //   try {
+  //     const { type, data } = JSON.parse(event.data);
       
-      switch (type) {
-        case 'FRIEND_REQUEST_RECEIVED':
-          stateManager.emit('FRIEND_REQUEST_RECEIVED', data);
-          break;
+  //     switch (type) {
+  //       case 'FRIEND_REQUEST_RECEIVED':
+  //         stateManager.emit('FRIEND_REQUEST_RECEIVED', data);
+  //         break;
           
-        case 'FRIEND_REQUEST_ACCEPTED':
-          stateManager.emit('FRIEND_REQUEST_ACCEPTED', data);
-          break;
+  //       case 'FRIEND_REQUEST_ACCEPTED':
+  //         stateManager.emit('FRIEND_REQUEST_ACCEPTED', data);
+  //         break;
           
-        case 'MESSAGE_RECEIVED':
-          stateManager.emit('MESSAGE_RECEIVED', data);
-          break;
+  //       case 'MESSAGE_RECEIVED':
+  //         stateManager.emit('MESSAGE_RECEIVED', data);
+  //         break;
           
-        case 'ACHIEVEMENT_UNLOCKED':
-          stateManager.emit('ACHIEVEMENT_UNLOCKED', data);
-          break;
+  //       case 'ACHIEVEMENT_UNLOCKED':
+  //         stateManager.emit('ACHIEVEMENT_UNLOCKED', data);
+  //         break;
           
-        case 'USER_STATUS_CHANGED':
-          stateManager.emit('USER_STATUS_CHANGED', data);
-          break;
+  //       case 'USER_STATUS_CHANGED':
+  //         stateManager.emit('USER_STATUS_CHANGED', data);
+  //         break;
           
-        default:
-          console.log('Unknown websocket message type:', type);
-      }
-    } catch (error) {
-      console.error('Failed to parse websocket message:', error);
+  //       default:
+  //         console.log('Unknown websocket message type:', type);
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to parse websocket message:', error);
+  //   }
+  // };
+
+  // ws.onopen = () => {
+  //   console.log('WebSocket connected');
+  // };
+
+  // ws.onclose = () => {
+  //   console.log('WebSocket disconnected');
+  //   // Implement reconnection logic here
+  //   setTimeout(() => {
+  //     initializeWebSocket();
+  //   }, 5000);
+  // };
+
+  // ws.onerror = (error) => {
+  //   console.error('WebSocket error:', error);
+  // };
+
+  // return ws;
+}
+
+
+export async function searchProfiles(username: string) {
+  try {
+  const response = await fetch(API_URL + `/api/user-management/profile?username=${username}`, {
+    credentials: "include"
+  });
+  if (!response.ok) {
+    throw new Error('Failed to search profiles');
     }
-  };
-
-  ws.onopen = () => {
-    console.log('WebSocket connected');
-  };
-
-  ws.onclose = () => {
-    console.log('WebSocket disconnected');
-    // Implement reconnection logic here
-    setTimeout(() => {
-      initializeWebSocket();
-    }, 5000);
-  };
-
-  ws.onerror = (error) => {
-    console.error('WebSocket error:', error);
-  };
-
-  return ws;
+    const data = await response.json();
+    const users = data.users;
+    return users;
+  } catch (error) {
+    console.error('Failed to search profiles:', error);
+    return [];
+  }
 }

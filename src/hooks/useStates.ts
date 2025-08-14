@@ -17,7 +17,6 @@ export function useUserProfile() {
   const [profile, setProfile] = Miku.useState<UserProfileState | null>(
     stateManager.getState('userProfile')
   );
-  console.log("getUserProfile :", profile);
   Miku.useEffect(() => {
     return stateManager.subscribe('userProfile', setProfile);
   }, []);

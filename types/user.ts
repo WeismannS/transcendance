@@ -8,7 +8,7 @@ export type User = {
   gameHistory: GameHistory[];
   gameStats: GameStats;
   achievements: number[]; // Array of achievement IDs
-  friends: Friend[];
+  friends: ProfileOverview[];
   friendRequests: {
     sent: FriendRequest[];
     received: FriendRequest[];
@@ -37,14 +37,14 @@ export type Achievement = {
 };
 
 export type FriendRequest = {
-  user : Friend;
+  user : ProfileOverview & {lastActive: Date};
   createdAt: Date;
 };
 
-export type Friend = {
+export type ProfileOverview = {
   id: number;
   displayName: string;
   avatar: string;
   status: "online" | "offline" | "In Game" | "in Tournament";
-  lastActive: Date;
+  rank: number;
 };

@@ -11,7 +11,7 @@ import {
   Friends,
 } from "./components/index.tsx";
 import { useDashboardData } from "../../src/hooks/useStates.ts";
-import { updateProfile } from "../../src/services/api.ts";
+import { logOut, updateProfile } from "../../src/services/api.ts";
 
 export default function DashboardPage() {
   const { identity, profile, gameState, social, achievements, notifications, messages } = useDashboardData();
@@ -131,6 +131,7 @@ export default function DashboardPage() {
 
       {/* Header */}
       <Header 
+        onLogout={logOut}
         profile={profile} 
         onlineUsers={social?.onlineUsers || onlineUsers} 
         notifications={notifications?.unreadCount || notificationCount} 

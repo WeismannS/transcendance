@@ -69,9 +69,8 @@ const Routing = () => {
                         // Initialize state manager
                         stateManager.initializeFromUser(userData, achievementsData.achievements || []);
                         console.log("State initialized with user data", stateManager.getState('userProfile'));
-                        // Initialize WebSocket for real-time updates
                         initializeWebSocket();
-                        
+                        stateManager.setState("auth", {setIsLoggedIn, setUserDataLoaded})
                         setUserDataLoaded(true);
                     }
                 } catch (error) {
