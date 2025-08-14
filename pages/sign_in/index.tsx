@@ -42,7 +42,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
     }, 3000)
 
     // Listen for OAuth messages from popup
-    const handleMessage = (event) => {
+    const handleMessage = (event : MessageEvent) => {
       // Be more permissive with origins during development
       if (event.origin !== window.location.origin && event.origin !== 'http://localhost:3001') {
         console.log('Message rejected due to origin mismatch')
@@ -92,7 +92,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
     }
   }, [])
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: { target: { name: any; value: any } } ) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -108,7 +108,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
   }
 
   const [toast, setToast] = useState({ message: "", type: "" })
-  const toastTimeoutRef = useRef(null)
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (toast.message) {

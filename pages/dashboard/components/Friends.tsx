@@ -287,7 +287,7 @@ export default function Friends() {
                           <div className="text-orange-400 font-bold">#{user.rank}</div>
                           <div className="text-gray-400">{user.status}</div>
                         </div>
-                        {(stateManager.getState("social") as SocialState).friendRequests.sent.includes(user.id) ? (
+                        {(stateManager.getState("social") as SocialState).friendRequests.sent.find( (e) => (e.user.id == user.id) )? (
                           <button className="px-4 py-2 bg-gray-600 text-gray-400 rounded-lg cursor-not-allowed" disabled>
                             Request Sent
                           </button>

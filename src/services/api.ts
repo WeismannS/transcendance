@@ -37,7 +37,7 @@ export async function logOut() {
     if (!response.ok) {
       throw new Error('Failed to log out');
     }
-    const {setIsLoggedIn , setUserDataLoaded}  = stateManager.getState("auth");
+    const {setIsLoggedIn , setUserDataLoaded}  = stateManager.getState("auth") as any 
     setIsLoggedIn(false)
     setUserDataLoaded(false)
 
