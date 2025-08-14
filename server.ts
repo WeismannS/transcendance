@@ -8,14 +8,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, "dist", 'public')));
 
-app.use('/pages', express.static(path.join(__dirname, 'pages')));
+app.use('/pages', express.static(path.join(__dirname, "dist", 'pages')));
 
 
-app.use('/src', express.static(path.join(__dirname, 'src')));
+app.use('/src', express.static(path.join(__dirname, "dist", 'src')));
 
-app.use('/Miku', express.static(path.join(__dirname, 'Miku')));
+app.use('/Miku', express.static(path.join(__dirname, "dist", 'Miku')));
 
 app.use('/dist', express.static(path.join(__dirname, 'dist')));
 

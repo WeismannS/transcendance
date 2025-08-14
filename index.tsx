@@ -29,7 +29,7 @@ const Routing = () => {
     const [userDataLoaded, setUserDataLoaded] = Miku.useState(false);
 
     useEffect(() => {
-        const res = fetch(API_URL + "/verify", {
+        const res = fetch(API_URL + "/api/auth/verify", {
             credentials: "include",
         });
         res.then(response => {
