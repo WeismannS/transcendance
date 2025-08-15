@@ -44,7 +44,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
     // Listen for OAuth messages from popup
     const handleMessage = (event : MessageEvent) => {
       // Be more permissive with origins during development
-      if (event.origin !== window.location.origin && event.origin !== 'http://localhost:3001') {
+      if (event.origin !== window.location.origin && event.origin !== 'http://localhost:3000') {
         console.log('Message rejected due to origin mismatch')
         return
       }
@@ -208,7 +208,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
     
     // Open Google OAuth popup
     const popup = window.open(
-      API_URL + '/auth/google',
+      API_URL + '/api/auth/google',
       'google-oauth',
       'width=500,height=600,scrollbars=yes,resizable=yes'
     )

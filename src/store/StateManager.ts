@@ -201,7 +201,7 @@ class StateManager {
         this.addNotification({
           id: Date.now(),
           type: 'friend_accepted',
-          message: `${event.payload.friend.displayName} accepted your friend request`,
+          message: `You are now friends with ${event.payload.friend.displayName}`,
           timestamp: new Date()
         });
         break;

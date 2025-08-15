@@ -38,6 +38,7 @@ export type Achievement = {
 
 export type FriendRequest = {
   user : Friend
+  id : number,
   createdAt: Date;
 };
 

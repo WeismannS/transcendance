@@ -87,8 +87,13 @@ export async function sendFriendRequest(userId: number, username: string) {
 
 export async function acceptFriendRequest(requestId: number, friend: any) {
   try {
-    const response = await fetch(API_URL + `/api/friends/accept/${requestId}`, {
-      method: 'POST'
+    const response = await fetch(API_URL + `/api/user-management/friendships/${requestId}`, {
+      method: 'PATCH',
+      credentials : "include",
+      headers : {
+      'Content-Type': 'application/json'
+      },
+      body : JSON.stringify({action : "accepted"})
     });
 
     if (response.ok) {
