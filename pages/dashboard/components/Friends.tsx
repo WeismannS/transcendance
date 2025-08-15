@@ -1,5 +1,5 @@
 import Miku, { useState, useEffect } from "Miku";
-import { acceptFriendRequest, API_URL, searchProfiles, sendFriendRequest } from "../../../src/services/api.ts";
+import { acceptFriendRequest, API_URL, declineFriendRequest, searchProfiles, sendFriendRequest } from "../../../src/services/api.ts";
 import { ProfileOverview } from "../../../types/user.ts";
 import { SocialState, stateManager } from "../../../src/store/StateManager.ts";
 
@@ -323,7 +323,7 @@ export default function Friends() {
                       <button className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm" onClick={()=> acceptFriendRequest(request.id, request.user)}>
                         Accept
                       </button>
-                      <button className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm">
+                      <button className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm" onClick={() => declineFriendRequest(request.id , request.user)}>
                         Decline
                       </button>
                     </div>

@@ -110,24 +110,28 @@ export async function acceptFriendRequest(requestId: number, friend: any) {
 
 
 
-export async function declineFriendRequest(requestId: number, userId: number) {
+export async function declineFriendRequest(requestId: number, friend: any) {
   try {
-    const response = await fetch(API_URL + `/api/friends/decline/${requestId}`, {
-      method: 'POST'
+    const response = await fetch(API_URL + `/api/user-management/friendships/${requestId}`, {
+      method: 'PATCH',
+      credentials : "include",
+      headers : {
+      'Content-Type': 'application/json'
+      },
+      body : JSON.stringify({action : "declined"})
     });
 
     if (response.ok) {
-      stateManager.emit('FRIEND_REQUEST_DECLINED', { requestId, userId });
+      stateManager.emit('FRIEND_REQUEST_DECLINED', { requestId, friend });
       return true;
     } else {
-      throw new Error('Failed to decline friend request');
+      throw new Error('Failed to accept friend request');
     }
   } catch (error) {
-    console.error('Failed to decline friend request:', error);
+    console.error('Failed to accept friend request:', error);
     return false;
   }
 }
-
 // Game Actions
 export async function finishGame(gameResult: any) {
   try {

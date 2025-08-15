@@ -283,7 +283,7 @@ class StateManager {
       ...prev,
       friendRequests: {
         ...prev.friendRequests,
-        received: prev.friendRequests.received.filter(req => req.user.id !== payload.userId)
+        received: prev.friendRequests.received.filter(req => req.user.id !== payload.friend.id)
       }
     }));
   }
