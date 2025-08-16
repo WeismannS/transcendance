@@ -1,3 +1,5 @@
+import { EventType } from "../src/store/StateManager.ts"
+
 export type User = {
   profile: {
     id: number;
@@ -50,3 +52,16 @@ export type ProfileOverview = {
   status: "online" | "offline" | "In Game" | "in Tournament";
   rank: number;
 };
+
+
+export type FriendEvent = | 'FRIEND_REQUEST_RECEIVED'
+| 'FRIEND_REQUEST_ACCEPTED'
+| 'FRIEND_REQUEST_DECLINED'
+
+
+export type Notification<T extends EventType> = {
+  type : EventType
+  content : string
+  title : string
+  user : T extends FriendEvent ? ProfileOverview : never
+}

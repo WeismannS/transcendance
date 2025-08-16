@@ -40,7 +40,7 @@ export interface NotificationsState {
 }
 
 export interface MessagesState {
-  conversations: any[];
+  conversations: number[];
   unreadCount: number;
   activeChat?: string;
 }
@@ -57,7 +57,8 @@ export type EventType =
   | 'MESSAGE_RECEIVED'
   | 'PROFILE_UPDATED'
   | 'USER_STATUS_CHANGED'
-  | 'NOTIFICATION_ADDED';
+  | 'NOTIFICATION_ADDED'
+  | "CONVERSATION_ADDED"
 
 interface StateEvent {
   type: EventType;

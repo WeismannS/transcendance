@@ -9,6 +9,7 @@ import LeaderboardPage from "./pages/leaderboard/index.ts";
 import GamePage from "./pages/game/index.ts";
 import { API_URL, initializeUserData, initializeWebSocket } from "./src/services/api.ts";
 import { stateManager } from "./src/store/StateManager.ts";
+import { NotificationContainer } from "./pages/notification.tsx";
 
 const aa = document.body.querySelector("#app");
 const ProtectedRoutes=   ({isLoggedIn} : {isLoggedIn: boolean}) =>
@@ -91,6 +92,7 @@ const Routing = () => {
             ) : (
                 <ProtectedRoutes isLoggedIn={isLoggedIn} />
             )}
+            <NotificationContainer></NotificationContainer>
         </div>
     )
     }

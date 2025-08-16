@@ -2,6 +2,7 @@ import Miku, { useState, useEffect } from "Miku";
 import { acceptFriendRequest, API_URL, declineFriendRequest, searchProfiles, sendFriendRequest } from "../../../src/services/api.ts";
 import { ProfileOverview } from "../../../types/user.ts";
 import { SocialState, stateManager } from "../../../src/store/StateManager.ts";
+import { useNotifications } from "../../use-notification.tsx";
 
 export default function Friends() {
   const [showAddFriendsModal, setShowAddFriendsModal] = useState(false);
@@ -44,7 +45,15 @@ export default function Friends() {
     setIsSearching(false);
   }
 
-  function handleSendFriendRequest(userId: number, username: string) {
+  function handleSendFriendRequest({userId, username, avatar} : {userId : number, username : string, avatar:string}) {
+    addNotification({
+      type: "info",
+      title: "Finding Match",
+      message: "Looking for an opponent...",
+      duration: 3000,
+      avatar
+    })
+    console.log("logged")
     sendFriendRequest(userId, username).then((success) => {
       if (success) {
         setSentRequests(prev => new Set([...prev, userId]));
@@ -53,7 +62,7 @@ export default function Friends() {
       console.error('Failed to send friend request:', error);
     });
   }
-
+  const {addNotification} = useNotifications();
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery) {
@@ -176,7 +185,7 @@ export default function Friends() {
               </button>
             ) : (
               <button
-                onClick={() => handleSendFriendRequest(user.id, user.displayName)}
+                onClick={() => handleSendFriendRequest({userId : user.id, username : user.displayName, avatar : user.avatar})}
                 className="px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
               >
                 Add Friend
@@ -320,7 +329,10 @@ export default function Friends() {
                       <div className="text-gray-400">{request.createdAt}</div>
                     </div>
                     <div className="flex space-x-2">
-                      <button className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm" onClick={()=> acceptFriendRequest(request.id, request.user)}>
+                      <button className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm" onClick={()=> {
+                        
+                        acceptFriendRequest(request.id, request.user)}
+                      }>
                         Accept
                       </button>
                       <button className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm" onClick={() => declineFriendRequest(request.id , request.user)}>

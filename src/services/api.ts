@@ -133,6 +133,7 @@ export async function declineFriendRequest(requestId: number, friend: any) {
   }
 }
 // Game Actions
+
 export async function finishGame(gameResult: any) {
   try {
     const response = await fetch(API_URL + '/api/game/finish', {
@@ -197,58 +198,57 @@ export async function updateProfile(profileData: any) {
 
 // WebSocket connection for real-time updates
 export function initializeWebSocket() {
-  // const ws = new WebSocket('ws://localhost:3002/user-updates');
+  const ws = new WebSocket('ws://localhost:3000/ws/notifications/live');
   
-  // ws.onmessage = (event) => {
-  //   try {
-  //     const { type, data } = JSON.parse(event.data);
+  ws.onmessage = (event) => {
+    try {
+      const { type, data } = JSON.parse(event.data);
       
-  //     switch (type) {
-  //       case 'FRIEND_REQUEST_RECEIVED':
-  //         stateManager.emit('FRIEND_REQUEST_RECEIVED', data);
-  //         break;
+      switch (type) {
+        case 'FRIEND_REQUEST_RECEIVED':
+          stateManager.emit('FRIEND_REQUEST_RECEIVED', data);
+          break;
           
-  //       case 'FRIEND_REQUEST_ACCEPTED':
-  //         stateManager.emit('FRIEND_REQUEST_ACCEPTED', data);
-  //         break;
+        case 'FRIEND_REQUEST_ACCEPTED':
+          stateManager.emit('FRIEND_REQUEST_ACCEPTED', data);
+          break;
+        case 'MESSAGE_RECEIVED':
+          stateManager.emit('MESSAGE_RECEIVED', data);
+          break;
           
-  //       case 'MESSAGE_RECEIVED':
-  //         stateManager.emit('MESSAGE_RECEIVED', data);
-  //         break;
+        case 'ACHIEVEMENT_UNLOCKED':
+          stateManager.emit('ACHIEVEMENT_UNLOCKED', data);
+          break;
+   
+        case 'USER_STATUS_CHANGED':
+          stateManager.emit('USER_STATUS_CHANGED', data);
+          break;
           
-  //       case 'ACHIEVEMENT_UNLOCKED':
-  //         stateManager.emit('ACHIEVEMENT_UNLOCKED', data);
-  //         break;
-          
-  //       case 'USER_STATUS_CHANGED':
-  //         stateManager.emit('USER_STATUS_CHANGED', data);
-  //         break;
-          
-  //       default:
-  //         console.log('Unknown websocket message type:', type);
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to parse websocket message:', error);
-  //   }
-  // };
+        default:
+          console.log('Unknown websocket message type:', type);
+      }
+    } catch (error) {
+      console.error('Failed to parse websocket message:', error);
+    }
+  };
 
-  // ws.onopen = () => {
-  //   console.log('WebSocket connected');
-  // };
+  ws.onopen = () => {
+    console.log('WebSocket connected');
+  };
 
-  // ws.onclose = () => {
-  //   console.log('WebSocket disconnected');
-  //   // Implement reconnection logic here
-  //   setTimeout(() => {
-  //     initializeWebSocket();
-  //   }, 5000);
-  // };
+  ws.onclose = () => {
+    console.log('WebSocket disconnected');
+    // Implement reconnection logic here
+    setTimeout(() => {
+      initializeWebSocket();
+    }, 5000);
+  };
 
-  // ws.onerror = (error) => {
-  //   console.error('WebSocket error:', error);
-  // };
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
 
-  // return ws;
+  return ws;
 }
 
 
@@ -266,5 +266,31 @@ export async function searchProfiles(username: string) {
   } catch (error) {
     console.error('Failed to search profiles:', error);
     return [];
+  }
+}
+
+
+export async function createConversation(id : number) : Promise<number | undefined>
+{
+  try {
+    const response = await fetch(API_URL + "/api/chat/conversaton", 
+      {
+        method : "POST",
+        headers : {
+          'Content-Type': 'application/json'
+          },
+        body : JSON.stringify({
+          receiverId : id
+        }) 
+      }
+    )
+    if (!response.ok)
+      throw new Error("Failed to create conversation")
+    const data = await response.json()
+    return data.conversation.id
+  }
+  catch(e)
+  {
+    console.error("failed to creata convo ", e)
   }
 }
