@@ -1,7 +1,9 @@
-import { stateManager } from "../store/StateManager.ts";
-import { User, Achievement } from "../../types/user.ts";
+import { EventType, SocialState, stateManager } from "../store/StateManager.ts";
+import { User, Achievement, FriendEvent, isNotificationType, Conversation } from "../../types/user.ts";
 import { redirect } from "Miku/Router";
-
+import { useNotifications } from "../../pages/use-notification.tsx";
+import { Notification } from "../../types/user.ts";
+import { userInfo } from "os";
 export const API_URL = "http://localhost:3000";
 
 export async function initializeUserData(): Promise<{ user: User | null, achievements: Achievement[] }> {
@@ -87,6 +89,7 @@ export async function sendFriendRequest(userId: number, username: string) {
 
 export async function acceptFriendRequest(requestId: number, friend: any) {
   try {
+    console.info(requestId)
     const response = await fetch(API_URL + `/api/user-management/friendships/${requestId}`, {
       method: 'PATCH',
       credentials : "include",
@@ -197,36 +200,86 @@ export async function updateProfile(profileData: any) {
 }
 
 // WebSocket connection for real-time updates
-export function initializeWebSocket() {
-  const ws = new WebSocket('ws://localhost:3000/ws/notifications/live');
-  
+
+export function initializeChatWebSocket() {
+  const ws = new WebSocket('ws://localhost:3005/ws/chat/live?' + document.cookie);
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'new_message') {
+      stateManager.emit('MESSAGE_RECEIVED', data);
+    } else {
+      console.log('Unknown websocket message type:', data.type);
+    }
+  };
+
+  ws.onopen = () => {
+    console.log('WebSocket connected');
+  };
+
+  ws.onclose = () => {
+    console.log('WebSocket disconnected');
+    // Implement reconnection logic here
+    setTimeout(() => {
+      initializeChatWebSocket();
+    }, 5000);
+  };
+
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
+
+  return ws;
+}
+export function initializeNotificationWs() {
+  const { addNotification } = useNotifications();
+  const ws = new WebSocket('ws://localhost:3005/ws/notifications/live?' + document.cookie);
+ 
   ws.onmessage = (event) => {
     try {
-      const { type, data } = JSON.parse(event.data);
-      
-      switch (type) {
-        case 'FRIEND_REQUEST_RECEIVED':
-          stateManager.emit('FRIEND_REQUEST_RECEIVED', data);
-          break;
-          
-        case 'FRIEND_REQUEST_ACCEPTED':
-          stateManager.emit('FRIEND_REQUEST_ACCEPTED', data);
-          break;
-        case 'MESSAGE_RECEIVED':
-          stateManager.emit('MESSAGE_RECEIVED', data);
-          break;
-          
-        case 'ACHIEVEMENT_UNLOCKED':
-          stateManager.emit('ACHIEVEMENT_UNLOCKED', data);
-          break;
-   
-        case 'USER_STATUS_CHANGED':
-          stateManager.emit('USER_STATUS_CHANGED', data);
-          break;
-          
-        default:
-          console.log('Unknown websocket message type:', type);
+      const data = JSON.parse(event.data);
+      if (data.type === "connection_status") {
+        return;
       }
+
+      if (isNotificationType(data, 'FRIEND_REQUEST_RECEIVED')) {
+        addNotification({
+          title: data.title,
+          avatar: data.user.avatar,
+          type: "info",
+          message: data.content
+        });
+        console.error(data);
+        stateManager.emit("FRIEND_REQUEST_RECEIVED", {
+          user: data.user, 
+          id: data.requestId
+        });
+      } else if (isNotificationType(data, 'FRIEND_REQUEST_ACCEPTED')) {
+        addNotification({
+          title: data.title,
+          avatar: data.user.avatar,
+          type: "info",
+          message: data.content
+        });
+        stateManager.emit("FRIEND_REQUEST_ACCEPTED", { user: data.user });
+      } else if (isNotificationType(data, 'FRIEND_REQUEST_DECLINED')) {
+        addNotification({
+          title: data.title,
+          avatar: data.user.avatar,
+          type: "info",
+          message: data.content
+        });
+        stateManager.emit("FRIEND_REQUEST_DECLINED", { user: data.user });
+      } else if (isNotificationType(data, 'STATUS_UPDATE')) {
+
+        stateManager.emit("STATUS_UPDATE", {
+          user: data.user
+        });
+      } else if (isNotificationType(data, 'ACHIEVEMENT_UNLOCKED')) {
+      } else {
+        console.log('Unknown websocket message type:', data.type);
+      }
+      
     } catch (error) {
       console.error('Failed to parse websocket message:', error);
     }
@@ -240,7 +293,7 @@ export function initializeWebSocket() {
     console.log('WebSocket disconnected');
     // Implement reconnection logic here
     setTimeout(() => {
-      initializeWebSocket();
+      initializeNotificationWs();
     }, 5000);
   };
 
@@ -270,27 +323,123 @@ export async function searchProfiles(username: string) {
 }
 
 
-export async function createConversation(id : number) : Promise<number | undefined>
-{
+export async function getOrCreateConversation(userId: number) {
   try {
-    const response = await fetch(API_URL + "/api/chat/conversaton", 
-      {
-        method : "POST",
-        headers : {
-          'Content-Type': 'application/json'
-          },
-        body : JSON.stringify({
-          receiverId : id
-        }) 
-      }
-    )
-    if (!response.ok)
-      throw new Error("Failed to create conversation")
-    const data = await response.json()
-    return data.conversation.id
+    const response = await fetch(API_URL + `/api/chat/conversations/${userId}`, {
+      method: 'GET',
+      credentials: "include"
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get or create conversation');
+    }
+
+    const conversation = await response.json();
+    stateManager.emit('CONVERSATION_ADDED', conversation);
+    return conversation;
+  } catch (error) {
+    console.error('Failed to get or create conversation:', error);
+    return null;
   }
-  catch(e)
-  {
-    console.error("failed to creata convo ", e)
+}
+
+export async function getAllConversations() {
+  try {
+    const response = await fetch(API_URL + '/api/chat/conversations', {
+      method: 'GET',
+      credentials: "include"
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get conversations');
+    }
+
+    const data = await response.json();
+    console.info(data)
+    const conversations : Conversation[] = data.conversations.map((conversation: any) => ({
+      id: conversation.id,
+      members: conversation.members.map((m: any) => ({
+        id: m.userId,
+        displayName: m.displayName,
+        avatar: m.avatar,
+        status: m.status,
+        rank: m.rank || 0
+      })),
+      messages: conversation.messages.map((msg: any) => ({
+        id: msg.id,
+        content: msg.content,
+        senderId: msg.senderId,
+        receiverId: msg.receiverId,
+        createdAt: new Date(msg.createdAt)
+      })),
+      unreadCount: conversation.unreadCount || 0,
+      lastMessage: conversation.messages.length > 0 ? {
+        id: conversation.messages[conversation.messages.length - 1].id,
+        content: conversation.messages[conversation.messages.length - 1].content,
+        senderId: conversation.messages[conversation.messages.length - 1].senderId,
+        receiverId: conversation.messages[conversation.messages.length - 1].receiverId,
+        createdAt: new Date(conversation.messages[conversation.messages.length - 1].createdAt)
+      } : null
+    }));
+    stateManager.emit('CONVERSATIONS_LOADED', conversations);
+    return conversations;
+  } catch (error) {
+    console.error('Failed to get conversations:', error);
+    return [];
+  }
+}
+
+export async function sendMessage(conversationId: number, content: string) {
+  try {
+    const response = await fetch(API_URL + '/api/chat/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: "include",
+      body: JSON.stringify({ 
+        conversationId, 
+        content 
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send message');
+    }
+
+    const message = await response.json();
+    // The WebSocket should handle the real-time update, but we can emit an event for immediate feedback
+    stateManager.emit('MESSAGE_SENT', {
+      conversationId,
+      message: {
+        id: message.id,
+        content: message.content,
+        senderId: message.senderId,
+        receiverId: message.receiverId,
+        createdAt: new Date(message.createdAt)
+      }
+    });
+    
+    return message;
+  } catch (error) {
+    console.error('Failed to send message:', error);
+    throw error;
+  }
+}
+
+export async function markConversationAsRead(conversationId: number) {
+  try {
+    const response = await fetch(API_URL + `/api/chat/conversations/${conversationId}/read`, {
+      method: 'PATCH',
+      credentials: "include"
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to mark conversation as read');
+    }
+
+    stateManager.emit('CONVERSATION_READ', { conversationId });
+    return true;
+  } catch (error) {
+    console.error('Failed to mark conversation as read:', error);
+    return false;
   }
 }

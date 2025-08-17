@@ -7,7 +7,7 @@ import SignInPage from "./pages/sign_in/index.ts";
 import TournamentsPage from "./pages/tournaments/index.ts";
 import LeaderboardPage from "./pages/leaderboard/index.ts";
 import GamePage from "./pages/game/index.ts";
-import { API_URL, initializeUserData, initializeWebSocket } from "./src/services/api.ts";
+import { API_URL, initializeUserData, initializeNotificationWs, getAllConversations, initializeChatWebSocket } from "./src/services/api.ts";
 import { stateManager } from "./src/store/StateManager.ts";
 import { NotificationContainer } from "./pages/notification.tsx";
 
@@ -70,7 +70,14 @@ const Routing = () => {
                         // Initialize state manager
                         stateManager.initializeFromUser(userData, achievementsData.achievements || []);
                         console.log("State initialized with user data", stateManager.getState('userProfile'));
-                        initializeWebSocket();
+                        
+                        // Initialize WebSocket connections
+                        initializeNotificationWs();
+                        initializeChatWebSocket();
+                        
+                        // Load conversations
+                        await getAllConversations();
+                        
                         stateManager.setState("auth", {setIsLoggedIn, setUserDataLoaded})
                         setUserDataLoaded(true);
                     }

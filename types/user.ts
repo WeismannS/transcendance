@@ -60,8 +60,37 @@ export type FriendEvent = | 'FRIEND_REQUEST_RECEIVED'
 
 
 export type Notification<T extends EventType> = {
-  type : EventType
-  content : string
-  title : string
-  user : T extends FriendEvent ? ProfileOverview : never
+  type: T
+  content: string
+  title: string
+  user: T extends "STATUS_UPDATE" 
+    ? ProfileOverview & { isFriend: boolean, isOnline: boolean }
+    : T extends "FRIEND_REQUEST_RECEIVED" | "FRIEND_REQUEST_ACCEPTED" | "FRIEND_REQUEST_DECLINED"
+    ? ProfileOverview 
+    : never,
+  requestId: T extends "FRIEND_REQUEST_RECEIVED" ? number : never
+}
+
+export function isNotificationType<T extends EventType>(
+  data: any, 
+  type: T
+): data is Notification<T> {
+  return data && data.type === type;
+}
+
+
+export type Message = {
+  id: number;
+  senderId: number;
+  content: string;
+  receiverId: number;
+  createdAt: Date;
+}
+
+export type Conversation = {
+  id : number;
+  members : ProfileOverview[];
+  messages: Message[];
+  unreadCount: number;
+  lastMessage: Message | null;
 }

@@ -1,4 +1,5 @@
-import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest } from "../../types/user.ts";
+import { Notification } from "../../pages/use-notification";
+import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest, ProfileOverview, Conversation } from "../../types/user.ts";
 
 // State Fragments based on your User schema
 export interface UserIdentityState {
@@ -40,7 +41,7 @@ export interface NotificationsState {
 }
 
 export interface MessagesState {
-  conversations: number[];
+  conversations: Conversation[];
   unreadCount: number;
   activeChat?: string;
 }
@@ -55,10 +56,13 @@ export type EventType =
   | 'FRIEND_REQUEST_DECLINED'
   | 'ACHIEVEMENT_UNLOCKED'
   | 'MESSAGE_RECEIVED'
+  | 'MESSAGE_SENT'
+  | 'CONVERSATION_READ'
   | 'PROFILE_UPDATED'
-  | 'USER_STATUS_CHANGED'
   | 'NOTIFICATION_ADDED'
   | "CONVERSATION_ADDED"
+  | "STATUS_UPDATE" 
+  | "CONVERSATIONS_LOADED"
 
 interface StateEvent {
   type: EventType;
@@ -113,10 +117,8 @@ class StateManager {
 
     console.log('StateManager Event:', event);
 
-    // Handle cross-state updates
     this.handleCrossStateEvents(event);
 
-    // Notify event listeners
     this.eventListeners.get(type)?.forEach(callback => callback(payload));
   }
 
@@ -168,6 +170,7 @@ class StateManager {
       unreadCount: 0,
       activeChat: undefined
     });
+    this.setState('messages', { conversations: [], unreadCount: 0, activeChat: undefined });
 
     this.emit('USER_DATA_LOADED', { user, achievements });
   }
@@ -224,9 +227,21 @@ class StateManager {
       case 'PROFILE_UPDATED':
         this.updateProfile(event.payload);
         break;
-
+      case 'STATUS_UPDATE' :
+        console.log(event.payload)
+        this.updateStatus(event.payload.user);
+        break;
+      case 'CONVERSATIONS_LOADED':
+        this.setConversations(event.payload);
+        break;
       case 'MESSAGE_RECEIVED':
         this.addMessage(event.payload);
+        break;
+      case 'MESSAGE_SENT':
+        this.addSentMessage(event.payload);
+        break;
+      case 'CONVERSATION_READ':
+        this.markConversationAsRead(event.payload.conversationId);
         break;
     }
   }
@@ -247,7 +262,28 @@ class StateManager {
       };
     });
   }
+  private updateStatus(user : ProfileOverview & {isFriend : boolean, isOnline : boolean})
+  {
+    console.error("Updating status for user:", user);
+    this.updateState<SocialState>('social', (prev) => {
+      const updatedFriends = prev.friends.map(friend => 
+        friend.id === user.id ? (console.log("Found"), { ...friend,  status : user.isOnline ? "online" : "offline" as Friend["status"] }) : friend
+      );
+    
+      const updatedReceivedRequests = prev.friendRequests.received.map(req => 
+        req.user.id === user.id ? { ...req, user: { ...req.user, isOnline: user.isOnline } } : req
+      );
 
+      return {
+        ...prev,
+        friends: updatedFriends,
+        friendRequests: {
+          ...prev.friendRequests,
+          received: updatedReceivedRequests
+        }
+      };
+    });
+  }
   private addSentFriendRequest(payload: any) {
     this.updateState<SocialState>('social', (prev) => ({
       ...prev,
@@ -259,6 +295,7 @@ class StateManager {
   }
 
   private addReceivedFriendRequest(payload: any) {
+    console.error(payload)
     this.updateState<SocialState>('social', (prev) => ({
       ...prev,
       friendRequests: {
@@ -279,6 +316,16 @@ class StateManager {
     }));
   }
 
+  private setConversations(conversations: Conversation[]) {
+    this.updateState<MessagesState>('messages', (prev) => ({
+      ...prev,
+      conversations: conversations,
+      unreadCount: conversations.reduce(
+        (count, conv) => count + (typeof conv.unreadCount === "number" ? conv.unreadCount : 0),
+        0
+      )
+    }));
+  }
   private declineFriendRequest(payload: any) {
     this.updateState<SocialState>('social', (prev) => ({
       ...prev,
@@ -303,10 +350,63 @@ class StateManager {
     }));
   }
 
-  private addMessage(message: any) {
+  private addMessage(payload: any) {
+    // Handle incoming messages from WebSocket
+    this.updateState<MessagesState>('messages', (prev) => {
+      const conversationId = payload.conversationId || payload.message?.conversationId;
+      if (!conversationId) {
+        return {
+          ...prev,
+          unreadCount: prev.unreadCount + 1
+        };
+      }
+
+      const updatedConversations = prev.conversations.map(conv => 
+        conv.id === conversationId 
+          ? {
+              ...conv,
+              messages: [...conv.messages, payload.message],
+              lastMessage: payload.message,
+              unreadCount: conv.unreadCount + 1
+            }
+          : conv
+      );
+
+      return {
+        ...prev,
+        conversations: updatedConversations,
+        unreadCount: prev.unreadCount + 1
+      };
+    });
+  }
+
+  private addSentMessage(payload: any) {
     this.updateState<MessagesState>('messages', (prev) => ({
       ...prev,
-      unreadCount: prev.unreadCount + 1
+      conversations: prev.conversations.map(conv => 
+        conv.id === payload.conversationId 
+          ? {
+              ...conv,
+              messages: [...conv.messages, payload.message],
+              lastMessage: payload.message
+            }
+          : conv
+      )
+    }));
+  }
+
+  private markConversationAsRead(conversationId: number) {
+    this.updateState<MessagesState>('messages', (prev) => ({
+      ...prev,
+      conversations: prev.conversations.map(conv => 
+        conv.id === conversationId 
+          ? { ...conv, unreadCount: 0 }
+          : conv
+      ),
+      unreadCount: prev.conversations.reduce(
+        (total, conv) => total + (conv.id === conversationId ? 0 : conv.unreadCount),
+        0
+      )
     }));
   }
 

@@ -44,12 +44,6 @@ export default function DashboardPage() {
     { id: 3, name: "Rookie League", status: "completed" as const, players: 32, prize: "$1,000", result: "2nd Place" },
   ];
 
-  const chats = [
-    { id: 1, name: "Alex Chen", lastMessage: "GG! Great match, rematch later?", time: "2m ago", unread: 2, online: true },
-    { id: 2, name: "Tournament Chat", lastMessage: "Sarah: When does the next round start?", time: "5m ago", unread: 0, online: false },
-    { id: 3, name: "Maria Rodriguez", lastMessage: "Thanks for the tips on backhand!", time: "1h ago", unread: 1, online: true },
-  ];
-
   useEffect(() => {
     setIsVisible(true);
     // Initialize editable profile state when profile data is available
@@ -148,8 +142,8 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto">
           <div className={`transition-all duration-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
             {activeSection === "tournaments" && <TournamentsSection tournaments={tournaments} />}
-            {activeSection === "chats" && <ChatsSection chats={chats} />}
-            {activeSection === "friends" && <Friends />}
+            {activeSection === "chats" && <ChatsSection />}
+            {activeSection === "friends" && <Friends setActiveSection={setActiveSection} />}
             {activeSection === "profile" && (
               <ProfileSection
                 profile={profile}

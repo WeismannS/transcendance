@@ -1,10 +1,12 @@
 import Miku, { useState, useEffect } from "Miku";
-import { acceptFriendRequest, API_URL, declineFriendRequest, searchProfiles, sendFriendRequest } from "../../../src/services/api.ts";
+import { acceptFriendRequest, API_URL, getOrCreateConversation, declineFriendRequest, searchProfiles, sendFriendRequest } from "../../../src/services/api.ts";
 import { ProfileOverview } from "../../../types/user.ts";
 import { SocialState, stateManager } from "../../../src/store/StateManager.ts";
 import { useNotifications } from "../../use-notification.tsx";
 
-export default function Friends() {
+export default function Friends(
+  { setActiveSection }: { setActiveSection: (section: string) => void }
+) {
   const [showAddFriendsModal, setShowAddFriendsModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ProfileOverview[]>([]);
@@ -246,7 +248,16 @@ export default function Friends() {
                       >
                         Challenge
                       </button>
-                      <button className="px-3 py-2 bg-gray-600 rounded-lg hover:bg-gray-500 transition-all">💬</button>
+                      <button className="px-3 py-2 bg-gray-600 rounded-lg hover:bg-gray-500 transition-all" onClick={()=> {
+                         getOrCreateConversation(friend.id).then((conversation) => {
+                          if (conversation) {
+                            setActiveSection("chats");
+                          }
+                        }).catch((error) => {
+                          console.error('Failed to create or get conversation:', error);
+                        }
+                      )
+                      }}>💬</button>
                     </div>
                   </div>
                 ))}
@@ -330,7 +341,7 @@ export default function Friends() {
                     </div>
                     <div className="flex space-x-2">
                       <button className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm" onClick={()=> {
-                        
+                        console.log("request user", request)
                         acceptFriendRequest(request.id, request.user)}
                       }>
                         Accept

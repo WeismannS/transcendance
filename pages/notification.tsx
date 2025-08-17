@@ -78,7 +78,7 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
           ${isVisible && !isLeaving ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
           ${getColors()}
           bg-gray-800/90 backdrop-blur-lg border rounded-xl p-4 shadow-2xl
-          max-w-sm w-full pointer-events-auto
+          max-w-sm w-full pointer-events-auto z-100
         `}
       >
         <div className="flex items-start space-x-3">
@@ -110,8 +110,8 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
     const { notifications } = useNotifications()
   
     return (
-      <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none">
-        {notifications.map((notification) => (
+      <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none z-50">
+        {notifications && notifications.map((notification) => (
           <NotificationToast key={notification.id} notification={notification} />
         ))}
       </div>

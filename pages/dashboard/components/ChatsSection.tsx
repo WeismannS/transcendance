@@ -1,131 +1,93 @@
-import Miku, { useState } from "Miku";
-
-interface Message {
-  id: number;
-  text: string;
-  sender: 'me' | 'other';
-  time: string;
-}
-
-interface Chat {
-  id: number;
-  name: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
-  online: boolean;
-  messages: Message[];
-}
-
-interface ChatsSectionProps {
-  chats: Chat[];
-}
-
-// Sample chat data with messages
-const sampleChats: Chat[] = [
-  {
-    id: 1,
-    name: "Alex Chen",
-    lastMessage: "GG! Great match, rematch later?",
-    time: "2m ago",
-    unread: 2,
-    online: true,
-    messages: [
-      { id: 1, text: "Hey! Ready for another match?", sender: 'me', time: '10:30 AM' },
-      { id: 2, text: "That last game was intense 🏓", sender: 'other', time: '10:32 AM' },
-      { id: 3, text: "GG! Great match, rematch later?", sender: 'other', time: '10:35 AM' }
-    ]
-  },
-  {
-    id: 2,
-    name: "Sarah Johnson",
-    lastMessage: "Thanks for the tips!",
-    time: "1h ago",
-    unread: 0,
-    online: false,
-    messages: [
-      { id: 1, text: "Can you help me with my serve?", sender: 'other', time: '9:15 AM' },
-      { id: 2, text: "Sure! Try keeping your wrist relaxed", sender: 'me', time: '9:16 AM' },
-      { id: 3, text: "Thanks for the tips!", sender: 'other', time: '9:20 AM' }
-    ]
-  },
-  {
-    id: 3,
-    name: "Mike Torres",
-    lastMessage: "See you at practice!",
-    time: "3h ago",
-    unread: 1,
-    online: true,
-    messages: [
-      { id: 1, text: "Practice is at 6 PM tomorrow", sender: 'other', time: '7:45 AM' },
-      { id: 2, text: "Perfect, I'll be there", sender: 'me', time: '7:46 AM' },
-      { id: 3, text: "See you at practice!", sender: 'other', time: '7:50 AM' }
-    ]
-  },
-  {
-    id: 4,
-    name: "Emma Wilson",
-    lastMessage: "Good luck in the tournament!",
-    time: "5h ago",
-    unread: 0,
-    online: false,
-    messages: [
-      { id: 1, text: "Tournament starts next week", sender: 'me', time: '5:30 AM' },
-      { id: 2, text: "You've been training hard!", sender: 'other', time: '5:32 AM' },
-      { id: 3, text: "Good luck in the tournament!", sender: 'other', time: '5:35 AM' }
-    ]
-  }
-];
+import Miku, { useState, useEffect } from "Miku";
+import { useMessages, useUserProfile } from "../../../src/hooks/useStates.ts";
+import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL } from "../../../src/services/api.ts";
+import { Conversation, Message, ProfileOverview } from "../../../types/user.ts";
 
 export default function ChatsSection() {
-  const chats = sampleChats
-  const [selectedChatId, setSelectedChatId] = useState<number>(chats[0]?.id || 1);
+  const messagesState = useMessages();
+  const currentUser = useUserProfile();
+  
+  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
-  const [chatData, setChatData] = useState<Chat[]>(chats);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const selectedChat = chatData.find(chat => chat.id === selectedChatId);
+  const conversations = messagesState?.conversations || [];
+  const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
-  const handleChatSelect = (chatId: number) => {
-    setSelectedChatId(chatId);
-    // Mark messages as read when switching to a chat
-    setChatData(prevChats => 
-      prevChats.map(chat => 
-        chat.id === chatId ? { ...chat, unread: 0 } : chat
-      )
-    );
+  // Auto-select first conversation if none selected
+  useEffect(() => {
+    if (conversations.length > 0 && !selectedConversationId && !isInitialized) {
+      setSelectedConversationId(conversations[0].id);
+      setIsInitialized(true);
+    }
+  }, [conversations, selectedConversationId, isInitialized]);
+
+  const handleConversationSelect = (conversationId: number) => {
+    setSelectedConversationId(conversationId);
+    // Mark conversation as read when selected
+    markConversationAsRead(conversationId);
   };
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedChat) return;
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversationId || isLoading || !currentUser) return;
 
-    const message: Message = {
-      id: selectedChat.messages.length + 1,
-      text: newMessage,
-      sender: 'me',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setChatData(prevChats =>
-      prevChats.map(chat =>
-        chat.id === selectedChatId
-          ? {
-              ...chat,
-              messages: [...chat.messages, message],
-              lastMessage: newMessage,
-              time: 'now'
-            }
-          : chat
-      )
-    );
-
-    setNewMessage("");
+    setIsLoading(true);
+    try {
+      await sendMessage(selectedConversationId, newMessage);
+      setNewMessage("");
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
+
+  const formatTime = (date: Date) => {
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return date.toLocaleDateString();
+  };
+
+  const getOtherMember = (conversation: Conversation): ProfileOverview | null => {
+    if (!currentUser) return null;
+    return conversation.members.find(member => member.id !== currentUser.id) || null;
+  };
+
+  const isMessageFromCurrentUser = (message: Message): boolean => {
+    return currentUser ? message.senderId === currentUser.id : false;
+  };
+
+  // Show loading if user profile is not loaded yet
+  if (!currentUser) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold text-white">Messages</h2>
+          <button disabled className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold opacity-50">
+            New Chat
+          </button>
+        </div>
+        <div className="flex items-center justify-center h-64 text-gray-400">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <p>Loading messages...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -135,64 +97,107 @@ export default function ChatsSection() {
           New Chat
         </button>
       </div>
+      
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chat List */}
+        {/* Conversations List */}
         <div className="lg:col-span-1 space-y-4 max-h-[600px] overflow-y-auto">
-          {chatData.map((chat) => (
-            <div 
-              key={chat.id} 
-              onClick={() => handleChatSelect(chat.id)}
-              className={`bg-gray-800/50 backdrop-blur-lg border rounded-2xl p-4 transition-all cursor-pointer transform hover:scale-[1.02] ${
-                selectedChatId === chat.id 
-                  ? 'border-orange-500/70 bg-gray-800/70 shadow-lg shadow-orange-500/20' 
-                  : 'border-gray-700 hover:border-orange-500/50'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">
-                        {chat.name.split(" ").map((n) => n[0]).join("")}
-                      </span>
+          {conversations.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">
+              <p>No conversations yet</p>
+              <p className="text-sm">Start a new chat to begin messaging</p>
+            </div>
+          ) : (
+            conversations.map((conversation) => {
+              const otherMember = getOtherMember(conversation);
+              if (!otherMember) return null;
+
+              return (
+                <div 
+                  key={conversation.id} 
+                  onClick={() => handleConversationSelect(conversation.id)}
+                  className={`bg-gray-800/50 backdrop-blur-lg border rounded-2xl p-4 transition-all cursor-pointer transform hover:scale-[1.02] ${
+                    selectedConversationId === conversation.id 
+                      ? 'border-orange-500/70 bg-gray-800/70 shadow-lg shadow-orange-500/20' 
+                      : 'border-gray-700 hover:border-orange-500/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                          {otherMember.avatar ? (
+                            <img 
+                              src={`${API_URL}/${otherMember.avatar}`} 
+                              alt={otherMember.displayName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-white font-bold text-sm">
+                              {otherMember.displayName.split(" ").map((n) => n[0]).join("").substring(0, 2)}
+                            </span>
+                          )}
+                        </div>
+                        {otherMember.status === 'online' && (
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold">{otherMember.displayName}</h3>
+                        <p className="text-gray-400 text-sm">
+                          {conversation.lastMessage ? formatTime(conversation.lastMessage.createdAt) : 'No messages'}
+                        </p>
+                      </div>
                     </div>
-                    {chat.online && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
+                    {conversation.unreadCount > 0 && (
+                      <div className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                        {conversation.unreadCount}
+                      </div>
                     )}
                   </div>
-                  <div>
-                    <h3 className="text-white font-semibold">{chat.name}</h3>
-                    <p className="text-gray-400 text-sm">{chat.time}</p>
-                  </div>
+                  <p className="text-gray-300 text-sm truncate">
+                    {conversation.lastMessage ? conversation.lastMessage.content : 'No messages yet'}
+                  </p>
                 </div>
-                {chat.unread > 0 && (
-                  <div className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                    {chat.unread}
-                  </div>
-                )}
-              </div>
-              <p className="text-gray-300 text-sm truncate">{chat.lastMessage}</p>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
 
         {/* Chat Interface */}
         <div className="lg:col-span-2 bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
-          {selectedChat ? (
+          {selectedConversation ? (
             <>
+              {/* Chat Header */}
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-700">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">
-                      {selectedChat.name.split(" ").map((n) => n[0]).join("")}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold">{selectedChat.name}</h3>
-                    <p className={`text-sm ${selectedChat.online ? 'text-green-400' : 'text-gray-400'}`}>
-                      {selectedChat.online ? 'Online' : 'Offline'}
-                    </p>
-                  </div>
+                  {(() => {
+                    const otherMember = getOtherMember(selectedConversation);
+                    if (!otherMember) return null;
+                    
+                    return (
+                      <>
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                          {otherMember.avatar ? (
+                            <img 
+                              src={`${API_URL}/${otherMember.avatar}`} 
+                              alt={otherMember.displayName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-white font-bold text-sm">
+                              {otherMember.displayName.split(" ").map((n) => n[0]).join("").substring(0, 2)}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-white font-semibold">{otherMember.displayName}</h3>
+                          <p className={`text-sm ${otherMember.status === 'online' ? 'text-green-400' : 'text-gray-400'}`}>
+                            {otherMember.status === 'online' ? 'Online' : 'Offline'}
+                          </p>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="flex space-x-2">
                   <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105">
@@ -204,21 +209,31 @@ export default function ChatsSection() {
                 </div>
               </div>
 
+              {/* Messages */}
               <div className="space-y-4 mb-6 h-64 overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-orange-500">
-                {selectedChat.messages.map((message) => (
-                  <div key={message.id} className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`px-4 py-2 rounded-2xl max-w-xs ${
-                      message.sender === 'me'
-                        ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-br-sm'
-                        : 'bg-gray-700 text-white rounded-bl-sm'
-                    }`}>
-                      <p>{message.text}</p>
-                      <p className="text-xs opacity-70 mt-1">{message.time}</p>
-                    </div>
+                {selectedConversation.messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    <p>No messages yet. Start the conversation!</p>
                   </div>
-                ))}
+                ) : (
+                  selectedConversation.messages.map((message) => (
+                    <div key={message.id} className={`flex ${isMessageFromCurrentUser(message) ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`px-4 py-2 rounded-2xl max-w-xs ${
+                        isMessageFromCurrentUser(message)
+                          ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-br-sm'
+                          : 'bg-gray-700 text-white rounded-bl-sm'
+                      }`}>
+                        <p>{message.content}</p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {formatTime(message.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
+              {/* Message Input */}
               <div className="flex space-x-3">
                 <input 
                   type="text" 
@@ -227,19 +242,23 @@ export default function ChatsSection() {
                   onKeyPress={handleKeyPress}
                   placeholder="Type a message..." 
                   className="flex-1 bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" 
+                  disabled={isLoading}
                 />
                 <button 
                   onClick={handleSendMessage}
                   className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() || isLoading}
                 >
-                  Send
+                  {isLoading ? 'Sending...' : 'Send'}
                 </button>
               </div>
             </>
           ) : (
             <div className="flex items-center justify-center h-full text-gray-400">
-              <p>Select a chat to start messaging</p>
+              <div className="text-center">
+                <p className="text-lg mb-2">Select a conversation to start messaging</p>
+                <p className="text-sm">Choose from your conversations on the left</p>
+              </div>
             </div>
           )}
         </div>
