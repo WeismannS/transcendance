@@ -369,7 +369,7 @@ private addMessage(message: Message) {
   console.error("Adding sent message:", message);
   this.updateState<MessagesState>('messages', (prev) => {
     const updatedConversations = prev.conversations.map(conv =>
-      conv.members.find(member => (member.id === message.receiverId || member.id === message.senderId) )?.id
+      conv.id == message.convoId
         ? {
             ...conv,
             messages: [...conv.messages, { ...message, createdAt: new Date(message.createdAt) }],
@@ -432,7 +432,7 @@ private addSentMessage(payload: { message: Message, receiverId: number }) {
   });
 }
 
-  private markConversationAsRead(conversationId: number) {
+  private markConversationAsRead(conversationId: string) {
     this.updateState<MessagesState>('messages', (prev) => ({
       ...prev,
       conversations: prev.conversations.map(conv => 

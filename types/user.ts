@@ -85,10 +85,11 @@ export type Message = {
   content: string;
   receiverId: number;
   createdAt: Date;
+  convoId : string; // Optional for direct messages
 }
 
 export type Conversation = {
-  id : number;
+  id : string;
   members : ProfileOverview[];
   messages: Message[];
   unreadCount: number;
