@@ -1,5 +1,5 @@
 import { Notification } from "../../pages/use-notification";
-import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest, ProfileOverview, Conversation } from "../../types/user.ts";
+import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest, ProfileOverview, Conversation, Message } from "../../types/user.ts";
 
 // State Fragments based on your User schema
 export interface UserIdentityState {
@@ -238,6 +238,7 @@ class StateManager {
         this.addMessage(event.payload);
         break;
       case 'MESSAGE_SENT':
+        console.error("Message sent:", event.payload);
         this.addSentMessage(event.payload);
         break;
       case 'CONVERSATION_READ':
@@ -265,6 +266,8 @@ class StateManager {
   private updateStatus(user : ProfileOverview & {isFriend : boolean, isOnline : boolean})
   {
     console.error("Updating status for user:", user);
+    
+    // Update social state (friends)
     this.updateState<SocialState>('social', (prev) => {
       const updatedFriends = prev.friends.map(friend => 
         friend.id === user.id ? (console.log("Found"), { ...friend,  status : user.isOnline ? "online" : "offline" as Friend["status"] }) : friend
@@ -283,6 +286,19 @@ class StateManager {
         }
       };
     });
+
+    // Update conversations (chat members)
+    this.updateState<MessagesState>('messages', (prev) => ({
+      ...prev,
+      conversations: prev.conversations.map(conv => ({
+        ...conv,
+        members: conv.members.map(member => 
+          member.id === user.id 
+            ? { ...member, status: user.isOnline ? "online" : "offline" as const }
+            : member
+        )
+      }))
+    }));
   }
   private addSentFriendRequest(payload: any) {
     this.updateState<SocialState>('social', (prev) => ({
@@ -349,51 +365,72 @@ class StateManager {
       ...profileData
     }));
   }
+private addMessage(message: Message) {
+  console.error("Adding sent message:", message);
+  this.updateState<MessagesState>('messages', (prev) => {
+    const updatedConversations = prev.conversations.map(conv =>
+      conv.members.find(member => (member.id === message.receiverId || member.id === message.senderId) )?.id
+        ? {
+            ...conv,
+            messages: [...conv.messages, { ...message, createdAt: new Date(message.createdAt) }],
+            lastMessage: { ...message, createdAt: new Date(message.createdAt) }
+          }
+        : conv
+    );
 
-  private addMessage(payload: any) {
-    // Handle incoming messages from WebSocket
-    this.updateState<MessagesState>('messages', (prev) => {
-      const conversationId = payload.conversationId || payload.message?.conversationId;
-      if (!conversationId) {
-        return {
-          ...prev,
-          unreadCount: prev.unreadCount + 1
-        };
-      }
-
-      const updatedConversations = prev.conversations.map(conv => 
-        conv.id === conversationId 
-          ? {
-              ...conv,
-              messages: [...conv.messages, payload.message],
-              lastMessage: payload.message,
-              unreadCount: conv.unreadCount + 1
-            }
-          : conv
-      );
-
-      return {
-        ...prev,
-        conversations: updatedConversations,
-        unreadCount: prev.unreadCount + 1
-      };
+    // Sort conversations to put the updated one first
+    const sortedConversations = updatedConversations.sort((a, b) => {
+      // Check if this conversation was just updated
+      const aHasReceiver = a.members.find(member => member.id === message.receiverId);
+      const bHasReceiver = b.members.find(member => member.id === message.receiverId);
+      
+      if (aHasReceiver && !bHasReceiver) return -1;
+      if (!aHasReceiver && bHasReceiver) return 1;
+      
+      // If neither or both have the receiver, sort by lastMessage timestamp
+      const aTime = new Date(a.lastMessage?.createdAt || 0).getTime();
+      const bTime = new Date(b.lastMessage?.createdAt || 0).getTime();
+      return bTime - aTime;
     });
-  }
 
-  private addSentMessage(payload: any) {
-    this.updateState<MessagesState>('messages', (prev) => ({
+    return {
       ...prev,
-      conversations: prev.conversations.map(conv => 
-        conv.id === payload.conversationId 
-          ? {
-              ...conv,
-              messages: [...conv.messages, payload.message],
-              lastMessage: payload.message
-            }
-          : conv
-      )
-    }));
-  }
+      conversations: sortedConversations
+    };
+  });
+}
+
+private addSentMessage(payload: { message: Message, receiverId: number }) {
+  console.error("Adding sent message:", payload);
+  this.updateState<MessagesState>('messages', (prev) => {
+    const updatedConversations = prev.conversations.map(conv =>
+      conv.members.find(member => member.id === payload.receiverId)?.id
+        ? {
+            ...conv,
+            messages: [...conv.messages, { ...payload.message, createdAt: new Date(payload.message.createdAt) }],
+            lastMessage: { ...payload.message, createdAt: new Date(payload.message.createdAt) }
+          }
+        : conv
+    );
+
+    const sortedConversations = updatedConversations.sort((a, b) => {
+      const aHasReceiver = a.members.find(member => member.id === payload.receiverId);
+      const bHasReceiver = b.members.find(member => member.id === payload.receiverId);
+      
+      if (aHasReceiver && !bHasReceiver) return -1;
+      if (!aHasReceiver && bHasReceiver) return 1;
+      
+      const aTime = new Date(a.lastMessage?.createdAt || 0).getTime();
+      const bTime = new Date(b.lastMessage?.createdAt || 0).getTime();
+      return bTime - aTime;
+    });
+
+    return {
+      ...prev,
+      conversations: sortedConversations
+    };
+  });
+}
 
   private markConversationAsRead(conversationId: number) {
     this.updateState<MessagesState>('messages', (prev) => ({

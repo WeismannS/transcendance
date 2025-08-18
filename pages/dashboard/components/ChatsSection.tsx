@@ -31,10 +31,12 @@ export default function ChatsSection() {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversationId || isLoading || !currentUser) return;
-
+    if (!selectedConversation) return ;
     setIsLoading(true);
     try {
-      await sendMessage(selectedConversationId, newMessage);
+      const receiverId = selectedConversation.members.find(e => e.id !== currentUser.id)?.id;
+      if (!receiverId) return;
+      await sendMessage(receiverId, newMessage);
       setNewMessage("");
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -109,11 +111,11 @@ export default function ChatsSection() {
           ) : (
             conversations.map((conversation) => {
               const otherMember = getOtherMember(conversation);
+              console.log("Other member:", otherMember);
               if (!otherMember) return null;
-
+             console.log("Other member:", otherMember);
               return (
                 <div 
-                  key={conversation.id} 
                   onClick={() => handleConversationSelect(conversation.id)}
                   className={`bg-gray-800/50 backdrop-blur-lg border rounded-2xl p-4 transition-all cursor-pointer transform hover:scale-[1.02] ${
                     selectedConversationId === conversation.id 
@@ -172,8 +174,9 @@ export default function ChatsSection() {
                 <div className="flex items-center space-x-3">
                   {(() => {
                     const otherMember = getOtherMember(selectedConversation);
+                    console.log("Other member:", otherMember);
                     if (!otherMember) return null;
-                    
+                    console.log("Other member:", otherMember);
                     return (
                       <>
                         <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">

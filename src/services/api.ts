@@ -1,4 +1,4 @@
-import { EventType, SocialState, stateManager } from "../store/StateManager.ts";
+import { EventType, SocialState, stateManager, UserProfileState } from "../store/StateManager.ts";
 import { User, Achievement, FriendEvent, isNotificationType, Conversation } from "../../types/user.ts";
 import { redirect } from "Miku/Router";
 import { useNotifications } from "../../pages/use-notification.tsx";
@@ -202,7 +202,7 @@ export async function updateProfile(profileData: any) {
 // WebSocket connection for real-time updates
 
 export function initializeChatWebSocket() {
-  const ws = new WebSocket('ws://localhost:3005/ws/chat/live?' + document.cookie);
+  const ws = new WebSocket('ws://localhost:3004/ws/chat/live?' + document.cookie);
 
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
@@ -221,6 +221,7 @@ export function initializeChatWebSocket() {
     console.log('WebSocket disconnected');
     // Implement reconnection logic here
     setTimeout(() => {
+      console.log('Reconnecting WebSocket...');
       initializeChatWebSocket();
     }, 5000);
   };
@@ -356,31 +357,52 @@ export async function getAllConversations() {
 
     const data = await response.json();
     console.info(data)
-    const conversations : Conversation[] = data.conversations.map((conversation: any) => ({
+    // Get friends and current user from stateManager
+    const friends = (stateManager.getState("social") as SocialState)?.friends || [];
+    const currentUser = stateManager.getState("userProfile") as UserProfileState | null;
+
+    const conversations: Conversation[] = data.conversations.map((conversation: any) => ({
       id: conversation.id,
-      members: conversation.members.map((m: any) => ({
-        id: m.userId,
-        displayName: m.displayName,
-        avatar: m.avatar,
-        status: m.status,
-        rank: m.rank || 0
-      })),
+      members: conversation.members.map((m: any) => {
+        console.log("Member:", m);
+        // Check if this member is the current user (m should be a user ID)
+        if (currentUser && m === currentUser.id) {
+          return {
+            id: currentUser.id,
+            displayName: currentUser.displayName,
+            avatar: currentUser.avatar,
+            status: "online" as const, // Current user is always online
+            rank: 0 // You might want to get this from game stats
+          };
+        }
+        
+        // Otherwise, look for them in friends list
+        const friend = friends.find(f => f.id === m);
+        return {
+          id: m,
+          displayName: friend?.displayName || `User ${m}`,
+          avatar: friend?.avatar || '',
+          status: friend?.status || "offline",
+          rank: friend?.rank ?? 0
+        };
+      }),
       messages: conversation.messages.map((msg: any) => ({
-        id: msg.id,
-        content: msg.content,
-        senderId: msg.senderId,
-        receiverId: msg.receiverId,
-        createdAt: new Date(msg.createdAt)
+      id: msg.id,
+      content: msg.content,
+      senderId: msg.senderId,
+      receiverId: msg.receiverId,
+      createdAt: new Date(msg.createdAt)
       })),
       unreadCount: conversation.unreadCount || 0,
       lastMessage: conversation.messages.length > 0 ? {
-        id: conversation.messages[conversation.messages.length - 1].id,
-        content: conversation.messages[conversation.messages.length - 1].content,
-        senderId: conversation.messages[conversation.messages.length - 1].senderId,
-        receiverId: conversation.messages[conversation.messages.length - 1].receiverId,
-        createdAt: new Date(conversation.messages[conversation.messages.length - 1].createdAt)
+      id: conversation.messages[conversation.messages.length - 1].id,
+      content: conversation.messages[conversation.messages.length - 1].content,
+      senderId: conversation.messages[conversation.messages.length - 1].senderId,
+      receiverId: conversation.messages[conversation.messages.length - 1].receiverId,
+      createdAt: new Date(conversation.messages[conversation.messages.length - 1].createdAt)
       } : null
     }));
+    console.log("Conversations loaded:", conversations);
     stateManager.emit('CONVERSATIONS_LOADED', conversations);
     return conversations;
   } catch (error) {
@@ -389,14 +411,14 @@ export async function getAllConversations() {
   }
 }
 
-export async function sendMessage(conversationId: number, content: string) {
+export async function sendMessage(receiverId: number, content: string) {
   try {
-    const response = await fetch(API_URL + '/api/chat/messages', {
+    const response = await fetch(API_URL + '/api/chat/messages/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: "include",
       body: JSON.stringify({ 
-        conversationId, 
+        receiverId, 
         content 
       })
     });
@@ -407,16 +429,16 @@ export async function sendMessage(conversationId: number, content: string) {
 
     const message = await response.json();
     // The WebSocket should handle the real-time update, but we can emit an event for immediate feedback
-    stateManager.emit('MESSAGE_SENT', {
-      conversationId,
-      message: {
-        id: message.id,
-        content: message.content,
-        senderId: message.senderId,
-        receiverId: message.receiverId,
-        createdAt: new Date(message.createdAt)
-      }
-    });
+    // stateManager.emit('MESSAGE_SENT', {
+    //   receiverId,
+    //   message: {
+    //     id: message.id,
+    //     content: message.content,
+    //     senderId: message.senderId,
+    //     receiverId: message.receiverId,
+    //     createdAt: new Date(message.createdAt)
+    //   }
+    // });
     
     return message;
   } catch (error) {
