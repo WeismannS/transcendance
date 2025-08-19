@@ -40,6 +40,13 @@ export async function logOut() {
       throw new Error('Failed to log out');
     }
     const {setIsLoggedIn , setUserDataLoaded}  = stateManager.getState("auth") as any 
+    const {wsChat, wsNotifications} = stateManager.getState("webSocket") as any;
+    if (wsChat) {
+      wsChat.close();
+    }
+    if (wsNotifications) {
+      wsNotifications.close();
+    }
     setIsLoggedIn(false)
     setUserDataLoaded(false)
 
@@ -51,7 +58,7 @@ export async function logOut() {
   }
 }
 // Friend Request Actions
-export async function sendFriendRequest(userId: number, username: string) {
+export async function sendFriendRequest(userId: string, username: string) {
   try {
     // Optimistic update
     const tempRequest = {
@@ -87,7 +94,7 @@ export async function sendFriendRequest(userId: number, username: string) {
   }
 }
 
-export async function acceptFriendRequest(requestId: number, friend: any) {
+export async function acceptFriendRequest(requestId: string, user : any) {
   try {
     console.info(requestId)
     const response = await fetch(API_URL + `/api/user-management/friendships/${requestId}`, {
@@ -100,7 +107,7 @@ export async function acceptFriendRequest(requestId: number, friend: any) {
     });
 
     if (response.ok) {
-      stateManager.emit('FRIEND_REQUEST_ACCEPTED', { requestId, friend });
+      stateManager.emit('FRIEND_REQUEST_ACCEPTED', { requestId, user   });
       return true;
     } else {
       throw new Error('Failed to accept friend request');
@@ -112,8 +119,26 @@ export async function acceptFriendRequest(requestId: number, friend: any) {
 }
 
 
+export async function isOnline(userId: number): Promise<boolean> {
+  try {
+    const response = await fetch(`http://localhost:3005/api/notifications/user/${userId}/online`, {
+      method: 'GET',
+      credentials: "include"
+    });
 
-export async function declineFriendRequest(requestId: number, friend: any) {
+    if (!response.ok) {
+      throw new Error('Failed to check online status');
+    }
+
+    const data = await response.json();
+    return data.online;
+  } catch (error) {
+    console.error('Failed to check online status:', error);
+    return false;
+  }
+}
+
+export async function declineFriendRequest(requestId: string, friend: any) {
   try {
     const response = await fetch(API_URL + `/api/user-management/friendships/${requestId}`, {
       method: 'PATCH',
@@ -276,7 +301,14 @@ export function initializeNotificationWs() {
         stateManager.emit("STATUS_UPDATE", {
           user: data.user
         });
-      } else if (isNotificationType(data, 'ACHIEVEMENT_UNLOCKED')) {
+      
+      } else if (isNotificationType(data, 'FRIEND_REMOVED')) {
+        console.log("Friend removed:", data);
+          stateManager.emit("FRIEND_REMOVED", {
+          user : data.user
+        });
+      }
+       else if (isNotificationType(data, 'ACHIEVEMENT_UNLOCKED')) {
       } else {
         console.log('Unknown websocket message type:', data.type);
       }
@@ -324,7 +356,7 @@ export async function searchProfiles(username: string) {
 }
 
 
-export async function getOrCreateConversation(userId: number) {
+export async function getOrCreateConversation(userId: string) {
   try {
     const response = await fetch(API_URL + `/api/chat/conversations/${userId}`, {
       method: 'GET',
@@ -336,6 +368,33 @@ export async function getOrCreateConversation(userId: number) {
     }
 
     const conversation = await response.json();
+    
+    // Get friends and current user from stateManager
+    const friends = (stateManager.getState("social") as SocialState)?.friends || [];
+    const currentUser = stateManager.getState("userProfile") as UserProfileState | null;
+    
+    conversation.members = conversation.members.map((m: any) => {
+        // Check if this member is the current user (m should be a user ID)
+        if (currentUser && m === currentUser.id) {
+          return {
+            id: currentUser.id,
+            displayName: currentUser.displayName,
+            avatar: currentUser.avatar,
+            status: "online" as const, // Current user is always online
+            rank: 0 // You might want to get this from game stats
+          };
+        }
+        
+        // Otherwise, look for them in friends list
+        const friend = friends.find(f => f.id === m);
+        return {
+          id: m,
+          displayName: friend?.displayName || `User ${m}`,
+          avatar: friend?.avatar || '',
+          status: friend?.status || "offline",
+          rank: friend?.rank ?? 0
+        };
+      })
     stateManager.emit('CONVERSATION_ADDED', conversation);
     return conversation;
   } catch (error) {
@@ -411,7 +470,7 @@ export async function getAllConversations() {
   }
 }
 
-export async function sendMessage(receiverId: number, content: string) {
+export async function sendMessage(receiverId: string, content: string) {
   try {
     const response = await fetch(API_URL + '/api/chat/messages/', {
       method: 'POST',
@@ -447,7 +506,7 @@ export async function sendMessage(receiverId: number, content: string) {
   }
 }
 
-export async function markConversationAsRead(conversationId: number) {
+export async function markConversationAsRead(conversationId: string) {
   try {
     const response = await fetch(API_URL + `/api/chat/conversations/${conversationId}/read`, {
       method: 'PATCH',
@@ -465,3 +524,33 @@ export async function markConversationAsRead(conversationId: number) {
     return false;
   }
 }
+
+export  const formatTime = (date: Date) => {
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return date.toLocaleDateString();
+  };
+
+
+  export async function removeFriend(userId : string) {
+    try {
+      const response = await fetch(API_URL + `/api/user-management/friendships/${userId}`, {
+        method: 'DELETE',
+        credentials: "include"
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to remove friend');
+      }
+  
+      stateManager.emit('FRIEND_REMOVED', { user : { id: userId } });
+      return true;
+    } catch (error) {
+      console.error('Failed to remove friend:', error);
+      return false;
+    }
+  }

@@ -1,15 +1,16 @@
-import { Notification } from "../../pages/use-notification";
+import { Notification } from "../../pages/use-notification.tsx";
 import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest, ProfileOverview, Conversation, Message } from "../../types/user.ts";
+import { initializeChatWebSocket, initializeNotificationWs, isOnline } from "../services/api.ts";
 
 // State Fragments based on your User schema
 export interface UserIdentityState {
-  id: number;
+  id: string;
   isOnline: boolean;
   lastSeen?: Date;
 }
 
 export interface UserProfileState {
-  id: number;
+  id: string;
   displayName: string;
   bio: string;
   avatar: string;
@@ -32,7 +33,7 @@ export interface SocialState {
 
 export interface AchievementsState {
   allAchievements: Achievement[];
-  userAchievementIds: number[];
+  userAchievementIds: string[];
 }
 
 export interface NotificationsState {
@@ -40,6 +41,10 @@ export interface NotificationsState {
   unreadCount: number;
 }
 
+export interface WebSocketState {
+  wsChat: WebSocket | null;
+  wsNotifications: WebSocket | null;
+}
 export interface MessagesState {
   conversations: Conversation[];
   unreadCount: number;
@@ -63,6 +68,7 @@ export type EventType =
   | "CONVERSATION_ADDED"
   | "STATUS_UPDATE" 
   | "CONVERSATIONS_LOADED"
+  | "FRIEND_REMOVED"
 
 interface StateEvent {
   type: EventType;
@@ -70,7 +76,7 @@ interface StateEvent {
   timestamp: number;
 }
 
-type StateKey = 'auth' | 'userIdentity' | 'userProfile' | 'gameState' | 'social' | 'achievements' | 'notifications' | 'messages';
+type StateKey = 'auth' | 'userIdentity' | 'userProfile' | 'gameState' | 'social' | 'achievements' | 'notifications' | 'messages' | 'webSocket';
 
 class StateManager {
   private states: Map<StateKey, any> = new Map();
@@ -134,11 +140,16 @@ class StateManager {
   }
 
   // Initialize states from User object
-  initializeFromUser(user: User, achievements: Achievement[]) {
+  async initializeFromUser(user: User, achievements: Achievement[]) {
     this.setState<UserIdentityState>('userIdentity', {
       id: user.profile.id,
       isOnline: true,
       lastSeen: new Date()
+    });
+
+    this.setState<WebSocketState>('webSocket', {
+      wsChat : await initializeChatWebSocket(),
+      wsNotifications: await initializeNotificationWs(),
     });
 
     this.setState<UserProfileState>('userProfile', user.profile);
@@ -205,7 +216,7 @@ class StateManager {
         this.addNotification({
           id: Date.now(),
           type: 'friend_accepted',
-          message: `You are now friends with ${event.payload.friend.displayName}`,
+          message: `You are now friends with ${event.payload.user.displayName}`,
           timestamp: new Date()
         });
         break;
@@ -243,6 +254,19 @@ class StateManager {
         break;
       case 'CONVERSATION_READ':
         this.markConversationAsRead(event.payload.conversationId);
+        break;
+      case "FRIEND_REMOVED" :
+        this.updateState<SocialState>('social', (prev) => ({
+          ...prev,
+          friends: prev.friends.filter(friend => friend.id !== event.payload.user.id)
+        }));
+        break;
+      case 'CONVERSATION_ADDED':
+        this.updateState<MessagesState>('messages', (prev) => ({
+          ...prev,
+          conversations: [...prev.conversations, event.payload.conversation],
+          unreadCount: prev.unreadCount + (event.payload.conversation.unreadCount || 0)
+        }));
         break;
     }
   }
@@ -321,13 +345,16 @@ class StateManager {
     }));
   }
 
-  private acceptFriendRequest(payload: any) {
+  private async acceptFriendRequest(payload: any) {
+    console.error("Accepting friend request:", payload);
+    const user = payload.user || payload.friend;
+    user.status = (await isOnline(user.id)) ? "online" : "offline";
     this.updateState<SocialState>('social', (prev) => ({
       ...prev,
-      friends: [...prev.friends, payload.friend],
+      friends: [...prev.friends, payload.user],
       friendRequests: {
-        sent: prev.friendRequests.sent.filter(req => req.user.id !== payload.friend.id),
-        received: prev.friendRequests.received.filter(req => req.user.id !== payload.friend.id)
+        sent: prev.friendRequests.sent.filter(req => req.user.id !==  user.id),
+        received: prev.friendRequests.received.filter(req => req.user.id !== user.id)
       }
     }));
   }
@@ -343,11 +370,14 @@ class StateManager {
     }));
   }
   private declineFriendRequest(payload: any) {
+    console.error("Declining friend request:", payload);
+    const user = payload.user || payload.friend;
     this.updateState<SocialState>('social', (prev) => ({
       ...prev,
       friendRequests: {
         ...prev.friendRequests,
-        received: prev.friendRequests.received.filter(req => req.user.id !== payload.friend.id)
+        received: prev.friendRequests.received.filter(req => req.user.id !== user.id),
+        sent: prev.friendRequests.sent.filter(req => req.user.id !== user.id)
       }
     }));
   }
@@ -400,7 +430,7 @@ private addMessage(message: Message) {
   });
 }
 
-private addSentMessage(payload: { message: Message, receiverId: number }) {
+private addSentMessage(payload: { message: Message, receiverId: string }) {
   console.error("Adding sent message:", payload);
   this.updateState<MessagesState>('messages', (prev) => {
     const updatedConversations = prev.conversations.map(conv =>
@@ -462,15 +492,15 @@ private addSentMessage(payload: { message: Message, receiverId: number }) {
     if (!gameState || !achievements) return;
 
     // Example achievement checks
-    if (gameState.stats.wins === 10 && !achievements.userAchievementIds.includes(1)) {
-      const achievement = achievements.allAchievements.find(a => a.id === 1);
+    if (gameState.stats.wins === 10 && !achievements.userAchievementIds.includes('1')) {
+      const achievement = achievements.allAchievements.find(a => a.id === '1');
       if (achievement) {
         this.emit('ACHIEVEMENT_UNLOCKED', achievement);
       }
     }
 
-    if (gameState.stats.totalGames === 1 && !achievements.userAchievementIds.includes(2)) {
-      const achievement = achievements.allAchievements.find(a => a.id === 2);
+    if (gameState.stats.totalGames === 1 && !achievements.userAchievementIds.includes('2')) {
+      const achievement = achievements.allAchievements.find(a => a.id === '2');
       if (achievement) {
         this.emit('ACHIEVEMENT_UNLOCKED', achievement);
       }

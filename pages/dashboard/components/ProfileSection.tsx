@@ -14,7 +14,7 @@ interface ProfileSectionProps {
   profile: UserProfileState | null;
   gameState: GameState | null;
   achievements: Achievement[];
-  userAchievementIds: number[];
+  userAchievementIds: string[];
   userStats: {
     wins: number;
     losses: number;

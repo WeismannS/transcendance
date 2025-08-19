@@ -68,12 +68,9 @@ const Routing = () => {
                         console.log("Achievements data:", achievementsData);
 
                         // Initialize state manager
-                        stateManager.initializeFromUser(userData, achievementsData.achievements || []);
+                        await stateManager.initializeFromUser(userData, achievementsData.achievements || []);
                         console.log("State initialized with user data", stateManager.getState('userProfile'));
-                        
-                        // Initialize WebSocket connections
-                        initializeNotificationWs();
-                        initializeChatWebSocket();
+
                         
                         // Load conversations
                         await getAllConversations();

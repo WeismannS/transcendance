@@ -2,14 +2,14 @@ import { EventType } from "../src/store/StateManager.ts"
 
 export type User = {
   profile: {
-    id: number;
+    id: string;
     displayName: string;
     bio: string;
     avatar: string;
   };
   gameHistory: GameHistory[];
   gameStats: GameStats;
-  achievements: number[]; // Array of achievement IDs
+  achievements: string[]; // Array of achievement IDs
   friends: Friend[];
   friendRequests: {
     sent: FriendRequest[];
@@ -32,7 +32,7 @@ export type GameStats = {
 };
 
 export type Achievement = {
-  id: number;
+  id: string;
   title: string;
   description: string;
   icon: string;
@@ -40,13 +40,13 @@ export type Achievement = {
 
 export type FriendRequest = {
   user : Friend
-  id : number,
+  id : string,
   createdAt: Date;
 };
 
 export type Friend = ProfileOverview & {lastActive : Date}
 export type ProfileOverview = {
-  id: number;
+  id: string;
   displayName: string;
   avatar: string;
   status: "online" | "offline" | "In Game" | "in Tournament";
@@ -80,10 +80,10 @@ export function isNotificationType<T extends EventType>(
 
 
 export type Message = {
-  id: number;
-  senderId: number;
+  id: string;
+  senderId: string;
   content: string;
-  receiverId: number;
+  receiverId: string;
   createdAt: Date;
   convoId : string; // Optional for direct messages
 }

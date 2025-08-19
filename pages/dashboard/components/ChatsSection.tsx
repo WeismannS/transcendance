@@ -1,17 +1,19 @@
-import Miku, { useState, useEffect } from "Miku";
+import Miku, { useState, useEffect, useRef } from "Miku";
 import { useMessages, useUserProfile } from "../../../src/hooks/useStates.ts";
-import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL } from "../../../src/services/api.ts";
+import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL, formatTime } from "../../../src/services/api.ts";
 import { Conversation, Message, ProfileOverview } from "../../../types/user.ts";
+import { CursorPos } from "readline";
 
 export default function ChatsSection() {
   const messagesState = useMessages();
   const currentUser = useUserProfile();
   
-  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  console.log(newMessage)
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-
+  const input_ref = useRef<HTMLInputElement | null>(null);
   const conversations = messagesState?.conversations || [];
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
@@ -23,13 +25,13 @@ export default function ChatsSection() {
     }
   }, [conversations, selectedConversationId, isInitialized]);
 
-  const handleConversationSelect = (conversationId: number) => {
+  const handleConversationSelect = (conversationId: string) => {
     setSelectedConversationId(conversationId);
     // Mark conversation as read when selected
     markConversationAsRead(conversationId);
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async ( e : any) => {
     if (!newMessage.trim() || !selectedConversationId || isLoading || !currentUser) return;
     if (!selectedConversation) return ;
     setIsLoading(true);
@@ -37,7 +39,11 @@ export default function ChatsSection() {
       const receiverId = selectedConversation.members.find(e => e.id !== currentUser.id)?.id;
       if (!receiverId) return;
       await sendMessage(receiverId, newMessage);
-      setNewMessage("");
+      setNewMessage("")
+      if (input_ref.current) {
+        input_ref.current.value = "";
+      }
+      
     } catch (error) {
       console.error('Failed to send message:', error);
     } finally {
@@ -48,19 +54,11 @@ export default function ChatsSection() {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleSendMessage(e);
     }
   };
 
-  const formatTime = (date: Date) => {
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
-    return date.toLocaleDateString();
-  };
+  
 
   const getOtherMember = (conversation: Conversation): ProfileOverview | null => {
     if (!currentUser) return null;
@@ -111,9 +109,9 @@ export default function ChatsSection() {
           ) : (
             conversations.map((conversation) => {
               const otherMember = getOtherMember(conversation);
-              console.log("Other member:", otherMember);
+              // console.log("Other member:", otherMember);
               if (!otherMember) return null;
-             console.log("Other member:", otherMember);
+            //  console.log("Other member:", otherMember);
               return (
                 <div 
                   onClick={() => handleConversationSelect(conversation.id)}
@@ -174,9 +172,9 @@ export default function ChatsSection() {
                 <div className="flex items-center space-x-3">
                   {(() => {
                     const otherMember = getOtherMember(selectedConversation);
-                    console.log("Other member:", otherMember);
+                    // console.log("Other member:", otherMember);
                     if (!otherMember) return null;
-                    console.log("Other member:", otherMember);
+                    // console.log("Other member:", otherMember);
                     return (
                       <>
                         <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
@@ -242,15 +240,17 @@ export default function ChatsSection() {
                   type="text" 
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   placeholder="Type a message..." 
                   className="flex-1 bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" 
                   disabled={isLoading}
+                  ref={input_ref}
                 />
                 <button 
                   onClick={handleSendMessage}
                   className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
                   disabled={!newMessage.trim() || isLoading}
+                  
                 >
                   {isLoading ? 'Sending...' : 'Send'}
                 </button>
@@ -269,3 +269,4 @@ export default function ChatsSection() {
     </div>
   );
 }
+

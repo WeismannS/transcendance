@@ -1,5 +1,5 @@
 import Miku, { useState, useEffect } from "Miku";
-import { acceptFriendRequest, API_URL, getOrCreateConversation, declineFriendRequest, searchProfiles, sendFriendRequest } from "../../../src/services/api.ts";
+import { acceptFriendRequest, API_URL, getOrCreateConversation, declineFriendRequest, searchProfiles, sendFriendRequest, formatTime, removeFriend } from "../../../src/services/api.ts";
 import { ProfileOverview } from "../../../types/user.ts";
 import { SocialState, stateManager } from "../../../src/store/StateManager.ts";
 import { useNotifications } from "../../use-notification.tsx";
@@ -12,9 +12,12 @@ export default function Friends(
   const [searchResults, setSearchResults] = useState<ProfileOverview[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [sentRequests, setSentRequests] = useState(new Set());
+  const [showConfirmRemove, setShowConfirmRemove] = useState<string | null>(null);
   const social = stateManager.getState("social") as SocialState
   const friendRequests = social.friendRequests.received
   const friends = social.friends
+  const {addNotification} = useNotifications();
+
   function handleQuickMatch() {
     console.log("Starting quick match...");
   }
@@ -47,7 +50,7 @@ export default function Friends(
     setIsSearching(false);
   }
 
-  function handleSendFriendRequest({userId, username, avatar} : {userId : number, username : string, avatar:string}) {
+  function handleSendFriendRequest({userId, username, avatar} : {userId : string, username : string, avatar:string}) {
     addNotification({
       type: "info",
       title: "Finding Match",
@@ -64,7 +67,27 @@ export default function Friends(
       console.error('Failed to send friend request:', error);
     });
   }
-  const {addNotification} = useNotifications();
+
+  function handleRemoveFriend(friendId: string, friendName: string) {
+    setShowConfirmRemove(friendId);
+  }
+
+  function confirmRemoveFriend() {
+    if (showConfirmRemove) {
+      const friend = friends.find(f => f.id === showConfirmRemove);
+      removeFriend(showConfirmRemove).catch((error) => {
+        console.error('Failed to remove friend:', error);
+        addNotification({
+          type: "error",
+          title: "Error",
+          message: "Failed to remove friend",
+          duration: 3000
+        });
+      });
+    }
+    setShowConfirmRemove(null);
+  }
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery) {
@@ -88,6 +111,32 @@ export default function Friends(
           Add Friends
         </button>
       </div>
+
+      {/* Confirm Remove Friend Modal */}
+      {showConfirmRemove && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-xl font-bold text-white mb-4">Remove Friend</h3>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to remove {friends.find(f => f.id === showConfirmRemove)?.displayName} from your friends list?
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={confirmRemoveFriend}
+                className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+              >
+                Remove
+              </button>
+              <button
+                onClick={() => setShowConfirmRemove(null)}
+                className="flex-1 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Friends Modal */}
       {showAddFriendsModal && (
@@ -220,8 +269,15 @@ export default function Friends(
                 .map((friend) => (
                   <div
                     key={friend.id}
-                    className="bg-gray-700/30 rounded-xl p-4 hover:bg-gray-700/50 transition-all cursor-pointer"
+                    className="bg-gray-700/30 rounded-xl p-4 hover:bg-gray-700/50 transition-all cursor-pointer relative group"
                   >
+                    <button
+                      onClick={() => handleRemoveFriend(friend.id, friend.displayName)}
+                      className="absolute top-2 right-2 text-gray-400 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 text-lg"
+                      title="Remove friend"
+                    >
+                      ×
+                    </button>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
@@ -271,7 +327,7 @@ export default function Friends(
               {friends.map((friend) => (
                 <div
                   key={friend.id}
-                  className="flex items-center justify-between p-3 bg-gray-700/30 rounded-xl hover:bg-gray-700/50 transition-all cursor-pointer"
+                  className="flex items-center justify-between p-3 bg-gray-700/30 rounded-xl hover:bg-gray-700/50 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="relative">
@@ -285,7 +341,7 @@ export default function Friends(
                     <div>
                       <h4 className="text-white font-semibold">{friend.displayName}</h4>
                       <p className="text-gray-400 text-sm">
-                        {friend.status == "online" ? friend.status : `Last seen ${friend.lastActive}`}
+                        {friend.status == "online" ? friend.status : `Last seen ${formatTime(new Date(friend.lastActive))}`}
                       </p>
                     </div>
                   </div>
@@ -300,8 +356,25 @@ export default function Friends(
                       >
                         Challenge
                       </button>
-                      <button className="px-2 py-1 bg-gray-600 rounded-lg hover:bg-gray-500 transition-all text-sm">
+                      <button className="px-2 py-1 bg-gray-600 rounded-lg hover:bg-gray-500 transition-all text-sm" onClick={ ()=>
+                        getOrCreateConversation(friend.id).then((conversation) => {
+                          if (conversation) {
+                            setActiveSection("chats");
+                          }
+                          stateManager.emit('CONVERSATION_ADDED', {conversationId: conversation.id, conversation});
+                        }).catch((error) => {
+                          console.error('Failed to create or get conversation:', error);
+                        }
+                      )
+                      }>
                         💬
+                      </button>
+                      <button
+                        onClick={() => handleRemoveFriend(friend.id, friend.displayName)}
+                        className="px-2 py-1 bg-red-600/80 rounded-lg hover:bg-red-600 transition-all text-sm text-white opacity-0 group-hover:opacity-100"
+                        title="Remove friend"
+                      >
+                        🗑️
                       </button>
                     </div>
                   </div>
