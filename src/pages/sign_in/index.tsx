@@ -23,12 +23,11 @@ export default function AuthPage({setIsLoggedIn} : any) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [oauthLoading, setOauthLoading] = useState({
     google: false,
-    discord: false
   })
   const [show2FAModal, setShow2FAModal] = useState(false)
   const [twoFACode, setTwoFACode] = useState("")
   const [tempToken, setTempToken] = useState("")
-  const [pendingUser, setPendingUser] = useState(null)
+  const [pendingUser, setPendingUser] = useState<{email : string} | null>(null)
 
   useEffect(() => {
     setIsVisible(true)
@@ -93,7 +92,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
   }, [])
 
   const handleInputChange = (e: { target: { name: any; value: any } } ) => {
-    const { name, value } = e.target
+    const { name, value } = e.target as { name: keyof typeof formData; value: string }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -225,27 +224,10 @@ export default function AuthPage({setIsLoggedIn} : any) {
 
 
 
-    // Add timeout fallback
-    setTimeout(() => {
-      if (!popup.closed) {
-        console.log('OAuth timeout - closing popup')
-        popup.close()
-        clearInterval(checkClosed)
-        setOauthLoading(prev => ({ ...prev, google: false }))
-        setToast({ message: "OAuth timeout. Please try again.", type: "error" })
-      }
-    }, 60000) // 1 minute timeout
+
   }
 
-  const handleDiscordLogin = () => {
-    setOauthLoading(prev => ({ ...prev, discord: true }))
-    
-    // You'll need to implement Discord OAuth similar to Google
-    setTimeout(() => {
-      setOauthLoading(prev => ({ ...prev, discord: false }))
-      setToast({ message: "Discord OAuth not implemented yet", type: "error" })
-    }, 1000)
-  }
+
 
   const handle2FASubmit = async () => {
     if (!twoFACode || twoFACode.length !== 6) {
@@ -505,24 +487,6 @@ export default function AuthPage({setIsLoggedIn} : any) {
                     </>
                   )}
                 </button>
-                <button
-                  key="discord-btn"
-                  onClick={handleDiscordLogin}
-                  disabled={oauthLoading.discord}
-                  className="w-full bg-indigo-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-indigo-700 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {oauthLoading.discord ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Connecting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>💬</span>
-                      <span>Continue with Discord</span>
-                    </>
-                  )}
-                </button>
               </div>
 
               {/* Divider */}
@@ -543,9 +507,6 @@ export default function AuthPage({setIsLoggedIn} : any) {
                       type="checkbox"
                       className="w-4 h-4 text-orange-500 bg-gray-700 border-gray-600 rounded focus:ring-orange-500"
                     />
-                    <span key="checkbox-text" className="ml-2 text-sm text-gray-300">
-                      {isSignUp ? "I agree to the Terms of Service" : "Remember me"}
-                    </span>
                   </label>
                   <button 
                     key="forgot-password" 
