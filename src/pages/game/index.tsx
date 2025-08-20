@@ -39,18 +39,20 @@ export default function GamePage() {
 
   // Game timer
   useEffect(() => {
-    let interval
+    let interval: NodeJS.Timeout | undefined
     if (gameState === "playing") {
       interval = setInterval(() => {
         setGameTime((prev) => prev + 1)
       }, 1000)
     }
-    return () => clearInterval(interval)
+    return () => {
+      if (interval) clearInterval(interval)
+    }
   }, [gameState])
 
   // Keyboard controls
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e : any) => {
       switch (e.key) {
         case "ArrowUp":
         case "w":
@@ -75,7 +77,7 @@ export default function GamePage() {
       }
     }
 
-    const handleKeyUp = (e) => {
+    const handleKeyUp = (e : any) => {
       switch (e.key) {
         case "ArrowUp":
         case "w":
@@ -210,7 +212,7 @@ export default function GamePage() {
     }
   }
 
-  const render = (ctx) => {
+  const render = (ctx: CanvasRenderingContext2D) => {
     const { ball, playerPaddle, opponentPaddle } = gameObjects.current
 
     // Clear canvas
@@ -266,7 +268,7 @@ export default function GamePage() {
     }
   }, [score, sets])
 
-  const startGame = (mode) => {
+  const startGame = (mode: string) => {
     setGameMode(mode)
     setGameState("playing")
     setScore({ player: 0, opponent: 0 })
@@ -281,13 +283,13 @@ export default function GamePage() {
     }
   }
 
-  const endGame = (result) => {
+  const endGame = (result : "win" | "loss") => {
     setGameState("finished")
     const finalScore = `${sets.player + (result === "win" ? 1 : 0)}-${sets.opponent + (result === "loss" ? 1 : 0)}`
     const xpGained = result === "win" ? 45 + Math.floor(gameTime / 10) : 15
 
     setMatchResults({
-      result,
+      result : result,
       opponent: opponent.name,
       score: finalScore,
       duration: formatTime(gameTime),

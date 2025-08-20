@@ -10,8 +10,8 @@ import {
   AnimatedBackground,
   Friends,
 } from "./components/index.tsx";
-import { useDashboardData } from "../../src/hooks/useStates.ts";
-import { API_URL, logOut, updateProfile } from "../../src/services/api.ts";
+import { useDashboardData } from "../../hooks/useStates.ts";
+import { API_URL, logOut, updateProfile } from "../../services/api.ts";
 
 export default function DashboardPage() {
   const { identity, profile, gameState, social, achievements, notifications, messages } = useDashboardData();

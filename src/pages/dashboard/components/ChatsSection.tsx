@@ -1,6 +1,6 @@
 import Miku, { useState, useEffect, useRef } from "Miku";
-import { useMessages, useUserProfile } from "../../../src/hooks/useStates.ts";
-import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL, formatTime } from "../../../src/services/api.ts";
+import { useMessages, useUserProfile } from "../../../hooks/useStates.ts";
+import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL, formatTime } from "../../../services/api.ts";
 import { Conversation, Message, ProfileOverview } from "../../../types/user.ts";
 import { CursorPos } from "readline";
 

@@ -1,5 +1,5 @@
 import Miku from "Miku";
-import { Tournament } from "./types.ts";
+import { Tournament } from "./types";
 
 interface TournamentsSectionProps {
   tournaments: Tournament[];

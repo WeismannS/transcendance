@@ -1,5 +1,5 @@
-import { Notification } from "../../pages/use-notification.tsx";
-import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest, ProfileOverview, Conversation, Message } from "../../types/user.ts";
+import { Notification } from "../pages/use-notification.ts";
+import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest, ProfileOverview, Conversation, Message } from "../types/user.ts";
 import { initializeChatWebSocket, initializeNotificationWs, isOnline } from "../services/api.ts";
 
 // State Fragments based on your User schema
@@ -265,7 +265,7 @@ class StateManager {
         this.updateState<MessagesState>('messages', (prev) => ({
           ...prev,
           conversations: [...prev.conversations, event.payload.conversation],
-          unreadCount: prev.unreadCount + (event.payload.conversation.unreadCount || 0)
+          // unreadCount: prev.unreadCount + (event.payload.conversation.unreadCount || 0)
         }));
         break;
     }

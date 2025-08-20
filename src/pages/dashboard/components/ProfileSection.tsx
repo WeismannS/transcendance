@@ -1,7 +1,7 @@
 import Miku from "Miku";
 import { Link } from "Miku/Router";
 import { Achievement, GameHistory } from "../../../types/user.ts";
-import { UserProfileState, GameState } from "../../../src/store/StateManager.ts";
+import { UserProfileState, GameState } from "../../../store/StateManager.ts";
 
 interface EditableProfile {
   displayName: string;

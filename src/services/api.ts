@@ -1,8 +1,8 @@
 import { EventType, SocialState, stateManager, UserProfileState } from "../store/StateManager.ts";
-import { User, Achievement, FriendEvent, isNotificationType, Conversation } from "../../types/user.ts";
+import { User, Achievement, FriendEvent, isNotificationType, Conversation } from "../types/user.ts";
 import { redirect } from "Miku/Router";
-import { useNotifications } from "../../pages/use-notification.tsx";
-import { Notification } from "../../types/user.ts";
+import { useNotifications } from "../pages/use-notification.ts";
+import { Notification } from "../types/user.ts";
 import { userInfo } from "os";
 export const API_URL = "http://localhost:3000";
 
@@ -367,12 +367,12 @@ export async function getOrCreateConversation(userId: string) {
       throw new Error('Failed to get or create conversation');
     }
 
-    const conversation = await response.json();
-    
+    let conversation = await response.json();
+    conversation = conversation.conversation
     // Get friends and current user from stateManager
     const friends = (stateManager.getState("social") as SocialState)?.friends || [];
     const currentUser = stateManager.getState("userProfile") as UserProfileState | null;
-    
+    console.log(conversation)
     conversation.members = conversation.members.map((m: any) => {
         // Check if this member is the current user (m should be a user ID)
         if (currentUser && m === currentUser.id) {

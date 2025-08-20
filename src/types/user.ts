@@ -1,4 +1,4 @@
-import { EventType } from "../src/store/StateManager.ts"
+import { EventType } from "../store/StateManager.ts"
 
 export type User = {
   profile: {

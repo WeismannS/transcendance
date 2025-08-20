@@ -1,7 +1,7 @@
 import Miku, { useState, useEffect } from "Miku";
-import { acceptFriendRequest, API_URL, getOrCreateConversation, declineFriendRequest, searchProfiles, sendFriendRequest, formatTime, removeFriend } from "../../../src/services/api.ts";
+import { acceptFriendRequest, API_URL, getOrCreateConversation, declineFriendRequest, searchProfiles, sendFriendRequest, formatTime, removeFriend } from "../../../services/api.ts";
 import { ProfileOverview } from "../../../types/user.ts";
-import { SocialState, stateManager } from "../../../src/store/StateManager.ts";
+import { SocialState, stateManager } from "../../../store/StateManager.tsx";
 import { useNotifications } from "../../use-notification.tsx";
 
 export default function Friends(
@@ -51,14 +51,6 @@ export default function Friends(
   }
 
   function handleSendFriendRequest({userId, username, avatar} : {userId : string, username : string, avatar:string}) {
-    addNotification({
-      type: "info",
-      title: "Finding Match",
-      message: "Looking for an opponent...",
-      duration: 3000,
-      avatar
-    })
-    console.log("logged")
     sendFriendRequest(userId, username).then((success) => {
       if (success) {
         setSentRequests(prev => new Set([...prev, userId]));

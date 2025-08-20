@@ -1,7 +1,7 @@
 import { useState } from "Miku";
 import Miku from "Miku";
-import { UserProfileState } from "../../../src/store/StateManager.ts";
-import { API_URL } from "../../../src/services/api.ts";
+import { UserProfileState } from "../../../store/StateManager.ts";
+import { API_URL } from "../../../services/api.ts";
 
 interface HeaderProps {
   profile: UserProfileState | null;

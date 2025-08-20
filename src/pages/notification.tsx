@@ -1,8 +1,8 @@
 
 import Miku, {useState,useRef, useEffect} from "Miku"
-import { Notification, useNotifications } from "./use-notification.tsx"
+import { Notification, useNotifications } from "./use-notification.ts"
 import { Props } from "src/types/types"
-import { API_URL } from "../src/services/api.ts"
+import { API_URL } from "../services/api.ts"
 const NotificationToast = ({ notification }: { notification: Notification } & Props) => {
     const [isVisible, setIsVisible] = useState(false)
     const [isLeaving, setIsLeaving] = useState(false)
@@ -110,7 +110,7 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
     const { notifications } = useNotifications()
   
     return (
-      <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none z-50">
+      <div className="fixed top-4 right-4 z-100 space-y-3 pointer-events-none ">
         {notifications && notifications.map((notification) => (
           <NotificationToast key={notification.id} notification={notification} />
         ))}

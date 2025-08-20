@@ -1,14 +1,14 @@
 import Miku, { useEffect, workLoop } from "Miku";
-import HomePage from "./pages/app_home/index.ts";
-import DashboardPage from "./pages/dashboard/index.ts";
-import UserHomePage from "./pages/profile/index.ts";
+import HomePage from "./pages/app_home/index.tsx";
+import DashboardPage from "./pages/dashboard/index.tsx";
+import UserHomePage from "./pages/profile/index.tsx";
 import { redirect, Router } from "Miku/Router";
-import SignInPage from "./pages/sign_in/index.ts";
-import TournamentsPage from "./pages/tournaments/index.ts";
-import LeaderboardPage from "./pages/leaderboard/index.ts";
-import GamePage from "./pages/game/index.ts";
-import { API_URL, initializeUserData, initializeNotificationWs, getAllConversations, initializeChatWebSocket } from "./src/services/api.ts";
-import { stateManager } from "./src/store/StateManager.ts";
+import SignInPage from "./pages/sign_in/index.tsx";
+import TournamentsPage from "./pages/tournaments/index.tsx";
+import LeaderboardPage from "./pages/leaderboard/index.tsx";
+import GamePage from "./pages/game/index.tsx";
+import { API_URL, initializeUserData, initializeNotificationWs, getAllConversations, initializeChatWebSocket } from "./services/api.ts";
+import { stateManager } from "./store/StateManager.ts";
 import { NotificationContainer } from "./pages/notification.tsx";
 
 const aa = document.body.querySelector("#app");
