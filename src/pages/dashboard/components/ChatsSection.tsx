@@ -15,6 +15,7 @@ export default function ChatsSection() {
   const [isInitialized, setIsInitialized] = useState(false);
   const input_ref = useRef<HTMLInputElement | null>(null);
   const conversations = messagesState?.conversations || [];
+  console.log("Conversations: ", conversations);
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
   // Auto-select first conversation if none selected

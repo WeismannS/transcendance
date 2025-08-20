@@ -384,7 +384,6 @@ export async function getOrCreateConversation(userId: string) {
             rank: 0 // You might want to get this from game stats
           };
         }
-        
         // Otherwise, look for them in friends list
         const friend = friends.find(f => f.id === m);
         return {
@@ -395,6 +394,7 @@ export async function getOrCreateConversation(userId: string) {
           rank: friend?.rank ?? 0
         };
       })
+
     stateManager.emit('CONVERSATION_ADDED', conversation);
     return conversation;
   } catch (error) {
