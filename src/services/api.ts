@@ -394,7 +394,7 @@ export async function getOrCreateConversation(userId: string) {
           rank: friend?.rank ?? 0
         };
       })
-
+    
     stateManager.emit('CONVERSATION_ADDED', conversation);
     return conversation;
   } catch (error) {

@@ -262,7 +262,9 @@ class StateManager {
         }));
         break;
       case 'CONVERSATION_ADDED':
-        this.updateState<MessagesState>('messages', (prev) => ({
+        
+        this.updateState<MessagesState>('messages', (prev) => prev.conversations.find(e=>e.id === event.payload.id) ?  prev :
+      ({
           ...prev,
           conversations: [...prev.conversations, event.payload],
           // unreadCount: prev.unreadCount + (event.payload.conversation.unreadCount || 0)
