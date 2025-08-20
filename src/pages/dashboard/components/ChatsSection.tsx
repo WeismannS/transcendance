@@ -155,7 +155,7 @@ export default function ChatsSection() {
                       </div>
                     )}
                   </div>
-                  <p className="text-gray-300 text-sm truncate">
+                  <p className="text-gray-300 text-sm truncate" key={conversation.id}>
                     {conversation.lastMessage ? conversation.lastMessage.content : 'No messages yet'}
                   </p>
                 </div>

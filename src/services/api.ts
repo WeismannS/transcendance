@@ -228,16 +228,46 @@ export async function updateProfile(profileData: any) {
 
 export function initializeChatWebSocket() {
   const ws = new WebSocket('ws://localhost:3004/ws/chat/live?' + document.cookie);
-
+  
   ws.onmessage = (event) => {
+    const friends = (stateManager.getState("social") as SocialState)?.friends || [];
+    const currentUser = stateManager.getState("userProfile") as UserProfileState | null;
     const data = JSON.parse(event.data);
     if (data.type === 'new_message') {
       stateManager.emit('MESSAGE_RECEIVED', data);
+    } else if (data.type === 'CONVERSATION_ADDED') {
+      const conversation: Conversation = {
+        id: data.id,
+        members: data.members.map(({userId : m} : {userId: string})=> {
+          if (currentUser && m === currentUser.id) {
+          return {
+            id: currentUser.id,
+            displayName: currentUser.displayName,
+            avatar: currentUser.avatar,
+            status: "online" as const, // Current user is always online
+            rank: 0 // You might want to get this from game stats
+          };
+        }
+        // Otherwise, look for them in friends list
+        const friend = friends.find(f => f.id === m);
+        return {
+          id: m,
+          displayName: friend?.displayName || `User ${m}`,
+          avatar: friend?.avatar || '',
+          status: friend?.status || "offline",
+          rank: friend?.rank ?? 0
+        };
+        }),
+        messages: data.messages,
+        unreadCount: data.unreadCount || 0,
+        lastMessage: data.lastMessage || null
+      };
+      stateManager.emit('CONVERSATION_ADDED', conversation);
     } else {
       console.log('Unknown websocket message type:', data.type);
     }
   };
-
+  
   ws.onopen = () => {
     console.log('WebSocket connected');
   };

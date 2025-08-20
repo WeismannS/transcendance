@@ -260,6 +260,10 @@ class StateManager {
           ...prev,
           friends: prev.friends.filter(friend => friend.id !== event.payload.user.id)
         }));
+        this.updateState<MessagesState>('messages', (prev) => ({
+          ...prev,
+          conversations: prev.conversations.filter(conv => !conv.members.some(member => member.id === event.payload.user.id))
+        }));
         break;
       case 'CONVERSATION_ADDED':
         
