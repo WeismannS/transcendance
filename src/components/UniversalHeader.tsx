@@ -190,10 +190,6 @@ export default function UniversalHeader({
                         className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-purple-500/20 hover:text-purple-300 transition-colors flex items-center space-x-3"
                       >
                         <span className="text-lg">⚙️</span>
-                        <div>
-                          <div className="font-medium">Settings</div>
-                          <div className="text-xs text-gray-500">Preferences & account</div>
-                        </div>
                       </button>
                       <hr className="border-gray-700 my-2" />
                       <button

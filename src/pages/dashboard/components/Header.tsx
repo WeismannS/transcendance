@@ -2,27 +2,21 @@ import { useState } from "Miku";
 import Miku from "Miku";
 import { UserProfileState } from "../../../store/StateManager.ts";
 import { API_URL } from "../../../services/api.ts";
-
+import { Link } from "Miku/Router";
 interface HeaderProps {
   profile: UserProfileState | null;
   onlineUsers: number;
   notifications: number;
   onLogout?: () => void;
   onProfileClick?: () => void;
-  onSettingsClick?: () => void;
 }
 
-export default function Header({ profile, onlineUsers, notifications, onLogout, onProfileClick, onSettingsClick }: HeaderProps) {
+export default function Header({ profile, onlineUsers, notifications, onLogout, onProfileClick }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleProfileClick = () => {
     setDropdownOpen(false);
     onProfileClick?.();
-  };
-
-  const handleSettingsClick = () => {
-    setDropdownOpen(false);
-    onSettingsClick?.();
   };
 
   const handleLogout = () => {
@@ -84,20 +78,14 @@ export default function Header({ profile, onlineUsers, notifications, onLogout, 
                 {/* Dropdown menu */}
                 <div className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-xl border border-indigo-500/30 z-50">
                   <div className="py-1">
-                    <button
+                    <Link
+                      to={"/profile/" + profile?.displayName}
                       onClick={handleProfileClick}
                       className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-indigo-600/20 hover:text-purple-300 transition-colors flex items-center space-x-2"
                     >
                       <span>👤</span>
                       <span>Profile</span>
-                    </button>
-                    <button
-                      onClick={handleSettingsClick}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-indigo-600/20 hover:text-purple-300 transition-colors flex items-center space-x-2"
-                    >
-                      <span>⚙️</span>
-                      <span>Settings</span>
-                    </button>
+                    </Link>
                     <hr className="border-indigo-500/30 my-1" />
                     <button
                       onClick={handleLogout}
