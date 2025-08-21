@@ -77,9 +77,6 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
       currentStreak: profile.gameStats.currentStreak,
       bestStreak: profile.gameStats.bestStreak,
       joinDate: "Unknown", // This would need to be added to the Profile type
-      country: "� Unknown",
-      favoriteTable: "Classic",
-      playStyle: "Balanced",
       totalMatches: profile.gameStats.totalGames,
       tournamentsWon: profile.gameStats.tournamentWins,
       xp: profile.gameStats.wins * 100 + profile.gameStats.totalGames * 10,

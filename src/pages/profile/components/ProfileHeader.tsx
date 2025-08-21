@@ -104,27 +104,6 @@ export default function ProfileHeader({
         </div>
       </div>
 
-      {/* Quick Info */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-700">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-orange-400">{profileUser.country}</div>
-          <div className="text-gray-400 text-sm">Country</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-purple-400">{profileUser.favoriteTable}</div>
-          <div className="text-gray-400 text-sm">Favorite Table</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-400">{profileUser.playStyle}</div>
-          <div className="text-gray-400 text-sm">Play Style</div>
-        </div>
-        <div className="text-center">
-          <div className={`text-2xl font-bold ${isOnline ? "text-green-400" : "text-gray-400"}`}>
-            {isOnline ? "Online" : "Offline"}
-          </div>
-          <div className="text-gray-400 text-sm">Status</div>
-        </div>
-      </div>
     </div>
   )
 }

@@ -12,9 +12,6 @@ export interface ProfileUser {
   currentStreak: number
   bestStreak: number
   joinDate: string
-  country: string
-  favoriteTable: string
-  playStyle: string
   totalMatches: number
   tournamentsWon: number
   xp: number
