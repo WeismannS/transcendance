@@ -90,11 +90,10 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
   const transformGameHistory = (gameHistory: GameHistory[]): Match[] => {
     return gameHistory.map((game, index) => ({
       id: game.id,
-      opponent: "Unknown Player", // This would need to be added to GameHistory
+      opponent: game.opponentName, // This would need to be added to GameHistory
       result: game.result as "win" | "loss",
       score: `${game.playerScore}-${game.opponentScore}`,
       time: new Date(game.playedAt).toLocaleDateString(),
-      duration: "Unknown", // This would need to be added to GameHistory
     }))
   }
 

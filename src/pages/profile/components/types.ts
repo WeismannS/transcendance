@@ -26,7 +26,6 @@ export interface Match {
   result: "win" | "loss"
   score: string
   time: string
-  duration: string
 }
 
 export interface Achievement {

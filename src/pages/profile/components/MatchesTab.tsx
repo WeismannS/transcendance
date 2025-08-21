@@ -23,7 +23,6 @@ export default function MatchesTab({ recentMatches }: MatchesTabProps) {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-gray-300">{match.duration}</div>
               <div className="text-gray-400 text-sm">{match.time}</div>
             </div>
           </div>
