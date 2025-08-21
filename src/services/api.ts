@@ -1,5 +1,5 @@
 import { EventType, SocialState, stateManager, UserProfileState } from "../store/StateManager.ts";
-import { User, Achievement, FriendEvent, isNotificationType, Conversation } from "../types/user.ts";
+import { User, Achievement, FriendEvent, isNotificationType, Conversation, Profile } from "../types/user.ts";
 import { redirect } from "Miku/Router";
 import { useNotifications } from "../pages/use-notification.ts";
 import { Notification } from "../types/user.ts";
@@ -582,5 +582,23 @@ export  const formatTime = (date: Date) => {
     } catch (error) {
       console.error('Failed to remove friend:', error);
       return false;
+    }
+  }
+
+  export async function getProfileByUsername(username: string) : Promise<Profile | null> {
+    try {
+      const response = await fetch(API_URL + `/api/user-management/profiles/${username}`, {
+        credentials: "include"
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to get profile');
+      }
+  
+      const profile = await response.json();
+      return profile;
+    } catch (error) {
+      console.error('Failed to get profile:', error);
+      return null;
     }
   }

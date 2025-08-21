@@ -16,7 +16,24 @@ import { API_URL, logOut, updateProfile } from "../../services/api.ts";
 export default function DashboardPage() {
   const { identity, profile, gameState, social, achievements, notifications, messages } = useDashboardData();
   
-  const [activeSection, setActiveSection] = useState("tournaments");
+  // Check if we should start with a specific section (e.g., from profile message button)
+  const initialSection = sessionStorage.getItem('dashboardActiveSection') || "tournaments";
+  const [activeSection, setActiveSection] = useState(initialSection);
+  
+  // Check if we should start in edit mode (e.g., from profile edit button)
+  const initialEditMode = sessionStorage.getItem('dashboardEditMode') === 'true';
+  const [isEditMode, setIsEditMode] = useState(initialEditMode);
+  
+  // Clear the sessionStorage after using it
+  useEffect(() => {
+    if (sessionStorage.getItem('dashboardActiveSection')) {
+      sessionStorage.removeItem('dashboardActiveSection');
+    }
+    if (sessionStorage.getItem('dashboardEditMode')) {
+      sessionStorage.removeItem('dashboardEditMode');
+    }
+  }, []);
+  
   const [isVisible, setIsVisible] = useState(false);
   const [ballPosition, setBallPosition] = useState({ x: 90, y: 10 });
   const [notificationCount, setNotificationCount] = useState(3);
@@ -28,8 +45,7 @@ export default function DashboardPage() {
     winRate: gameState?.stats.totalGames && gameState.stats.totalGames > 0 ? ((gameState.stats.wins / gameState.stats.totalGames) * 100).toFixed(1) : 0,
   });
 
-  // State for profile editing
-  const [isEditMode, setIsEditMode] = useState(false);
+  // State for profile editing - removed duplicate declaration as it's now initialized above
   const [editableProfile, setEditableProfile] = useState({
     displayName: profile?.displayName || "",
     bio: profile?.bio || "",

@@ -1,0 +1,130 @@
+import Miku from "Miku"
+import { ProfileUser } from "./types.ts"
+import { API_URL } from "../../../services/api.ts"
+interface ProfileHeaderProps {
+  profileUser: ProfileUser
+  isOnline: boolean
+  isFriend: boolean
+  isOwnProfile?: boolean
+  onFriendToggle: () => void
+  onChallenge: () => void
+  onMessage: () => void
+  onEditProfile: () => void
+}
+
+export default function ProfileHeader({
+  profileUser,
+  isOnline,
+  isFriend,
+  isOwnProfile = false,
+  onFriendToggle,
+  onChallenge,
+  onMessage,
+  onEditProfile,
+}: ProfileHeaderProps) {
+  return (
+    <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 mb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="flex items-center space-x-6">
+          <div className="relative">
+            <div className="w-24 h-24 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+              {profileUser.avatar ? (
+                <img 
+                  src={API_URL + "/"+profileUser.avatar} 
+                  alt={profileUser.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold text-3xl">
+                  {profileUser.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </span>
+              )}
+            </div>
+            {isOnline && (
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-gray-800"></div>
+            )}
+          </div>
+
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">{profileUser.name}</h1>
+            <p className="text-gray-400 mb-2">{profileUser.username}</p>
+            <div className="flex items-center space-x-4 text-sm text-gray-300">
+              <span className="flex items-center space-x-1">
+                <span>🏆</span>
+                <span>Rank #{profileUser.rank}</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span>⭐</span>
+                <span>Level {profileUser.level}</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span>📅</span>
+                <span>Joined {profileUser.joinDate}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          {!isOwnProfile && (
+            <>
+              <button
+                onClick={onFriendToggle}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+                  isFriend ? "bg-gray-600 text-white hover:bg-gray-700" : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
+                {isFriend ? "Remove Friend" : "Add Friend"}
+              </button>
+              <button
+                onClick={onChallenge}
+                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+              >
+                Challenge
+              </button>
+              <button 
+                onClick={onMessage}
+                className="px-6 py-3 bg-gray-700 text-white rounded-xl hover:bg-gray-600 transition-all"
+              >
+                Message
+              </button>
+            </>
+          )}
+          {isOwnProfile && (
+            <button 
+              onClick={onEditProfile}
+              className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all"
+            >
+              Edit Profile
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Info */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-700">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-orange-400">{profileUser.country}</div>
+          <div className="text-gray-400 text-sm">Country</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-purple-400">{profileUser.favoriteTable}</div>
+          <div className="text-gray-400 text-sm">Favorite Table</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-green-400">{profileUser.playStyle}</div>
+          <div className="text-gray-400 text-sm">Play Style</div>
+        </div>
+        <div className="text-center">
+          <div className={`text-2xl font-bold ${isOnline ? "text-green-400" : "text-gray-400"}`}>
+            {isOnline ? "Online" : "Offline"}
+          </div>
+          <div className="text-gray-400 text-sm">Status</div>
+        </div>
+      </div>
+    </div>
+  )
+}

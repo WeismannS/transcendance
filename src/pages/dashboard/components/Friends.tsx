@@ -193,12 +193,18 @@ export default function Friends(
           className="flex items-center justify-between p-4 bg-gray-700/30 rounded-xl hover:bg-gray-700/50 transition-all"
         >
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-              <img
-                src={API_URL + '/' + user.avatar}
-                alt={user.displayName}
-                className="rounded-full "
-              />
+            <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+              {user.avatar ? (
+                <img
+                  src={API_URL + '/' + user.avatar}
+                  alt={user.displayName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold text-sm">
+                  {user.displayName.split(" ").map((n) => n[0]).join("").substring(0, 2)}
+                </span>
+              )}
             </div>
             <div>
               <h4 className="text-white font-semibold">{user.displayName}</h4>
@@ -273,8 +279,18 @@ export default function Friends(
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
-                          <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                            <img className="rounded-full " src={API_URL + '/' + friend.avatar}></img>
+                          <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                            {friend.avatar ? (
+                              <img 
+                                src={API_URL + '/' + friend.avatar} 
+                                alt={friend.displayName}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-white font-bold text-sm">
+                                {friend.displayName.split(" ").map((n) => n[0]).join("").substring(0, 2)}
+                              </span>
+                            )}
                           </div>
                           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800"></div>
                         </div>
@@ -323,8 +339,18 @@ export default function Friends(
                 >
                   <div className="flex items-center space-x-3">
                     <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                        <img className="rounded-full " src={API_URL +'/' +friend.avatar}></img>
+                      <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                        {friend.avatar ? (
+                          <img 
+                            src={API_URL + '/' + friend.avatar} 
+                            alt={friend.displayName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-sm">
+                            {friend.displayName.split(" ").map((n) => n[0]).join("").substring(0, 2)}
+                          </span>
+                        )}
                       </div>
                       {friend.status == "online" && (
                         <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
@@ -353,7 +379,6 @@ export default function Friends(
                           if (conversation) {
                             setActiveSection("chats");
                           }
-                          stateManager.emit('CONVERSATION_ADDED', {conversationId: conversation.id, conversation});
                         }).catch((error) => {
                           console.error('Failed to create or get conversation:', error);
                         }
@@ -393,8 +418,18 @@ export default function Friends(
                 {friendRequests.map((request) => (
                   <div key={request.user.id} className="bg-gray-700/30 rounded-xl p-4">
                     <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                        <img src ={API_URL + '/' + request.user.avatar} className="rounded-full "></img>
+                      <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                        {request.user.avatar ? (
+                          <img 
+                            src={API_URL + '/' + request.user.avatar} 
+                            alt={request.user.displayName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-sm">
+                            {request.user.displayName.split(" ").map((n) => n[0]).join("").substring(0, 2)}
+                          </span>
+                        )}
                       </div>
                       <div>
                         <h4 className="text-white font-semibold">{request.user.displayName}</h4>

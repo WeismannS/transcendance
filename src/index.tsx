@@ -13,13 +13,16 @@ import { NotificationContainer } from "./pages/notification.tsx";
 
 const aa = document.body.querySelector("#app");
 const ProtectedRoutes=   ({isLoggedIn} : {isLoggedIn: boolean}) =>
-{  
+{ 
+    if (!isLoggedIn) {
+        return null; // Don't render protected routes if not logged in
+    }
     return (
         <>
             <Router path="/dashboard" Component={DashboardPage} />
             <Router path="/app_home" Component={UserHomePage} />
-            <Router path="/profile/:userid" Component={UserHomePage} />
-            <Router path="/tournaments" Component={TournamentsPage} />
+            <Router path="/profile/:userid" Component={UserHomePage} isLoggedIn={isLoggedIn} />
+            <Router path="/tournaments" Component={TournamentsPage}  />
             <Router path="/leaderboard" Component={LeaderboardPage} />
             <Router path="/game" Component={GamePage} />
         </>

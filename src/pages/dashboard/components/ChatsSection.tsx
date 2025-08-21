@@ -2,6 +2,7 @@ import Miku, { useState, useEffect, useRef } from "Miku";
 import { useMessages, useUserProfile } from "../../../hooks/useStates.ts";
 import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL, formatTime } from "../../../services/api.ts";
 import { Conversation, Message, ProfileOverview } from "../../../types/user.ts";
+import { stateManager } from "../../../store/StateManager.ts";
 import { CursorPos } from "readline";
 
 export default function ChatsSection() {
@@ -18,13 +19,35 @@ export default function ChatsSection() {
   console.log("Conversations: ", conversations);
   const selectedConversation = conversations.find(conv => conv.id === selectedConversationId);
 
-  // Auto-select first conversation if none selected
+  // Auto-select conversation based on activeChat from state or first conversation
   useEffect(() => {
-    if (conversations.length > 0 && !selectedConversationId && !isInitialized) {
-      setSelectedConversationId(conversations[0].id);
+    const activeChat = messagesState?.activeChat;
+    
+    if (conversations.length > 0 && !isInitialized) {
+      // If there's an activeChat set in state, use that, otherwise use first conversation
+      const targetConversationId = activeChat && conversations.find(conv => conv.id === activeChat) 
+        ? activeChat 
+        : conversations[0].id;
+      
+      setSelectedConversationId(targetConversationId);
       setIsInitialized(true);
+      
+      // Clear activeChat from state after using it
+      if (activeChat && messagesState) {
+        const { activeChat: _, ...restMessagesState } = messagesState;
+        stateManager.setState('messages', { ...restMessagesState, activeChat: undefined });
+      }
+    } else if (conversations.length > 0 && messagesState?.activeChat && !selectedConversationId) {
+      // Handle case where activeChat is set but no conversation is selected yet
+      const targetConversation = conversations.find(conv => conv.id === messagesState.activeChat);
+      if (targetConversation) {
+        setSelectedConversationId(targetConversation.id);
+        // Clear activeChat from state after using it
+        const { activeChat: _, ...restMessagesState } = messagesState;
+        stateManager.setState('messages', { ...restMessagesState, activeChat: undefined });
+      }
     }
-  }, [conversations, selectedConversationId, isInitialized]);
+  }, [conversations, selectedConversationId, isInitialized, messagesState]);
 
   const handleConversationSelect = (conversationId: string) => {
     setSelectedConversationId(conversationId);
@@ -76,9 +99,6 @@ export default function ChatsSection() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold text-white">Messages</h2>
-          <button disabled className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold opacity-50">
-            New Chat
-          </button>
         </div>
         <div className="flex items-center justify-center h-64 text-gray-400">
           <div className="text-center">

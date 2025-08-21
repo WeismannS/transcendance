@@ -82,7 +82,17 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
         `}
       >
         <div className="flex items-start space-x-3">
-          {!notification.avatar ? <div className="text-xl flex-shrink-0 mt-0.5">{getIcon()}</div> : <img src={API_URL + '/' + notification.avatar} className="flex-shrink-0 rounded-full w-6 h-6 object-cover"></img>}
+          {notification.avatar ? (
+            <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mt-0.5">
+              <img 
+                src={API_URL + '/' + notification.avatar} 
+                className="w-full h-full object-cover"
+                alt="Avatar"
+              />
+            </div>
+          ) : (
+            <div className="text-xl flex-shrink-0 mt-0.5">{getIcon()}</div>
+          )}
   
           <div className="flex-1 min-w-0">
             <h4 className="text-white font-semibold text-sm">{notification.title}</h4>

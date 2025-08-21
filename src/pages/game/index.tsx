@@ -1,6 +1,10 @@
 "use client"
 
 import Miku, { useState, useEffect, useRef } from "Miku"
+import { Link } from "Miku/Router"
+import { stateManager } from "../../store/StateManager.ts"
+import { UserProfileState } from "../../store/StateManager.ts"
+import { API_URL } from "../../services/api.ts"
 
 export default function GamePage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -9,6 +13,9 @@ export default function GamePage() {
   const [gameMode, setGameMode] = useState("quickmatch") // quickmatch, practice, tournament
   const [isVisible, setIsVisible] = useState(false)
   const [opponent, setOpponent] = useState({ name: "Alex Chen", avatar: "AC", difficulty: "intermediate" })
+
+  // Get current user from state manager
+  const currentUser = stateManager.getState<UserProfileState>('userProfile')
 
   // Game state
   const [score, setScore] = useState({ player: 0, opponent: 0 })
@@ -25,7 +32,14 @@ export default function GamePage() {
 
   // Controls
   const [keys, setKeys] = useState({ up: false, down: false })
-  const [matchResults, setMatchResults] = useState(null)
+  const [matchResults, setMatchResults] = useState<{
+    result: "win" | "loss";
+    opponent: string;
+    score: string;
+    duration: string;
+    xpGained: number;
+    pointsGained: number;
+  } | null>(null)
 
   // Game constants
   const CANVAS_WIDTH = 800
@@ -349,9 +363,9 @@ export default function GamePage() {
         </div>
 
         <div className="mt-6 text-center">
-          <a href="/dashboard" className="text-orange-400 hover:text-orange-300 transition-colors">
+          <Link to="/dashboard" className="text-orange-400 hover:text-orange-300 transition-colors">
             ← Back to Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -363,11 +377,21 @@ export default function GamePage() {
       <div className="w-full max-w-4xl mb-4">
         <div className="flex items-center justify-between bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-4">
           <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">JD</span>
-            </div>
+            {currentUser?.avatar ? (
+              <img 
+                src={API_URL + `/${currentUser.avatar}`} 
+                alt={currentUser.displayName}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm">
+                  {currentUser?.displayName?.split(" ").map(n => n[0]).join("") || "U"}
+                </span>
+              </div>
+            )}
             <div>
-              <div className="text-white font-semibold">John Doe</div>
+              <div className="text-white font-semibold">{currentUser?.displayName || "Player"}</div>
               <div className="text-gray-400 text-sm">You</div>
             </div>
           </div>
@@ -467,9 +491,9 @@ export default function GamePage() {
 
           <div className="flex justify-between items-center p-3 bg-gray-700/30 rounded-xl">
             <span className="text-gray-400">Rank Points:</span>
-            <span className={`font-bold ${matchResults?.pointsGained > 0 ? "text-green-400" : "text-red-400"}`}>
-              {matchResults?.pointsGained > 0 ? "+" : ""}
-              {matchResults?.pointsGained}
+            <span className={`font-bold ${(matchResults?.pointsGained ?? 0) > 0 ? "text-green-400" : "text-red-400"}`}>
+              {(matchResults?.pointsGained ?? 0) > 0 ? "+" : ""}
+              {matchResults?.pointsGained ?? 0}
             </span>
           </div>
         </div>
@@ -489,12 +513,12 @@ export default function GamePage() {
             Main Menu
           </button>
 
-          <a
-            href="/dashboard"
+          <Link
+            to="/dashboard"
             className="block w-full py-3 bg-purple-600 text-white text-center rounded-xl hover:bg-purple-700 transition-all"
           >
             Back to Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     </div>

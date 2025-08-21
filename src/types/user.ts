@@ -1,12 +1,7 @@
 import { EventType } from "../store/StateManager.ts"
 
 export type User = {
-  profile: {
-    id: string;
-    displayName: string;
-    bio: string;
-    avatar: string;
-  };
+  profile: ProfileOverview;
   gameHistory: GameHistory[];
   gameStats: GameStats;
   achievements: string[]; // Array of achievement IDs
@@ -17,6 +12,10 @@ export type User = {
   };
 };
 
+export interface Profile extends Omit<User, "friends" | "friendRequests"> {
+  gamesH2h : GameHistory[];
+
+}
 export type GameHistory = {
   id: number;
   playedAt: string;
@@ -29,6 +28,10 @@ export type GameStats = {
   totalGames: number;
   wins: number;
   losses: number;
+  tournaments : number;
+  tournamentWins: number;
+  bestStreak  : number;
+  currentStreak: number;
 };
 
 export type Achievement = {
@@ -49,6 +52,7 @@ export type ProfileOverview = {
   id: string;
   displayName: string;
   avatar: string;
+  bio : string;
   status: "online" | "offline" | "In Game" | "in Tournament";
   rank: number;
 };
