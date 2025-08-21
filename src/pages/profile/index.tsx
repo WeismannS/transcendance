@@ -33,6 +33,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isOwnProfile, setIsOwnProfile] = useState(false)
+  const [hasPendingRequest, setHasPendingRequest] = useState(false)
 
   // Get state manager data - these will remain reactive
   const currentUser = stateManager.getState<UserProfileState>('userProfile')
@@ -113,6 +114,13 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
     return friends.some(friend => friend.id === userId)
   }
 
+  // Check if there's a pending friend request to this user
+  const checkPendingRequest = (userId: string, sentRequests: any[]): boolean => {
+    const hasPending = sentRequests.some(request => request.user.id === userId)
+    console.log(`Checking pending request for ${userId}:`, hasPending, sentRequests)
+    return hasPending
+  }
+
   // Extract and memoize username
   const username = getUsername()
 
@@ -163,6 +171,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
           
           setProfileData(mockProfile)
           setIsFriend(false) // Can't be friends with yourself
+          setHasPendingRequest(false) // Can't have pending request to yourself
           setIsOnline(true) // Current user is always online
         } else {
           // Fetch external user profile
@@ -180,9 +189,12 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
               if (socialState) {
                 console.log(socialState.friends)
                 setIsFriend(checkFriendship(profile.profile.id, socialState.friends))
+                // Check for pending friend requests
+                setHasPendingRequest(checkPendingRequest(profile.profile.id, socialState.friendRequests.sent))
               }
             } else {
               setIsFriend(false) // Can't be friends with yourself
+              setHasPendingRequest(false)
             }
             
             // Check online status (you'd need to implement this)
@@ -202,10 +214,11 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
     loadProfile()
   }, [isLoggedIn, username, currentUser?.id]) // Re-run when username or current user ID changes
 
-  // Update friend status reactively
+  // Update friend status and pending requests reactively
   useEffect(() => {
     if (profileData && !isOwnProfile && socialState) {
       setIsFriend(checkFriendship(profileData.profile.id, socialState.friends))
+      setHasPendingRequest(checkPendingRequest(profileData.profile.id, socialState.friendRequests.sent))
     }
   }, [profileData, isOwnProfile, socialState])
 
@@ -274,7 +287,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
   }, [loading])
 
   const handleFriendToggle = async () => {
-    if (!isOwnProfile && profileUser) {
+    if (!isOwnProfile && profileUser && !hasPendingRequest) {
       try {
         if (isFriend) {
           // Remove friend
@@ -286,7 +299,8 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
           // Send friend request
           const success = await sendFriendRequest(profileUser.id, profileUser.name)
           if (success) {
-            // Note: This doesn't immediately make them a friend, just sends a request
+            // Set pending request state immediately for better UX
+            setHasPendingRequest(true)
             console.log("Friend request sent!")
           }
         }
@@ -305,6 +319,11 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
 
   const handleMessage = async () => {
     if (!isOwnProfile && profileUser) {
+      if (!isFriend) {
+        console.log("Cannot send message: User is not a friend")
+        return
+      }
+      
       try {
         // Create or get conversation with this user
         const conversation = await getOrCreateConversation(profileUser.id)
@@ -531,6 +550,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
               isOnline={isOnline}
               isFriend={isFriend}
               isOwnProfile={isOwnProfile}
+              hasPendingRequest={hasPendingRequest}
               onFriendToggle={handleFriendToggle}
               onChallenge={handleChallenge}
               onMessage={handleMessage}

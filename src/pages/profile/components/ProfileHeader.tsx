@@ -6,6 +6,7 @@ interface ProfileHeaderProps {
   isOnline: boolean
   isFriend: boolean
   isOwnProfile?: boolean
+  hasPendingRequest?: boolean
   onFriendToggle: () => void
   onChallenge: () => void
   onMessage: () => void
@@ -17,6 +18,7 @@ export default function ProfileHeader({
   isOnline,
   isFriend,
   isOwnProfile = false,
+  hasPendingRequest = false,
   onFriendToggle,
   onChallenge,
   onMessage,
@@ -69,11 +71,16 @@ export default function ProfileHeader({
             <>
               <button
                 onClick={onFriendToggle}
+                disabled={hasPendingRequest}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-                  isFriend ? "bg-gray-600 text-white hover:bg-gray-700" : "bg-blue-600 text-white hover:bg-blue-700"
+                  hasPendingRequest 
+                    ? "bg-yellow-600/50 text-yellow-200 cursor-not-allowed" 
+                    : isFriend 
+                      ? "bg-gray-600 text-white hover:bg-gray-700" 
+                      : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               >
-                {isFriend ? "Remove Friend" : "Add Friend"}
+                {hasPendingRequest ? "Request Pending" : isFriend ? "Remove Friend" : "Add Friend"}
               </button>
               <button
                 onClick={onChallenge}
@@ -83,7 +90,13 @@ export default function ProfileHeader({
               </button>
               <button 
                 onClick={onMessage}
-                className="px-6 py-3 bg-gray-700 text-white rounded-xl hover:bg-gray-600 transition-all"
+                disabled={!isFriend}
+                className={`px-6 py-3 rounded-xl transition-all ${
+                  isFriend 
+                    ? "bg-gray-700 text-white hover:bg-gray-600" 
+                    : "bg-gray-700/50 text-gray-400 cursor-not-allowed"
+                }`}
+                title={!isFriend ? "You must be friends to send messages" : "Send a message"}
               >
                 Message
               </button>
