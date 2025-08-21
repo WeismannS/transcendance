@@ -9,6 +9,7 @@ import {
   FloatingQuickMatchButton,
   AnimatedBackground,
   Friends,
+  Overview,
 } from "./components/index.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
 import { API_URL, logOut, updateProfile } from "../../services/api.ts";
@@ -17,7 +18,7 @@ export default function DashboardPage() {
   const { identity, profile, gameState, social, achievements, notifications, messages } = useDashboardData();
   
   // Check if we should start with a specific section (e.g., from profile message button)
-  const initialSection = sessionStorage.getItem('dashboardActiveSection') || "tournaments";
+  const initialSection = sessionStorage.getItem('dashboardActiveSection') || "overview";
   const [activeSection, setActiveSection] = useState(initialSection);
   
   // Check if we should start in edit mode (e.g., from profile edit button)
@@ -157,6 +158,7 @@ export default function DashboardPage() {
       <main className="relative z-10 px-6 py-8">
         <div className="max-w-7xl mx-auto">
           <div className={`transition-all duration-500 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+            {activeSection === "overview" && <Overview />}
             {activeSection === "tournaments" && <TournamentsSection tournaments={tournaments} />}
             {activeSection === "chats" && <ChatsSection />}
             {activeSection === "friends" && <Friends setActiveSection={setActiveSection} />}

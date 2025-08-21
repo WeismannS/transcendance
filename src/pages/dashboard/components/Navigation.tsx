@@ -7,6 +7,7 @@ interface NavigationProps {
 
 export default function Navigation({ activeSection, setActiveSection }: NavigationProps) {
   const sections = [
+    { id: "overview", label: "Overview", icon: "📊" },
     { id: "tournaments", label: "Tournaments", icon: "🏆" },
     { id: "chats", label: "Messages", icon: "💬" },
     { id: "friends", label: "Friends", icon: "👥" },

@@ -90,6 +90,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
 
   // Transform GameHistory to Match format
   const transformGameHistory = (gameHistory: GameHistory[]): Match[] => {
+    console.log("Transforming game history:", gameHistory)
     return gameHistory.map((game, index) => ({
       id: game.id,
       opponent: game.opponentName, // This would need to be added to GameHistory
@@ -153,9 +154,10 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
         setIsOwnProfile(!!isOwn)
 
         console.log("Is own profile:", isOwn)
-
+        
         if (isOwn && currentUser) {
           // Use current user data from state manager
+          console.log("Using current user data for own profile", gameState)
           const mockProfile: Profile = {
             profile: {
               ...currentUser,
@@ -237,6 +239,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
         gamesH2h: []
 
       }
+      console.log("this in useeffect", gameState)
       setProfileData(updatedProfile)
     }
   }, [isOwnProfile, currentUser, gameState, achievementsState])
@@ -244,9 +247,9 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
   // Get transformed data
   const profileUser = profileData && achievementsState ? 
     transformProfileData(profileData, achievementsState.allAchievements || []) : null
-
+  console.log("profile data game history", profileData?.gameHistory)
   const recentMatches: Match[] = profileData ? transformGameHistory(profileData.gameHistory.slice(0, 10)) : []
-
+  console.log("recent matches", recentMatches)
   const achievements: Achievement[] = profileData && achievementsState ? 
     transformAchievements(profileData.achievements, achievementsState.allAchievements) : []
 

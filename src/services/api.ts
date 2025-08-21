@@ -602,3 +602,22 @@ export  const formatTime = (date: Date) => {
       return null;
     }
   }
+
+
+  export async function sendChallenge(opponentId: string, mode : "classic" | "tournament") {
+    try {
+      const response = await fetch(API_URL + '/api/game/challenges?opponentId=' + opponentId +"&mode=" + mode, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send challenge');
+      }
+
+    } catch (error) {
+      console.error('Failed to send challenge:', error);
+      throw error;
+    }
+  }
