@@ -57,10 +57,6 @@ export default function ProfileHeader({
                 <span>Rank #{profileUser.rank}</span>
               </span>
               <span className="flex items-center space-x-1">
-                <span>⭐</span>
-                <span>Level {profileUser.level}</span>
-              </span>
-              <span className="flex items-center space-x-1">
                 <span>📅</span>
                 <span>Joined {profileUser.joinDate}</span>
               </span>

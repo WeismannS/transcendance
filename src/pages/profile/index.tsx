@@ -76,10 +76,14 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
       winStreak: profile.gameStats.currentStreak,
       currentStreak: profile.gameStats.currentStreak,
       bestStreak: profile.gameStats.bestStreak,
-      joinDate: "Unknown", // This would need to be added to the Profile type
+      joinDate:  new Date(profile.profile.createdAt).toLocaleDateString(),// This would need to be added to the Profile type
       totalMatches: profile.gameStats.totalGames,
       tournamentsWon: profile.gameStats.tournamentWins,
       xp: profile.gameStats.wins * 100 + profile.gameStats.totalGames * 10,
+      overallRecord: {
+        wins: profile.overallRecord?.wins || 0,
+        losses: profile.overallRecord?.losses || 0,
+      },
     }
   }
 
@@ -148,7 +152,8 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
             profile: {
               ...currentUser,
               status: "online" as const,
-              rank: 1 // Default rank, should be in UserProfileState
+              rank: 1, // Default rank, should be in UserProfileState
+              createdAt: currentUser.createdAt || new Date().toISOString(), // Use current date if not available
             },
             gameHistory: gameState?.history || [],
             gameStats: gameState?.stats || { totalGames: 0, wins: 0, losses: 0, tournaments: 0, tournamentWins: 0, bestStreak: 0, currentStreak: 0 },
@@ -217,6 +222,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
         gameStats: gameState.stats || { totalGames: 0, wins: 0, losses: 0, tournaments: 0, tournamentWins: 0, bestStreak: 0, currentStreak: 0 },
         achievements: achievementsState.userAchievementIds || [],
         gamesH2h: []
+
       }
       setProfileData(updatedProfile)
     }

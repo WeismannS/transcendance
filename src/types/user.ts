@@ -14,6 +14,10 @@ export type User = {
 
 export interface Profile extends Omit<User, "friends" | "friendRequests"> {
   gamesH2h : GameHistory[];
+  overallRecord?: {
+    wins: number;
+    losses: number;
+  }
 
 }
 export type GameHistory = {
@@ -57,6 +61,7 @@ export type ProfileOverview = {
   bio : string;
   status: "online" | "offline" | "In Game" | "in Tournament";
   rank: number;
+  createdAt: string; // ISO date string
 };
 
 

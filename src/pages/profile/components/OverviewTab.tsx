@@ -70,7 +70,7 @@ export default function OverviewTab({ profileUser, mutualHistory }: OverviewTabP
         <div className="mt-4 p-4 bg-gradient-to-r from-orange-500/20 to-pink-500/20 rounded-xl border border-orange-500/30">
           <div className="text-center">
             <div className="text-white font-semibold mb-1">Overall Record</div>
-            <div className="text-orange-400 font-bold">You: 1 - 2 :{profileUser.name.split(" ")[0]}</div>
+            <div className="text-orange-400 font-bold">You: {profileUser.overallRecord.wins} - {profileUser.overallRecord.losses} :{profileUser.name.split(" ")[0]}</div>
           </div>
         </div>
       </div>

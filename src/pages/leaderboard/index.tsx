@@ -289,7 +289,6 @@ export default function LeaderboardPage() {
                     <div>
                       <div className="text-white font-semibold">{player.name}</div>
                       <div className="text-gray-400 text-sm flex items-center space-x-2">
-                        <span>{player.country}</span>
                         <span>{player.username}</span>
                       </div>
                     </div>

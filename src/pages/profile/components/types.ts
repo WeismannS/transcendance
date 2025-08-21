@@ -14,6 +14,10 @@ export interface ProfileUser {
   joinDate: string
   totalMatches: number
   tournamentsWon: number
+  overallRecord: {
+    wins: number
+    losses: number
+  }
   xp: number
 }
 
