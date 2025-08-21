@@ -3,7 +3,6 @@ import Miku, { useState, useEffect } from "Miku"
 import { Link } from "Miku/Router"
 import {
   AnimatedBackground,
-  Header,
   ProfileHeader,
   TabNavigation,
   OverviewTab,
@@ -361,16 +360,157 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
-        <div className="text-2xl">Loading profile...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
+          <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+
+          {/* Animated Ping Pong Ball */}
+          <div
+            className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
+            style={{
+              left: `${ballPosition.x}%`,
+              top: `${ballPosition.y}%`,
+              transform: "translate(-50%, -50%)",
+            }}
+          ></div>
+
+          {/* Geometric shapes */}
+          <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-orange-500/10 rounded-full"></div>
+          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-pink-500/10 rounded-full"></div>
+        </div>
+
+
+        <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
+          <div className="text-center max-w-lg mx-auto">
+            <div
+              className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+            >
+              {/* Loading Card */}
+              <div key="loading-card" className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-12 shadow-2xl">
+                {/* Loading Spinner */}
+                <div key="loading-spinner" className="mb-6">
+                  <div className="w-16 h-16 mx-auto border-4 border-gray-600 border-t-orange-500 rounded-full animate-spin"></div>
+                </div>
+                
+                {/* Loading Text */}
+                <h2 key="loading-title" className="text-3xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                    Loading Profile
+                  </span>
+                </h2>
+                
+                <p key="loading-message" className="text-xl text-gray-300">
+                  Fetching player information...
+                </p>
+
+                {/* Loading dots animation */}
+                <div key="loading-dots" className="flex justify-center space-x-1 mt-6">
+                  <div key="dot-1" className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                  <div key="dot-2" className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                  <div key="dot-3" className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
   if (error || !profileData || !profileUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
-        <div className="text-2xl text-red-400">{error || "Profile not found"}</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
+          <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+
+          {/* Animated Ping Pong Ball */}
+          <div
+            className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
+            style={{
+              left: `${ballPosition.x}%`,
+              top: `${ballPosition.y}%`,
+              transform: "translate(-50%, -50%)",
+            }}
+          ></div>
+
+          {/* Geometric shapes */}
+          <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-orange-500/10 rounded-full"></div>
+          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-pink-500/10 rounded-full"></div>
+        </div>
+
+
+        <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
+          <div className="text-center max-w-2xl mx-auto">
+            <div
+              className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+            >
+              {/* Main Error Card */}
+              <div key="main-error-card" className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-12 mb-8 shadow-2xl">
+                {/* Pensive Emoji with animation */}
+                <div key="pensive-emoji" className="text-8xl mb-6 animate-bounce">😔</div>
+                
+                {/* Error Title */}
+                <h1 key="error-title" className="text-4xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                    Profile Not Found
+                  </span>
+                </h1>
+                
+                {/* Error Message */}
+                <p key="error-message" className="text-xl text-gray-300 mb-8 leading-relaxed">
+                  {error === "Profile not found" || error === null 
+                    ? "We couldn't find the profile you're looking for. The user might not exist or the profile may have been removed."
+                    : error
+                  }
+                </p>
+
+                {/* Suggestions Section */}
+                <div className="bg-gray-700/30 rounded-xl p-6 mb-8">
+                  <h3 key="suggestions-title" className="text-lg font-semibold text-white mb-4">What you can do:</h3>
+                  <div key="suggestions-list" className="space-y-3 text-gray-300">
+                    <div key="suggestion-1" className="flex items-center space-x-3">
+                      <span className="text-orange-400">•</span>
+                      <span>Check the URL for any typos</span>
+                    </div>
+                    <div key="suggestion-2" className="flex items-center space-x-3">
+                      <span className="text-orange-400">•</span>
+                      <span>Search for the user in the dashboard</span>
+                    </div>
+                    <div key="suggestion-3" className="flex items-center space-x-3">
+                      <span className="text-orange-400">•</span>
+                      <span>Browse the leaderboard to find players</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div key="action-buttons" className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button
+                    key="dashboard-button"
+                    onClick={() => redirect('/dashboard')}
+                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    🏠 Go to Dashboard
+                  </button>
+                  <button
+                    key="leaderboard-button"
+                    onClick={() => redirect('/leaderboard')}
+                    className="px-8 py-3 bg-gray-700 text-white rounded-xl font-semibold hover:bg-gray-600 transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    🏆 View Leaderboard
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -378,7 +518,6 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
       <AnimatedBackground ballPosition={ballPosition} />
-      <Header />
 
       <main className="relative z-10 px-6 py-8">
         <div className="max-w-7xl mx-auto">

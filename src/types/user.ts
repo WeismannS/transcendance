@@ -22,6 +22,8 @@ export type GameHistory = {
   result: "win" | "loss" | "draw";
   playerScore: number;
   opponentScore: number;
+  opponent: ProfileOverview;
+  opponentName: string;
 };
 
 export type GameStats = {
