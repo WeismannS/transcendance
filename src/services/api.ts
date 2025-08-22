@@ -626,7 +626,6 @@ export  const formatTime = (date: Date) => {
     try {
       const response = await fetch(API_URL + '/api/game/challenge?opponentId=' + opponentId +"&mode=" + mode, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         credentials: "include",
       });
 
