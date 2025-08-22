@@ -6,6 +6,35 @@ import { Notification } from "../types/user.ts";
 import { userInfo } from "os";
 export const API_URL = "http://localhost:3000";
 
+interface GameUpdate {
+  type: "gameUpdate" | "gameEnd" | "scoreUpdate" | "reconnection" | "connected" ;
+  gameId: string;
+  gameBoard: GameBoard;
+  score: Score;
+  gameStarted: boolean;
+}
+
+interface GameBoard {
+  player1: Player;
+  player2: Player;
+  ball: Ball;
+}
+
+interface Player {
+  paddleY: number;
+}
+
+interface Ball {
+  x: number;
+  y: number;
+  vx: number; // velocity x
+  vy: number; // velocity y
+}
+
+interface Score {
+  player1: number;
+  player2: number;
+}
 
 export async function logOut() {
   try {
@@ -675,7 +704,7 @@ export  const formatTime = (date: Date) => {
     onClose,
     onOpen
   }: {
-    onMessage: (data: any) => void;
+    onMessage: (data: GameUpdate) => void;
     onClose: () => void;
     onOpen: () => void;
   }) {
@@ -684,7 +713,14 @@ export  const formatTime = (date: Date) => {
 
       socket.onopen = onOpen;
 
-      socket.onmessage = onMessage;
+      socket.onmessage = (event) => {
+        try {
+          const data: GameUpdate = JSON.parse(event.data);
+          onMessage(data);
+        } catch (error) {
+          console.error('Failed to parse game update:', error);
+        }
+      };
       socket.onclose = onClose;
       return socket
     } catch (error) {
