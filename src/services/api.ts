@@ -621,7 +621,7 @@ export  const formatTime = (date: Date) => {
   }
 
 
-  export async function sendChallenge(opponentId: string, mode : "classic" | "tournament") {
+  export async function sendChallenge(opponentId: string, mode : "classic" | "tournament" = "classic") {
     try {
       const response = await fetch(API_URL + '/api/game/challenges?opponentId=' + opponentId +"&mode=" + mode, {
         method: 'POST',

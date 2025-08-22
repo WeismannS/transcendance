@@ -3,7 +3,7 @@ import { acceptFriendRequest, API_URL, getOrCreateConversation, declineFriendReq
 import { ProfileOverview } from "../../../types/user.ts";
 import { SocialState, stateManager } from "../../../store/StateManager.tsx";
 import { useNotifications } from "../../use-notification.tsx";
-
+import {sendChallenge} from "../../../services/api.ts"
 export default function Friends(
   { setActiveSection }: { setActiveSection: (section: string) => void }
 ) {
@@ -18,9 +18,6 @@ export default function Friends(
   const friends = social.friends
   const {addNotification} = useNotifications();
 
-  function handleQuickMatch() {
-    console.log("Starting quick match...");
-  }
 
   function handleAddFriends() {
     setShowAddFriendsModal(true);
@@ -307,7 +304,7 @@ export default function Friends(
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={handleQuickMatch}
+                        onClick={()=> sendChallenge(friend.id)}
                         disabled={friend.status !== "online"}
                         className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
                           friend.status !== "online"
@@ -374,7 +371,7 @@ export default function Friends(
                     </div>
                     <div className="flex space-x-1">
                      <button
-                        onClick={handleQuickMatch}
+                        onClick={()=> sendChallenge(friend.id)}
                         disabled={friend.status !== "online"}
                         className={`flex-1 px-3 py-1  rounded-lg text-sm font-semibold transition-all ${
                           friend.status !== "online"
