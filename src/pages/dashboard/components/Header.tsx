@@ -38,12 +38,7 @@ export default function Header({ profile, onlineUsers, notifications, onLogout, 
             <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
             <span className="text-sm">{onlineUsers.toLocaleString()} online</span>
           </div>
-          <div className="relative">
-            <button className="text-gray-300 hover:text-white transition-colors">
-              <span className="text-xl">🔔</span>
-              {notifications > 0 && <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{notifications}</div>}
-            </button>
-          </div>
+          
           <div className="relative">
             <button 
               onClick={() => setDropdownOpen(!dropdownOpen)}
