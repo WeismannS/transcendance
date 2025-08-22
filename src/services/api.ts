@@ -352,7 +352,9 @@ export function initializeNotificationWs() {
           },
           onReject: () => {
             // Handle reject action
-            console.log("Game invite rejected", data.gameId);
+           rejectChallenge(data.gameId).then(() => {
+             console.log("Game invite rejected", data.gameId);
+           });
           }
         });
         
@@ -635,6 +637,23 @@ export  const formatTime = (date: Date) => {
 
     } catch (error) {
       console.error('Failed to send challenge:', error);
+      throw error;
+    }
+  }
+
+  export async function rejectChallenge(challengeId: string) {
+    try {
+      const response = await fetch(API_URL + '/api/game/reject/' + challengeId, {
+        method: 'POST',
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reject challenge');
+      }
+
+    } catch (error) {
+      console.error('Failed to reject challenge:', error);
       throw error;
     }
   }
