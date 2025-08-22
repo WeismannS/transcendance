@@ -339,6 +339,7 @@ export function initializeNotificationWs() {
         });
       }
       else if (isNotificationType(data, 'GAME_INVITE')) {
+        console.log(data)
         addNotification({
           title: data.title,
           avatar: data.user.avatar,
