@@ -643,3 +643,28 @@ export  const formatTime = (date: Date) => {
       throw error;
     }
   }
+
+
+
+  export async function gameConnect(playerId : string, gameId : string, {
+    onMessage,
+    onClose,
+    onOpen
+  }: {
+    onMessage: (data: any) => void;
+    onClose: () => void;
+    onOpen: () => void;
+  }) {
+    try {
+      const socket = new WebSocket("ws://localhost:3006/ws?playerId=" + playerId + "&gameId=" + gameId);
+
+      socket.onopen = onOpen;
+
+      socket.onmessage = onMessage;
+      socket.onclose = onClose;
+      return socket
+    } catch (error) {
+      console.error('Failed to connect to game:', error);
+      return error;
+    }
+  }

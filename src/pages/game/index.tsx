@@ -6,6 +6,14 @@ import { stateManager } from "../../store/StateManager.ts"
 import { UserProfileState } from "../../store/StateManager.ts"
 import { API_URL } from "../../services/api.ts"
 
+const getGameId = () => {
+    const pathSegments = window.location.pathname.split('/').filter(segment => segment)
+    
+    if (pathSegments[0] === 'game' && pathSegments[1]) {
+      return pathSegments[1]
+    }
+    return null
+  }
 export default function GamePage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationRef = useRef<number | null>(null)
@@ -13,7 +21,9 @@ export default function GamePage() {
   const [gameMode, setGameMode] = useState("quickmatch") // quickmatch, practice, tournament
   const [isVisible, setIsVisible] = useState(false)
   const [opponent, setOpponent] = useState({ name: "Alex Chen", avatar: "AC", difficulty: "intermediate" })
-
+  
+   
+  console.log(getGameId())
   // Get current user from state manager
   const currentUser = stateManager.getState<UserProfileState>('userProfile')
 
