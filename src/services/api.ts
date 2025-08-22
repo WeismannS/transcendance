@@ -358,7 +358,16 @@ export function initializeNotificationWs() {
           }
         });
         
-      } else if (isNotificationType(data, 'ACHIEVEMENT_UNLOCKED')) {
+      } 
+      else if (isNotificationType(data, 'GAME_REJECTED')) {
+        addNotification({
+          title: data.title,
+          avatar: data.user.avatar,
+          type: "info",
+          message: data.content
+        });
+      }
+      else if (isNotificationType(data, 'ACHIEVEMENT_UNLOCKED')) {
       } else {
         console.log('Unknown websocket message type:', data.type);
       }
