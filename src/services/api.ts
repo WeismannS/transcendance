@@ -323,9 +323,7 @@ export function initializeNotificationWs() {
           type: "game_invite",
           message: data.content,
           onAccept: () => {
-            // Handle accept action
-
-            console.log("Game invite accepted ", data.gameId);
+            redirect("/game/" + data.gameId)
           },
           onReject: () => {
             // Handle reject action
@@ -334,8 +332,16 @@ export function initializeNotificationWs() {
            });
           }
         });
-        
-      } 
+      }
+      else if (isNotificationType(data, 'GAME_ACCEPTED')) {
+        redirect("/game/" + data.gameId);
+        addNotification({
+          title: data.title,
+          avatar: data.user.avatar,
+          type: "info",
+          message: data.content
+        });
+      }
       else if (isNotificationType(data, 'GAME_REJECTED')) {
         addNotification({
           title: data.title,
@@ -657,7 +663,7 @@ export  const formatTime = (date: Date) => {
   }) {
     try {
       const socket = new WebSocket("ws://localhost:3006/ws?playerId=" + playerId + "&gameId=" + gameId);
-
+      
       socket.onopen = onOpen;
 
       socket.onmessage = onMessage;

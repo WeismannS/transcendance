@@ -4,7 +4,7 @@ import Miku, { useState, useEffect, useRef } from "Miku"
 import { Link } from "Miku/Router"
 import { stateManager } from "../../store/StateManager.ts"
 import { UserProfileState } from "../../store/StateManager.ts"
-import { API_URL } from "../../services/api.ts"
+import { API_URL, gameConnect } from "../../services/api.ts"
 
 const getGameId = () => {
     const pathSegments = window.location.pathname.split('/').filter(segment => segment)
@@ -17,13 +17,15 @@ const getGameId = () => {
 export default function GamePage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationRef = useRef<number | null>(null)
-  const [gameState, setGameState] = useState("menu") // menu, playing, paused, finished
+  const gameSocket = useRef<WebSocket | null>(null)
+  const [gameState, setGameState] = useState("menu") // menu, playing, paused, finished, connecting
   const [gameMode, setGameMode] = useState("quickmatch") // quickmatch, practice, tournament
   const [isVisible, setIsVisible] = useState(false)
   const [opponent, setOpponent] = useState({ name: "Alex Chen", avatar: "AC", difficulty: "intermediate" })
+  const [connectionError, setConnectionError] = useState<string | null>(null)
   
-   
-  console.log(getGameId())
+  const gameId = getGameId()
+  
   // Get current user from state manager
   const currentUser = stateManager.getState<UserProfileState>('userProfile')
 
@@ -83,19 +85,33 @@ export default function GamePage() {
         case "W":
           e.preventDefault()
           setKeys((prev) => ({ ...prev, up: true }))
+          // Send paddle movement to server if in multiplayer
+          if (gameId && gameSocket.current) {
+            sendGameAction("paddle_move", { direction: "up" })
+          }
           break
         case "ArrowDown":
         case "s":
         case "S":
           e.preventDefault()
           setKeys((prev) => ({ ...prev, down: true }))
+          // Send paddle movement to server if in multiplayer
+          if (gameId && gameSocket.current) {
+            sendGameAction("paddle_move", { direction: "down" })
+          }
           break
         case " ":
           e.preventDefault()
           if (gameState === "playing") {
             setGameState("paused")
+            if (gameId && gameSocket.current) {
+              sendGameAction("pause")
+            }
           } else if (gameState === "paused") {
             setGameState("playing")
+            if (gameId && gameSocket.current) {
+              sendGameAction("resume")
+            }
           }
           break
       }
@@ -108,12 +124,20 @@ export default function GamePage() {
         case "W":
           e.preventDefault()
           setKeys((prev) => ({ ...prev, up: false }))
+          // Send stop paddle movement to server if in multiplayer
+          if (gameId && gameSocket.current) {
+            sendGameAction("paddle_stop", { direction: "up" })
+          }
           break
         case "ArrowDown":
         case "s":
         case "S":
           e.preventDefault()
           setKeys((prev) => ({ ...prev, down: false }))
+          // Send stop paddle movement to server if in multiplayer
+          if (gameId && gameSocket.current) {
+            sendGameAction("paddle_stop", { direction: "down" })
+          }
           break
       }
     }
@@ -126,6 +150,96 @@ export default function GamePage() {
       window.removeEventListener("keyup", handleKeyUp)
     }
   }, [gameState])
+
+  // WebSocket connection for multiplayer games
+  useEffect(() => {
+    if (gameId && currentUser) {
+      setGameState("connecting")
+      setConnectionError(null)
+      
+      const connectToGame = async () => {
+        try {
+          const socket = await gameConnect(currentUser.id, gameId, {
+            onOpen: () => {
+              console.log("Connected to game:", gameId)
+              setGameState("playing")
+              gameSocket.current = socket as WebSocket
+            },
+            onMessage: (event) => {
+              try {
+                const data = JSON.parse(event.data)
+                handleGameMessage(data)
+              } catch (error) {
+                console.error("Failed to parse game message:", error)
+              }
+            },
+            onClose: () => {
+              console.log("Disconnected from game:", gameId)
+              setGameState("finished")
+              gameSocket.current = null
+            }
+          })
+        } catch (error) {
+          console.error("Failed to connect to game:", error)
+          setConnectionError("Failed to connect to game. Please try again.")
+          setGameState("menu")
+        }
+      }
+
+      connectToGame()
+
+      return () => {
+        if (gameSocket.current) {
+          gameSocket.current.close()
+          gameSocket.current = null
+        }
+      }
+    }
+  }, [gameId, currentUser])
+
+  const handleGameMessage = (data: any) => {
+    switch (data.type) {
+      case 'game_state':
+        // Update game state from server
+        if (data.ball) {
+          gameObjects.current.ball = data.ball
+        }
+        if (data.paddles) {
+          gameObjects.current.playerPaddle = data.paddles.player
+          gameObjects.current.opponentPaddle = data.paddles.opponent
+        }
+        if (data.score) {
+          setScore(data.score)
+        }
+        break
+      case 'game_end':
+        setGameState("finished")
+        if (data.result) {
+          setMatchResults({
+            result: data.result,
+            opponent: data.opponent || "Unknown",
+            score: `${data.score?.player || 0} - ${data.score?.opponent || 0}`,
+            duration: formatTime(gameTime),
+            xpGained: data.xpGained || 0,
+            pointsGained: data.pointsGained || 0
+          })
+        }
+        break
+      case 'opponent_info':
+        if (data.opponent) {
+          setOpponent(data.opponent)
+        }
+        break
+      default:
+        console.log("Unknown game message type:", data.type)
+    }
+  }
+
+  const sendGameAction = (action: string, data?: any) => {
+    if (gameSocket.current && gameSocket.current.readyState === WebSocket.OPEN) {
+      gameSocket.current.send(JSON.stringify({ action, ...data }))
+    }
+  }
 
   // Single game loop with requestAnimationFrame
   useEffect(() => {
@@ -145,67 +259,70 @@ export default function GamePage() {
 
       const { ball, playerPaddle, opponentPaddle } = gameObjects.current
 
-      // Move player paddle
-      if (keys.up && playerPaddle.y > 0) {
-        playerPaddle.y -= playerPaddle.speed
-      }
-      if (keys.down && playerPaddle.y < CANVAS_HEIGHT - playerPaddle.height) {
-        playerPaddle.y += playerPaddle.speed
-      }
+      // Only run game physics for local games (not multiplayer)
+      if (!gameId) {
+        // Move player paddle
+        if (keys.up && playerPaddle.y > 0) {
+          playerPaddle.y -= playerPaddle.speed
+        }
+        if (keys.down && playerPaddle.y < CANVAS_HEIGHT - playerPaddle.height) {
+          playerPaddle.y += playerPaddle.speed
+        }
 
-      // AI opponent movement
-      const paddleCenter = opponentPaddle.y + opponentPaddle.height / 2
-      const ballY = ball.y
+        // AI opponent movement
+        const paddleCenter = opponentPaddle.y + opponentPaddle.height / 2
+        const ballY = ball.y
 
-      if (paddleCenter < ballY - 10) {
-        opponentPaddle.y = Math.min(opponentPaddle.y + opponentPaddle.speed, CANVAS_HEIGHT - opponentPaddle.height)
-      } else if (paddleCenter > ballY + 10) {
-        opponentPaddle.y = Math.max(opponentPaddle.y - opponentPaddle.speed, 0)
-      }
+        if (paddleCenter < ballY - 10) {
+          opponentPaddle.y = Math.min(opponentPaddle.y + opponentPaddle.speed, CANVAS_HEIGHT - opponentPaddle.height)
+        } else if (paddleCenter > ballY + 10) {
+          opponentPaddle.y = Math.max(opponentPaddle.y - opponentPaddle.speed, 0)
+        }
 
-      // Move ball
-      ball.x += ball.dx
-      ball.y += ball.dy
+        // Move ball
+        ball.x += ball.dx
+        ball.y += ball.dy
 
-      // Top and bottom wall collision
-      if (ball.y <= ball.radius || ball.y >= CANVAS_HEIGHT - ball.radius) {
-        ball.dy = -ball.dy
-      }
+        // Top and bottom wall collision
+        if (ball.y <= ball.radius || ball.y >= CANVAS_HEIGHT - ball.radius) {
+          ball.dy = -ball.dy
+        }
 
-      // Player paddle collision
-      if (
-        ball.x <= playerPaddle.x + playerPaddle.width + ball.radius &&
-        ball.x >= playerPaddle.x &&
-        ball.y >= playerPaddle.y &&
-        ball.y <= playerPaddle.y + playerPaddle.height &&
-        ball.dx < 0
-      ) {
-        ball.dx = Math.abs(ball.dx)
-        const hitPos = (ball.y - playerPaddle.y) / playerPaddle.height
-        ball.dy = (hitPos - 0.5) * 8
-      }
+        // Player paddle collision
+        if (
+          ball.x <= playerPaddle.x + playerPaddle.width + ball.radius &&
+          ball.x >= playerPaddle.x &&
+          ball.y >= playerPaddle.y &&
+          ball.y <= playerPaddle.y + playerPaddle.height &&
+          ball.dx < 0
+        ) {
+          ball.dx = Math.abs(ball.dx)
+          const hitPos = (ball.y - playerPaddle.y) / playerPaddle.height
+          ball.dy = (hitPos - 0.5) * 8
+        }
 
-      // Opponent paddle collision
-      if (
-        ball.x >= opponentPaddle.x - ball.radius &&
-        ball.x <= opponentPaddle.x + opponentPaddle.width &&
-        ball.y >= opponentPaddle.y &&
-        ball.y <= opponentPaddle.y + opponentPaddle.height &&
-        ball.dx > 0
-      ) {
-        ball.dx = -Math.abs(ball.dx)
-        const hitPos = (ball.y - opponentPaddle.y) / opponentPaddle.height
-        ball.dy = (hitPos - 0.5) * 8
-      }
+        // Opponent paddle collision
+        if (
+          ball.x >= opponentPaddle.x - ball.radius &&
+          ball.x <= opponentPaddle.x + opponentPaddle.width &&
+          ball.y >= opponentPaddle.y &&
+          ball.y <= opponentPaddle.y + opponentPaddle.height &&
+          ball.dx > 0
+        ) {
+          ball.dx = -Math.abs(ball.dx)
+          const hitPos = (ball.y - opponentPaddle.y) / opponentPaddle.height
+          ball.dy = (hitPos - 0.5) * 8
+        }
 
-      // Score points
-      if (ball.x < 0) {
-        setScore((prev) => ({ ...prev, opponent: prev.opponent + 1 }))
-        resetBall()
-      }
-      if (ball.x > CANVAS_WIDTH) {
-        setScore((prev) => ({ ...prev, player: prev.player + 1 }))
-        resetBall()
+        // Score points
+        if (ball.x < 0) {
+          setScore((prev) => ({ ...prev, opponent: prev.opponent + 1 }))
+          resetBall()
+        }
+        if (ball.x > CANVAS_WIDTH) {
+          setScore((prev) => ({ ...prev, player: prev.player + 1 }))
+          resetBall()
+        }
       }
 
       // Render everything
@@ -224,7 +341,7 @@ export default function GamePage() {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [gameState, keys])
+  }, [gameState, keys, gameId])
 
   const resetBall = () => {
     gameObjects.current.ball = { 
@@ -534,12 +651,34 @@ export default function GamePage() {
     </div>
   )
 
+  const renderConnecting = () => (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <h2 className="text-2xl font-bold text-white mb-2">Connecting to Game</h2>
+        <p className="text-gray-400">Please wait while we connect you to the game...</p>
+        {connectionError && (
+          <div className="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-xl">
+            <p className="text-red-400">{connectionError}</p>
+            <Link 
+              to="/dashboard" 
+              className="inline-block mt-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Back to Dashboard
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
       <div
         className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
       >
-        {gameState === "menu" && renderGameMenu()}
+        {gameState === "connecting" && renderConnecting()}
+        {gameState === "menu" && !gameId && renderGameMenu()}
         {(gameState === "playing" || gameState === "paused") && renderGameUI()}
         {gameState === "finished" && renderGameResults()}
       </div>
