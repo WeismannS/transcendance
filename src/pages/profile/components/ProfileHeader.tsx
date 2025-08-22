@@ -82,12 +82,17 @@ export default function ProfileHeader({
               >
                 {hasPendingRequest ? "Request Pending" : isFriend ? "Remove Friend" : "Add Friend"}
               </button>
-              <button
-                onClick={onChallenge}
-                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
-              >
-                Challenge
-              </button>
+               <button
+                        onClick={onChallenge}
+                        disabled={!isOnline}
+                        className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+                          !isOnline
+                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                        }`}
+                      >
+                        Challenge
+                      </button>
               <button 
                 onClick={onMessage}
                 disabled={!isFriend}

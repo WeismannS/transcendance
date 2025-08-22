@@ -1,8 +1,8 @@
-
 import Miku, {useState,useRef, useEffect} from "Miku"
 import { Notification, useNotifications } from "./use-notification.ts"
 import { Props } from "src/types/types"
 import { API_URL } from "../services/api.ts"
+
 const NotificationToast = ({ notification }: { notification: Notification } & Props) => {
     const [isVisible, setIsVisible] = useState(false)
     const [isLeaving, setIsLeaving] = useState(false)
@@ -40,7 +40,23 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
         removeNotification(notification.id)
       }, 300)
     }
+
+    const handleAccept = () => {
+      if (notification.onAccept) {
+        notification.onAccept()
+      }
+      handleClose()
+    }
+
+    const handleReject = () => {
+      if (notification.onReject) {
+        notification.onReject()
+      }
+      handleClose()
+    }
+    
     console.info(notification.duration)
+    
     const getIcon = () => {
       switch (notification.type) {
         case "success":
@@ -51,6 +67,8 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
           return "⚠️"
         case "info":
           return "ℹ️"
+        case "game_invite":
+          return "🎮"
         default:
           return "ℹ️"
       }
@@ -66,6 +84,8 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
           return "border-yellow-500/50 bg-yellow-500/10 text-yellow-400"
         case "info":
           return "border-blue-500/50 bg-blue-500/10 text-blue-400"
+        case "game_invite":
+          return "border-purple-500/50 bg-purple-500/10 text-purple-400"
         default:
           return "border-gray-500/50 bg-gray-500/10 text-gray-400"
       }
@@ -98,7 +118,22 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
             <h4 className="text-white font-semibold text-sm">{notification.title}</h4>
             {notification.message && <p className="text-gray-300 text-sm mt-1 leading-relaxed">{notification.message}</p>}
   
-            {notification.action && (
+            {notification.type === 'game_invite' ? (
+              <div className="flex space-x-2 mt-3">
+                <button
+                  onClick={handleAccept}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-3 rounded-lg transition-colors"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={handleReject}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-2 px-3 rounded-lg transition-colors"
+                >
+                  Reject
+                </button>
+              </div>
+            ) : notification.action && (
               <button
                 onClick={notification.action.onClick}
                 className="mt-2 text-orange-400 hover:text-orange-300 text-sm font-semibold transition-colors"
@@ -127,4 +162,3 @@ const NotificationToast = ({ notification }: { notification: Notification } & Pr
       </div>
     )
   }
-  

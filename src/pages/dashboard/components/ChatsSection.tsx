@@ -222,11 +222,8 @@ export default function ChatsSection() {
                   })()}
                 </div>
                 <div className="flex space-x-2">
-                  <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105">
+                  <button  className="bg-gradient-to-r from-orange-500 to-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105">
                     Challenge
-                  </button>
-                  <button className="text-gray-400 hover:text-white transition-colors transform hover:scale-110">
-                    ⚙️
                   </button>
                 </div>
               </div>

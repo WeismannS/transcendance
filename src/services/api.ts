@@ -338,7 +338,24 @@ export function initializeNotificationWs() {
           user : data.user
         });
       }
-       else if (isNotificationType(data, 'ACHIEVEMENT_UNLOCKED')) {
+      else if (isNotificationType(data, 'GAME_INVITE')) {
+        addNotification({
+          title: data.title,
+          avatar: data.user.avatar,
+          type: "game_invite",
+          message: data.content,
+          onAccept: () => {
+            // Handle accept action
+
+            console.log("Game invite accepted ", data.gameId);
+          },
+          onReject: () => {
+            // Handle reject action
+            console.log("Game invite rejected", data.gameId);
+          }
+        });
+        
+      } else if (isNotificationType(data, 'ACHIEVEMENT_UNLOCKED')) {
       } else {
         console.log('Unknown websocket message type:', data.type);
       }

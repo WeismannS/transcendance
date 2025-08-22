@@ -308,7 +308,12 @@ export default function Friends(
                     <div className="flex space-x-2">
                       <button
                         onClick={handleQuickMatch}
-                        className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+                        disabled={friend.status !== "online"}
+                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+                          friend.status !== "online"
+                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                        }`}
                       >
                         Challenge
                       </button>
@@ -368,9 +373,14 @@ export default function Friends(
                       <div className="text-orange-400 font-bold">#{friend.rank}</div>
                     </div>
                     <div className="flex space-x-1">
-                      <button
+                     <button
                         onClick={handleQuickMatch}
-                        className="px-3 py-1 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg text-sm hover:from-orange-600 hover:to-pink-600 transition-all"
+                        disabled={friend.status !== "online"}
+                        className={`flex-1 px-3 py-1  rounded-lg text-sm font-semibold transition-all ${
+                          friend.status !== "online"
+                            ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                        }`}
                       >
                         Challenge
                       </button>

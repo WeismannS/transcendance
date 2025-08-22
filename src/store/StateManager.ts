@@ -70,6 +70,9 @@ export type EventType =
   | "STATUS_UPDATE" 
   | "CONVERSATIONS_LOADED"
   | "FRIEND_REMOVED"
+  | "GAME_INVITE"
+  | "GAME_REJECTED"
+  | "GAME_ACCEPTED"
 
 interface StateEvent {
   type: EventType;

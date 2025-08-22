@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "Miku"
 
 export interface Notification {
   id: string
-  type: "success" | "error" | "warning" | "info"
+  type: "success" | "error" | "warning" | "info" | "game_invite"
   title: string
   message: string
   duration?: number
@@ -13,6 +13,8 @@ export interface Notification {
     onClick: () => void
   }
   avatar? : string
+  onAccept?: () => void
+  onReject?: () => void
 }
 
 // Global notification state using a simple object

@@ -69,6 +69,9 @@ export type FriendEvent = | 'FRIEND_REQUEST_RECEIVED'
 | 'FRIEND_REQUEST_ACCEPTED'
 | 'FRIEND_REQUEST_DECLINED'
 
+export type GameEvent = | 'GAME_INVITE'
+| 'GAME_ACCEPTED'
+| 'GAME_REJECTED'
 
 export type Notification<T extends EventType> = {
   type: T
@@ -76,10 +79,11 @@ export type Notification<T extends EventType> = {
   title: string
   user: T extends "STATUS_UPDATE" 
     ? ProfileOverview & { isFriend: boolean, isOnline: boolean }
-    : T extends "FRIEND_REQUEST_RECEIVED" | "FRIEND_REQUEST_ACCEPTED" | "FRIEND_REQUEST_DECLINED"
+    : T extends (FriendEvent |  GameEvent)  
     ? ProfileOverview 
     : never,
   requestId: T extends "FRIEND_REQUEST_RECEIVED" ? number : never
+  gameId : T extends "GAME_INVITE" | "GAME_REJECTED" | "GAME_ACCEPTED" ? string : never
 }
 
 export function isNotificationType<T extends EventType>(
