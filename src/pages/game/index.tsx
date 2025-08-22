@@ -34,6 +34,7 @@ interface Player {
 interface Ball {
   x: number;
   y: number;
+  radius?: number; // Made optional since API doesn't include it
   vx?: number; // velocity x
   vy?: number; // velocity y
 }
@@ -85,11 +86,13 @@ export default function GamePage() {
     pointsGained: number;
   } | null>(null)
 
-  // Game constants - Match backend dimensions
+  // Game constants - Match backend dimensions EXACTLY
   const CANVAS_WIDTH = 800
   const CANVAS_HEIGHT = 400
   const BACKEND_WIDTH = 20  // Backend game width
   const BACKEND_HEIGHT = 10 // Backend game height
+  const BACKEND_PADDLE_HEIGHT = 2 // Backend paddle height
+  const BACKEND_PADDLE_WIDTH = 0.5 // Backend paddle width
   const WINNING_SCORE = 11
   const WINNING_SETS = 2
 
@@ -97,11 +100,26 @@ export default function GamePage() {
   const SCALE_X = CANVAS_WIDTH / BACKEND_WIDTH
   const SCALE_Y = CANVAS_HEIGHT / BACKEND_HEIGHT
 
+  // Calculate scaled paddle dimensions
+  const PADDLE_WIDTH = BACKEND_PADDLE_WIDTH * SCALE_X  // 20px
+  const PADDLE_HEIGHT = BACKEND_PADDLE_HEIGHT * SCALE_Y // 80px
+  const BALL_RADIUS = 8
+
   // Game objects - using refs to avoid stale closures
   const gameObjects = useRef({
-    ball: { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2, radius: 8 },
-    playerPaddle: { x: 50, y: CANVAS_HEIGHT / 2, width: 15, height: 80 },
-    opponentPaddle: { x: CANVAS_WIDTH - 65, y: CANVAS_HEIGHT / 2, width: 15, height: 80 }
+    ball: { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2, radius: BALL_RADIUS, vx: 6, vy: 4 },
+    playerPaddle: { 
+      x: playerNumber === 1 ? PADDLE_WIDTH / 2 : CANVAS_WIDTH - (PADDLE_WIDTH * 1.5), 
+      y: CANVAS_HEIGHT / 2, 
+      width: PADDLE_WIDTH, 
+      height: PADDLE_HEIGHT 
+    },
+    opponentPaddle: { 
+      x: playerNumber === 1 ? CANVAS_WIDTH - (PADDLE_WIDTH * 1.5) : PADDLE_WIDTH / 2, 
+      y: CANVAS_HEIGHT / 2, 
+      width: PADDLE_WIDTH, 
+      height: PADDLE_HEIGHT 
+    }
   })
 
   useEffect(() => {
@@ -121,6 +139,21 @@ export default function GamePage() {
     }
   }, [gameState])
 
+  // Update paddle positions when player number changes
+  useEffect(() => {
+    if (playerNumber === 1) {
+      gameObjects.current.playerPaddle.x = PADDLE_WIDTH / 2
+      gameObjects.current.opponentPaddle.x = CANVAS_WIDTH - (PADDLE_WIDTH * 1.5)
+    } else {
+      gameObjects.current.playerPaddle.x = CANVAS_WIDTH - (PADDLE_WIDTH * 1.5)
+      gameObjects.current.opponentPaddle.x = PADDLE_WIDTH / 2
+    }
+    gameObjects.current.playerPaddle.width = PADDLE_WIDTH
+    gameObjects.current.playerPaddle.height = PADDLE_HEIGHT
+    gameObjects.current.opponentPaddle.width = PADDLE_WIDTH
+    gameObjects.current.opponentPaddle.height = PADDLE_HEIGHT
+  }, [playerNumber])
+
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: any) => {
@@ -130,20 +163,12 @@ export default function GamePage() {
         case "W":
           e.preventDefault()
           setKeys((prev) => ({ ...prev, up: true }))
-          // Send paddle movement to server if in multiplayer
-          if (gameId && gameSocket.current && gameSocket.current.readyState === WebSocket.OPEN) {
-            sendPaddleMove("up")
-          }
           break
         case "ArrowDown":
         case "s":
         case "S":
           e.preventDefault()
           setKeys((prev) => ({ ...prev, down: true }))
-          // Send paddle movement to server if in multiplayer
-          if (gameId && gameSocket.current && gameSocket.current.readyState === WebSocket.OPEN) {
-            sendPaddleMove("down")
-          }
           break
         case " ":
           e.preventDefault()
@@ -190,10 +215,35 @@ export default function GamePage() {
           type: 'move',
           direction: direction
         })
+        console.log("Sending paddle move:", direction)
         gameSocket.current.send(message)
       } catch (error) {
         console.error("Failed to send paddle movement:", error)
       }
+    } else {
+      console.warn("Cannot send paddle move - socket not ready:", {
+        socket: !!gameSocket.current,
+        readyState: gameSocket.current?.readyState
+      })
+    }
+  }
+
+  // Throttled paddle movement sending for multiplayer
+  const sendPaddleMoveThrottled = useRef({
+    lastSent: 0,
+    throttleMs: 16, // ~60 FPS
+    lastDirection: null as string | null
+  })
+
+  const sendPaddleMoveIfNeeded = (direction: "up" | "down") => {
+    const now = Date.now()
+    const throttleRef = sendPaddleMoveThrottled.current
+    
+    // Only send if enough time has passed OR direction changed
+    if (now - throttleRef.lastSent > throttleRef.throttleMs || throttleRef.lastDirection !== direction) {
+      sendPaddleMove(direction)
+      throttleRef.lastSent = now
+      throttleRef.lastDirection = direction
     }
   }
 
@@ -203,43 +253,34 @@ export default function GamePage() {
       setGameState("connecting")
       setConnectionError(null)
       
-      const connectToGame = () => {
+      const connectToGame = async () => {
         try {
-          const wsUrl = `ws://localhost:3006/ws?playerId=${currentUser.id}&gameId=${gameId}`
-          const socket = new WebSocket(wsUrl)
-          
-          socket.onopen = () => {
-            console.log("Connected to game:", gameId)
-            gameSocket.current = socket
-            setConnectionError(null)
-          }
-          
-          socket.onmessage = (event) => {
-            try {
-              const data = JSON.parse(event.data)
+          const socket = await gameConnect(currentUser.id, gameId, {
+            onMessage: (data) => {
               handleGameMessage(data)
-            } catch (error) {
-              console.error("Failed to parse game message:", error)
+            },
+            onClose: () => {
+              console.log("Disconnected from game:", gameId)
+              if (gameState !== "finished") {
+                setConnectionError("Connection lost. Game ended.")
+                setGameState("finished")
+              }
+              gameSocket.current = null
+            },
+            onOpen: () => {
+              console.log("Connected to game:", gameId)
+              setConnectionError(null)
             }
-          }
+          })
           
-          socket.onclose = (event) => {
-            console.log("Disconnected from game:", gameId, event)
-            if (gameState !== "finished") {
-              setConnectionError("Connection lost. Game ended.")
-              setGameState("finished")
-            }
-            gameSocket.current = null
-          }
-          
-          socket.onerror = (error) => {
-            console.error("WebSocket error:", error)
-            setConnectionError("Connection error occurred.")
-            setGameState("menu")
+          if (socket instanceof WebSocket) {
+            gameSocket.current = socket
+          } else {
+            throw socket // gameConnect returned an error
           }
           
         } catch (error) {
-          console.error("Failed to create WebSocket:", error)
+          console.error("Failed to connect to game:", error)
           setConnectionError("Failed to connect to game. Please check your connection and try again.")
           setGameState("menu")
         }
@@ -260,7 +301,7 @@ export default function GamePage() {
   }, [gameId, currentUser])
 
   const handleGameMessage = (data: GameUpdate) => {
-    console.log("Received game message:", data)
+    console.log("Received game message:", data.type, data)
     
     switch (data.type) {
       case 'connected':
@@ -271,6 +312,7 @@ export default function GamePage() {
       case 'gameCreated':
         console.log("Game created:", data)
         if (data.playerNumber) {
+          console.log("Setting player number:", data.playerNumber)
           setPlayerNumber(data.playerNumber)
         }
         if (data.opponent) {
@@ -286,6 +328,7 @@ export default function GamePage() {
         
         // Initialize game state from server
         if (data.gameBoard) {
+          console.log("Initial game board:", data.gameBoard)
           updateGameFromServer(data.gameBoard)
         }
         if (data.score) {
@@ -295,12 +338,14 @@ export default function GamePage() {
         
       case 'gameUpdate':
         if (data.gameStarted && gameState === "connecting") {
+          console.log("Game started, switching to playing state")
           setGameState("playing")
           setWaitingForOpponent(false)
         }
         
         // Update game state from server
         if (data.gameBoard) {
+          console.log("Game board update:", data.gameBoard)
           updateGameFromServer(data.gameBoard)
         }
         if (data.score) {
@@ -364,43 +409,53 @@ export default function GamePage() {
   const updateGameFromServer = (gameBoard: GameBoard) => {
     const { player1, player2, ball } = gameBoard
     
+    console.log("Updating from server - Player number:", playerNumber, "GameBoard:", { 
+      player1: player1?.paddleY, 
+      player2: player2?.paddleY,
+      ball: { x: ball?.x, y: ball?.y }
+    })
+    
     // Update ball position (convert from server coordinates)
     if (ball) {
       gameObjects.current.ball = {
+        ...gameObjects.current.ball, // Preserve existing properties like radius and velocity
         x: ball.x * SCALE_X,
-        y: ball.y * SCALE_Y,
-        radius: gameObjects.current.ball.radius
+        y: ball.y * SCALE_Y
       }
     }
     
     // Update paddle positions based on player number
+    // Server coordinates are paddle center Y, convert to canvas top-left Y
+    // Only update opponent paddle position from server, keep player paddle under local control
     if (playerNumber === 1) {
-      // Current player is player1 (left paddle)
-      if (player1) {
-        gameObjects.current.playerPaddle.y = (player1.paddleY * SCALE_Y) - (gameObjects.current.playerPaddle.height / 2)
-      }
+      // Current player is player1 (left paddle), only update opponent (player2) paddle
       if (player2) {
-        gameObjects.current.opponentPaddle.y = (player2.paddleY * SCALE_Y) - (gameObjects.current.opponentPaddle.height / 2)
+        const serverY = (player2.paddleY * SCALE_Y) - (PADDLE_HEIGHT / 2)
+        const targetY = Math.max(0, Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT))
+        
+        console.log("Player 1 - Updating opponent paddle from server:", player2.paddleY, "->", targetY)
+        
+        // Smooth interpolation for opponent paddle to reduce jerkiness
+        const currentY = gameObjects.current.opponentPaddle.y
+        const lerpFactor = 0.3 // Adjust for smoothness (0.1 = very smooth, 0.5 = responsive)
+        gameObjects.current.opponentPaddle.y = currentY + (targetY - currentY) * lerpFactor
       }
+      // Don't update player1 paddle from server - keep local control
     } else {
-      // Current player is player2 (right paddle)
-      if (player2) {
-        gameObjects.current.playerPaddle.y = (player2.paddleY * SCALE_Y) - (gameObjects.current.playerPaddle.height / 2)
-      }
+      // Current player is player2 (right paddle), only update opponent (player1) paddle  
       if (player1) {
-        gameObjects.current.opponentPaddle.y = (player1.paddleY * SCALE_Y) - (gameObjects.current.opponentPaddle.height / 2)
+        const serverY = (player1.paddleY * SCALE_Y) - (PADDLE_HEIGHT / 2)
+        const targetY = Math.max(0, Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT))
+        
+        console.log("Player 2 - Updating opponent paddle from server:", player1.paddleY, "->", targetY)
+        
+        // Smooth interpolation for opponent paddle to reduce jerkiness
+        const currentY = gameObjects.current.opponentPaddle.y
+        const lerpFactor = 0.3 // Adjust for smoothness
+        gameObjects.current.opponentPaddle.y = currentY + (targetY - currentY) * lerpFactor
       }
+      // Don't update player2 paddle from server - keep local control
     }
-    
-    // Ensure paddles stay within bounds
-    gameObjects.current.playerPaddle.y = Math.max(0, Math.min(
-      gameObjects.current.playerPaddle.y, 
-      CANVAS_HEIGHT - gameObjects.current.playerPaddle.height
-    ))
-    gameObjects.current.opponentPaddle.y = Math.max(0, Math.min(
-      gameObjects.current.opponentPaddle.y, 
-      CANVAS_HEIGHT - gameObjects.current.opponentPaddle.height
-    ))
   }
 
   // Update score based on player number
@@ -418,7 +473,7 @@ export default function GamePage() {
     }
   }
 
-  // Render loop - only for visual updates, no game logic for multiplayer
+  // Render loop - handles both local and multiplayer game logic
   useEffect(() => {
     const gameLoop = () => {
       if (gameState !== "playing") {
@@ -434,11 +489,13 @@ export default function GamePage() {
       const ctx = canvas.getContext("2d")
       if (!ctx) return
 
-      // For multiplayer games, only render (no game logic)
+      // Handle game logic based on mode
       if (gameId) {
+        // Multiplayer game - handle local player paddle movement only
+        handleMultiplayerLogic()
         render(ctx)
       } else {
-        // Local game logic (if not connected to multiplayer)
+        // Local game - full game logic including AI and ball physics
         runLocalGameLogic()
         render(ctx)
       }
@@ -458,42 +515,157 @@ export default function GamePage() {
     }
   }, [gameState, keys, gameId])
 
+  // Handle multiplayer game logic - only local player paddle movement
+  const handleMultiplayerLogic = () => {
+    const { playerPaddle, ball } = gameObjects.current
+    const paddleSpeed = 8
+    let isMoving = false
+    
+    // Only handle player paddle movement - server handles ball and opponent
+    if (keys.up && playerPaddle.y > 0) {
+      playerPaddle.y = Math.max(0, playerPaddle.y - paddleSpeed)
+      // Send throttled movement to server
+      sendPaddleMoveIfNeeded("up")
+      isMoving = true
+    }
+    if (keys.down && playerPaddle.y < CANVAS_HEIGHT - playerPaddle.height) {
+      playerPaddle.y = Math.min(CANVAS_HEIGHT - playerPaddle.height, playerPaddle.y + paddleSpeed)
+      // Send throttled movement to server
+      sendPaddleMoveIfNeeded("down")
+      isMoving = true
+    }
+    
+    // Send stop signal when not moving (to ensure server stops the paddle)
+    if (!isMoving && sendPaddleMoveThrottled.current.lastDirection) {
+      sendPaddleStop()
+    }
+
+    // Client-side prediction for player paddle collision (visual feedback only)
+    // Server will send authoritative ball position, but this provides immediate feedback
+    clientSideBallPrediction()
+  }
+
+  // Basic client-side ball prediction for immediate visual feedback
+  const clientSideBallPrediction = () => {
+    const { ball, playerPaddle } = gameObjects.current
+    
+    // Only do basic collision check with player's own paddle for immediate feedback
+    // This won't affect server state, just provides responsive visual feedback
+    const isPlayerCollision = (
+      (playerNumber === 1 && ball.x - (ball.radius || 8) <= playerPaddle.x + playerPaddle.width && ball.vx && ball.vx < 0) ||
+      (playerNumber === 2 && ball.x + (ball.radius || 8) >= playerPaddle.x && ball.vx && ball.vx > 0)
+    )
+    
+    if (isPlayerCollision && 
+        ball.y >= playerPaddle.y && 
+        ball.y <= playerPaddle.y + playerPaddle.height) {
+      
+      // Simple bounce prediction for immediate feedback
+      // Server will override this with authoritative position
+      if (ball.vx) {
+        ball.vx = -ball.vx
+        // Adjust position slightly to prevent stuck ball
+        if (playerNumber === 1) {
+          ball.x = playerPaddle.x + playerPaddle.width + (ball.radius || 8)
+        } else {
+          ball.x = playerPaddle.x - (ball.radius || 8)
+        }
+      }
+    }
+  }
+
+  // Send stop movement message to server
+  const sendPaddleStop = () => {
+    const throttleRef = sendPaddleMoveThrottled.current
+    if (gameSocket.current && gameSocket.current.readyState === WebSocket.OPEN && throttleRef.lastDirection) {
+      try {
+        const message = JSON.stringify({
+          type: 'stop'
+        })
+        console.log("Sending paddle stop")
+        gameSocket.current.send(message)
+        throttleRef.lastDirection = null // Reset last direction
+      } catch (error) {
+        console.error("Failed to send paddle stop:", error)
+      }
+    }
+  }
+
   const runLocalGameLogic = () => {
     const { ball, playerPaddle, opponentPaddle } = gameObjects.current
 
-    // Move player paddle
+    // Move player paddle - using realistic speed (20px per frame at 60fps)
+    const paddleSpeed = 8
     if (keys.up && playerPaddle.y > 0) {
-      playerPaddle.y -= 8
+      playerPaddle.y = Math.max(0, playerPaddle.y - paddleSpeed)
     }
     if (keys.down && playerPaddle.y < CANVAS_HEIGHT - playerPaddle.height) {
-      playerPaddle.y += 8
+      playerPaddle.y = Math.min(CANVAS_HEIGHT - playerPaddle.height, playerPaddle.y + paddleSpeed)
     }
 
-    // AI opponent movement
+    // AI opponent movement - track ball with some lag for challenge
     const paddleCenter = opponentPaddle.y + opponentPaddle.height / 2
     const ballY = ball.y
+    const aiSpeed = 6
 
-    if (paddleCenter < ballY - 10) {
-      opponentPaddle.y = Math.min(opponentPaddle.y + 6, CANVAS_HEIGHT - opponentPaddle.height)
-    } else if (paddleCenter > ballY + 10) {
-      opponentPaddle.y = Math.max(opponentPaddle.y - 6, 0)
+    if (paddleCenter < ballY - 20) {
+      opponentPaddle.y = Math.min(opponentPaddle.y + aiSpeed, CANVAS_HEIGHT - opponentPaddle.height)
+    } else if (paddleCenter > ballY + 20) {
+      opponentPaddle.y = Math.max(opponentPaddle.y - aiSpeed, 0)
+    }
+
+    // Initialize ball velocity if not set
+    if (!ball.vx || !ball.vy) {
+      ball.vx = 6 * (Math.random() > 0.5 ? 1 : -1)
+      ball.vy = 4 * (Math.random() > 0.5 ? 1 : -1)
     }
 
     // Move ball
-    ball.x += 5 * (ball.x < CANVAS_WIDTH / 2 ? 1 : -1)
-    ball.y += 3 * (Math.random() > 0.5 ? 1 : -1)
+    ball.x += ball.vx
+    ball.y += ball.vy
 
-    // Ball collision with top and bottom
+    // Ball collision with top and bottom walls
     if (ball.y <= ball.radius || ball.y >= CANVAS_HEIGHT - ball.radius) {
+      ball.vy = -ball.vy
       ball.y = Math.max(ball.radius, Math.min(ball.y, CANVAS_HEIGHT - ball.radius))
     }
 
+    // Ball collision with paddles
+    // Left paddle collision (player paddle when player is 1, opponent when player is 2)
+    const leftPaddle = playerNumber === 1 ? playerPaddle : opponentPaddle
+    if (ball.x - ball.radius <= leftPaddle.x + leftPaddle.width && ball.vx < 0) {
+      if (ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + leftPaddle.height) {
+        ball.vx = -ball.vx
+        ball.x = leftPaddle.x + leftPaddle.width + ball.radius
+        // Add some angle variation based on where ball hits paddle
+        const hitPos = (ball.y - (leftPaddle.y + leftPaddle.height / 2)) / (leftPaddle.height / 2)
+        ball.vy += hitPos * 2
+      }
+    }
+
+    // Right paddle collision (opponent paddle when player is 1, player when player is 2)
+    const rightPaddle = playerNumber === 1 ? opponentPaddle : playerPaddle
+    if (ball.x + ball.radius >= rightPaddle.x && ball.vx > 0) {
+      if (ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + rightPaddle.height) {
+        ball.vx = -ball.vx
+        ball.x = rightPaddle.x - ball.radius
+        // Add some angle variation
+        const hitPos = (ball.y - (rightPaddle.y + rightPaddle.height / 2)) / (rightPaddle.height / 2)
+        ball.vy += hitPos * 2
+      }
+    }
+
+    // Limit ball speed
+    const maxSpeed = 12
+    if (Math.abs(ball.vx) > maxSpeed) ball.vx = maxSpeed * Math.sign(ball.vx)
+    if (Math.abs(ball.vy) > maxSpeed) ball.vy = maxSpeed * Math.sign(ball.vy)
+
     // Score points
-    if (ball.x < 0) {
+    if (ball.x < -ball.radius) {
       setScore((prev) => ({ ...prev, opponent: prev.opponent + 1 }))
       resetBall()
     }
-    if (ball.x > CANVAS_WIDTH) {
+    if (ball.x > CANVAS_WIDTH + ball.radius) {
       setScore((prev) => ({ ...prev, player: prev.player + 1 }))
       resetBall()
     }
@@ -503,7 +675,9 @@ export default function GamePage() {
     gameObjects.current.ball = { 
       x: CANVAS_WIDTH / 2, 
       y: CANVAS_HEIGHT / 2,
-      radius: 8 
+      radius: BALL_RADIUS,
+      vx: 6 * (Math.random() > 0.5 ? 1 : -1),
+      vy: 4 * (Math.random() > 0.5 ? 1 : -1)
     }
   }
 
@@ -523,22 +697,12 @@ export default function GamePage() {
     ctx.stroke()
     ctx.setLineDash([])
 
-    // Draw paddles - adjust positions based on player number
-    if (playerNumber === 1 || !gameId) {
-      // Player is on the left
-      ctx.fillStyle = "#f97316" // Orange for player
-      ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height)
-      
-      ctx.fillStyle = "#ec4899" // Pink for opponent
-      ctx.fillRect(opponentPaddle.x, opponentPaddle.y, opponentPaddle.width, opponentPaddle.height)
-    } else {
-      // Player is on the right
-      ctx.fillStyle = "#ec4899" // Pink for opponent
-      ctx.fillRect(opponentPaddle.x, opponentPaddle.y, opponentPaddle.width, opponentPaddle.height)
-      
-      ctx.fillStyle = "#f97316" // Orange for player
-      ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height)
-    }
+    // Draw paddles - player paddle is always orange, opponent is always pink
+    ctx.fillStyle = "#f97316" // Orange for player
+    ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height)
+    
+    ctx.fillStyle = "#ec4899" // Pink for opponent
+    ctx.fillRect(opponentPaddle.x, opponentPaddle.y, opponentPaddle.width, opponentPaddle.height)
 
     // Draw ball
     ctx.fillStyle = "#ffffff"
@@ -575,9 +739,15 @@ export default function GamePage() {
     
     // Reset game objects for local play
     gameObjects.current = {
-      ball: { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2, radius: 8 },
-      playerPaddle: { x: 50, y: 150, width: 15, height: 80 },
-      opponentPaddle: { x: 735, y: 150, width: 15, height: 80 }
+      ball: { 
+        x: CANVAS_WIDTH / 2, 
+        y: CANVAS_HEIGHT / 2, 
+        radius: BALL_RADIUS,
+        vx: 6 * (Math.random() > 0.5 ? 1 : -1),
+        vy: 4 * (Math.random() > 0.5 ? 1 : -1)
+      },
+      playerPaddle: { x: PADDLE_WIDTH / 2, y: CANVAS_HEIGHT / 2 - PADDLE_HEIGHT / 2, width: PADDLE_WIDTH, height: PADDLE_HEIGHT },
+      opponentPaddle: { x: CANVAS_WIDTH - PADDLE_WIDTH * 1.5, y: CANVAS_HEIGHT / 2 - PADDLE_HEIGHT / 2, width: PADDLE_WIDTH, height: PADDLE_HEIGHT }
     }
   }
 
@@ -640,21 +810,21 @@ export default function GamePage() {
             onClick={() => startGame("quickmatch")}
             className="w-full py-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105"
           >
-            🚀 Quick Match
+            Quick Match
           </button>
 
           <button
             onClick={() => startGame("practice")}
             className="w-full py-4 bg-gray-700 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-all"
           >
-            🎯 Practice Mode
+            Practice Mode
           </button>
 
           <button
             onClick={() => startGame("tournament")}
             className="w-full py-4 bg-purple-600 text-white rounded-xl font-bold text-lg hover:bg-purple-700 transition-all"
           >
-            🏆 Tournament Match
+            Tournament Match
           </button>
         </div>
 
