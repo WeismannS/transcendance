@@ -144,7 +144,7 @@ class StateManager {
   }
 
   // Initialize states from User object
-  async initializeFromUser(user: User, achievements: Achievement[]) {
+  async initializeFromUser(user: User, achievements: Achievement[], onlineUserCount: number) {
     this.setState<UserIdentityState>('userIdentity', {
       id: user.profile.id,
       isOnline: true,
@@ -167,7 +167,7 @@ class StateManager {
     this.setState<SocialState>('social', {
       friends: user.friends,
       friendRequests: user.friendRequests,
-      onlineUsers: 1247 // This would come from server
+      onlineUsers: onlineUserCount
     });
 
     this.setState<AchievementsState>('achievements', {
@@ -317,7 +317,8 @@ class StateManager {
         friendRequests: {
           ...prev.friendRequests,
           received: updatedReceivedRequests
-        }
+        },
+        onlineUsers: prev.onlineUsers + (user.isOnline ? 1 : -1)
       };
     });
 

@@ -7,7 +7,7 @@ import SignInPage from "./pages/sign_in/index.tsx";
 import TournamentsPage from "./pages/tournaments/index.tsx";
 import LeaderboardPage from "./pages/leaderboard/index.tsx";
 import GamePage from "./pages/game/index.tsx";
-import { API_URL, initializeUserData, initializeNotificationWs, getAllConversations, initializeChatWebSocket } from "./services/api.ts";
+import { API_URL, initializeNotificationWs, getAllConversations, initializeChatWebSocket } from "./services/api.ts";
 import { stateManager } from "./store/StateManager.ts";
 import { NotificationContainer } from "./pages/notification.tsx";
 
@@ -58,20 +58,22 @@ const Routing = () => {
             const loadUserData = async () => {
                 try {
                     // Use your existing endpoints
-                    const [userResponse, achievementsResponse] = await Promise.all([
+                    const [userResponse, achievementsResponse, onlineCountResponse] = await Promise.all([
                         fetch(API_URL + "/api/user-management/me", { credentials: "include" }),
-                        fetch(API_URL + "/api/user-management/allachievements", { credentials: "include" })
+                        fetch(API_URL + "/api/user-management/allachievements", { credentials: "include" }),
+                        fetch("http://localhost:3005/api/notifications/users/online", { credentials: "include" })
                     ]);
 
-                    if (userResponse.status === 200 && achievementsResponse.status === 200) {
+                    if (userResponse.status === 200 && achievementsResponse.status === 200 && onlineCountResponse.status === 200) {
                         const userData = await userResponse.json();
                         const achievementsData = await achievementsResponse.json();
-                        
+                        const onlineCountData = await onlineCountResponse.json();
+
                         console.log("User data:", userData);
                         console.log("Achievements data:", achievementsData);
 
                         // Initialize state manager
-                        await stateManager.initializeFromUser(userData, achievementsData.achievements || []);
+                        await stateManager.initializeFromUser(userData, achievementsData.achievements || [], onlineCountData.totalOnline+1 );
                         console.log("State initialized with user data", stateManager.getState('userProfile'));
 
                         

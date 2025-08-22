@@ -38,7 +38,7 @@ export default function DashboardPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [ballPosition, setBallPosition] = useState({ x: 90, y: 10 });
   const [notificationCount, setNotificationCount] = useState(3);
-  const [onlineUsers, setOnlineUsers] = useState(1247);
+  const [onlineUsers, setOnlineUsers] = useState(0);
   const [userStats, setUserStats] = useState({
     wins: gameState?.stats.wins ?? 0,
     losses: gameState?.stats.losses ?? 0,

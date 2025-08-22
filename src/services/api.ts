@@ -6,29 +6,6 @@ import { Notification } from "../types/user.ts";
 import { userInfo } from "os";
 export const API_URL = "http://localhost:3000";
 
-export async function initializeUserData(): Promise<{ user: User | null, achievements: Achievement[] }> {
-  try {
-    const [userResponse, achievementsResponse] = await Promise.all([
-      fetch(API_URL + '/api/user/me'),
-      fetch(API_URL + '/api/achievements')
-    ]);
-
-    if (!userResponse.ok || !achievementsResponse.ok) {
-      throw new Error('Failed to fetch user data');
-    }
-
-    const user: User = await userResponse.json();
-    const achievements: Achievement[] = await achievementsResponse.json();
-
-    // Initialize state manager with user data
-    stateManager.initializeFromUser(user, achievements);
-
-    return { user, achievements };
-  } catch (error) {
-    console.error('Failed to initialize user data:', error);
-    return { user: null, achievements: [] };
-  }
-}
 
 export async function logOut() {
   try {
