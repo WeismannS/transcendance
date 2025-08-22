@@ -323,7 +323,9 @@ export function initializeNotificationWs() {
           type: "game_invite",
           message: data.content,
           onAccept: () => {
-            redirect("/game/" + data.gameId)
+            acceptChallenge(data.gameId).then(() => {
+              console.log("Game invite accepted", data.gameId);
+            });
           },
           onReject: () => {
             // Handle reject action
@@ -651,6 +653,22 @@ export  const formatTime = (date: Date) => {
   }
 
 
+  export async function acceptChallenge(gameId: string) {
+    try {
+      const response = await fetch(API_URL + '/api/game/accepted/' + gameId, {
+        method: 'POST',
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to accept challenge');
+      }
+      stateManager.emit('GAME_ACCEPTED', { requestId: gameId });
+    } catch (error) {
+      console.error('Failed to accept challenge:', error);
+      throw error;
+    }
+  }
 
   export async function gameConnect(playerId : string, gameId : string, {
     onMessage,
@@ -663,7 +681,7 @@ export  const formatTime = (date: Date) => {
   }) {
     try {
       const socket = new WebSocket("ws://localhost:3006/ws?playerId=" + playerId + "&gameId=" + gameId);
-      
+
       socket.onopen = onOpen;
 
       socket.onmessage = onMessage;

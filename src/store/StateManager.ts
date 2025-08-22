@@ -1,7 +1,7 @@
 import { Notification } from "../pages/use-notification.ts";
 import { User, GameHistory, GameStats, Achievement, Friend, FriendRequest, ProfileOverview, Conversation, Message } from "../types/user.ts";
 import { initializeChatWebSocket, initializeNotificationWs, isOnline } from "../services/api.ts";
-
+import {redirect} from "Miku/Router"
 // State Fragments based on your User schema
 export interface UserIdentityState {
   id: string;
@@ -73,6 +73,7 @@ export type EventType =
   | "GAME_INVITE"
   | "GAME_REJECTED"
   | "GAME_ACCEPTED"
+  
 
 interface StateEvent {
   type: EventType;
@@ -269,6 +270,12 @@ class StateManager {
           conversations: prev.conversations.filter(conv => !conv.members.some(member => member.id === event.payload.user.id))
         }));
         break;
+      case "GAME_ACCEPTED":
+        redirect("/game/" + event.payload.requestId);
+        this.updateState<GameState>('gameState', (prev) => ({
+          ...prev,
+          currentGameId: event.payload.requestId
+        }));
       case 'CONVERSATION_ADDED':
         
         this.updateState<MessagesState>('messages', (prev) => prev.conversations.find(e=>e.id === event.payload.id) ?  prev :
