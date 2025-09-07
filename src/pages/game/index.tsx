@@ -651,11 +651,28 @@ export default function GamePage() {
       };
     }
 
-    // Update paddle positions based on player number
-    // Server coordinates are paddle center Y, convert to canvas top-left Y
-    // Only update opponent paddle position from server, keep player paddle under local control
+    // In multiplayer mode, server is authoritative for ALL paddle positions
+    // Update BOTH player and opponent paddles from server data
     if (playerNumber === 1) {
-      // Current player is player1 (left paddle), only update opponent (player2) paddle
+      // Current player is player1 (left paddle)
+      if (player1) {
+        const serverY = player1.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
+        const targetY = Math.max(
+          0,
+          Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
+        );
+
+        console.log(
+          "Player 1 - Updating own paddle from server:",
+          player1.paddleY,
+          "->",
+          targetY
+        );
+
+        // Update own paddle position from server (authoritative)
+        gameObjects.current.playerPaddle.y = targetY;
+      }
+
       if (player2) {
         const serverY = player2.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
         const targetY = Math.max(
@@ -672,13 +689,30 @@ export default function GamePage() {
 
         // Smooth interpolation for opponent paddle to reduce jerkiness
         const currentY = gameObjects.current.opponentPaddle.y;
-        const lerpFactor = 0.3; // Adjust for smoothness (0.1 = very smooth, 0.5 = responsive)
+        const lerpFactor = 0.6; // More responsive for opponent paddle
         gameObjects.current.opponentPaddle.y =
           currentY + (targetY - currentY) * lerpFactor;
       }
-      // Don't update player1 paddle from server - keep local control
     } else {
-      // Current player is player2 (right paddle), only update opponent (player1) paddle
+      // Current player is player2 (right paddle)
+      if (player2) {
+        const serverY = player2.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
+        const targetY = Math.max(
+          0,
+          Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
+        );
+
+        console.log(
+          "Player 2 - Updating own paddle from server:",
+          player2.paddleY,
+          "->",
+          targetY
+        );
+
+        // Update own paddle position from server (authoritative)
+        gameObjects.current.playerPaddle.y = targetY;
+      }
+
       if (player1) {
         const serverY = player1.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
         const targetY = Math.max(
@@ -695,11 +729,10 @@ export default function GamePage() {
 
         // Smooth interpolation for opponent paddle to reduce jerkiness
         const currentY = gameObjects.current.opponentPaddle.y;
-        const lerpFactor = 0.3; // Adjust for smoothness
+        const lerpFactor = 0.6; // More responsive for opponent paddle
         gameObjects.current.opponentPaddle.y =
           currentY + (targetY - currentY) * lerpFactor;
       }
-      // Don't update player2 paddle from server - keep local control
     }
   };
 
@@ -732,36 +765,23 @@ export default function GamePage() {
 
     // Define handleMultiplayerLogic inside useEffect to access fresh socket reference
     const handleMultiplayerLogic = () => {
-      const { playerPaddle, ball } = gameObjects.current;
-      const paddleSpeed = 8;
+      // In multiplayer mode, client only sends input to server
+      // Server is authoritative for ALL paddle positions, including player's own
       let isMoving = false;
       console.log("=== HANDLE MULTIPLAYER LOGIC ===");
       console.log("🎮 Keys state:", keys);
-      console.log("🎮 Player paddle Y:", playerPaddle.y);
 
-      // ALWAYS get fresh socket reference DIRECTLY from the ref - no intermediate variable
+      // ALWAYS get fresh socket reference DIRECTLY from the ref
       console.log(
         "📱 Current socket reference in handleMultiplayerLogic:",
         gameSocket.current
       );
       console.log("📱 Socket readyState:", gameSocket.current?.readyState);
 
-      // Debug: Let's also check if we can access the socket from a different way
-      if (!gameSocket.current) {
-        console.log("🚨 Socket is null! Let's debug...");
-        console.log("🚨 gameSocket ref:", gameSocket);
-        console.log("🚨 gameSocket.current:", gameSocket.current);
-
-        // Try to find if there's a socket somewhere
-        const allElements = document.querySelectorAll("*");
-        console.log("🚨 Total DOM elements:", allElements.length);
-      }
-
-      // Only handle player paddle movement - server handles ball and opponent
-      if (keys.up && playerPaddle.y > 0) {
-        console.log("🔼 UP key pressed - moving paddle up");
-        playerPaddle.y = Math.max(0, playerPaddle.y - paddleSpeed);
-        // Send throttled movement to server using DIRECT socket reference
+      // Only send input commands to server - DO NOT move local paddle
+      // Server will update our paddle position and send it back via gameUpdate
+      if (keys.up) {
+        console.log("🔼 UP key pressed - sending command to server");
         if (
           gameSocket.current &&
           gameSocket.current.readyState === WebSocket.OPEN
@@ -776,13 +796,8 @@ export default function GamePage() {
         }
         isMoving = true;
       }
-      if (keys.down && playerPaddle.y < CANVAS_HEIGHT - playerPaddle.height) {
-        console.log("🔽 DOWN key pressed - moving paddle down");
-        playerPaddle.y = Math.min(
-          CANVAS_HEIGHT - playerPaddle.height,
-          playerPaddle.y + paddleSpeed
-        );
-        // Send throttled movement to server using DIRECT socket reference
+      if (keys.down) {
+        console.log("🔽 DOWN key pressed - sending command to server");
         if (
           gameSocket.current &&
           gameSocket.current.readyState === WebSocket.OPEN
