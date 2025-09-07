@@ -75,6 +75,19 @@ export default function GamePage() {
     avatar: "OP",
     difficulty: "intermediate",
   });
+
+  // Store both player information to display correctly based on paddle sides
+  const [player1Info, setPlayer1Info] = useState({
+    name: "Player 1",
+    avatar: "",
+    displayName: "Player 1",
+  });
+  const [player2Info, setPlayer2Info] = useState({
+    name: "Player 2",
+    avatar: "",
+    displayName: "Player 2",
+  });
+
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [playerNumber, setPlayerNumber] = useState<number>(1); // 1 or 2
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
@@ -129,19 +142,15 @@ export default function GamePage() {
       vy: 4,
     },
     playerPaddle: {
-      x:
-        playerNumber === 1
-          ? PADDLE_WIDTH / 2
-          : CANVAS_WIDTH - PADDLE_WIDTH * 1.5,
+      // Current player is ALWAYS on the LEFT side in frontend view
+      x: PADDLE_WIDTH / 2,
       y: CANVAS_HEIGHT / 2,
       width: PADDLE_WIDTH,
       height: PADDLE_HEIGHT,
     },
     opponentPaddle: {
-      x:
-        playerNumber === 1
-          ? CANVAS_WIDTH - PADDLE_WIDTH * 1.5
-          : PADDLE_WIDTH / 2,
+      // Opponent is ALWAYS on the RIGHT side in frontend view
+      x: CANVAS_WIDTH - PADDLE_WIDTH * 1.5,
       y: CANVAS_HEIGHT / 2,
       width: PADDLE_WIDTH,
       height: PADDLE_HEIGHT,
@@ -150,7 +159,50 @@ export default function GamePage() {
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+
+    // Initialize current user as one of the players
+    if (currentUser) {
+      if (playerNumber === 1) {
+        setPlayer1Info({
+          name: currentUser.displayName || "Player 1",
+          avatar: currentUser.avatar || "",
+          displayName: currentUser.displayName || "Player 1",
+        });
+      } else {
+        setPlayer2Info({
+          name: currentUser.displayName || "Player 2",
+          avatar: currentUser.avatar || "",
+          displayName: currentUser.displayName || "Player 2",
+        });
+      }
+    }
+  }, [currentUser, playerNumber]);
+
+  // Helper functions to determine which player info to show on which side
+  const getLeftSidePlayer = () => {
+    // Frontend always shows current player on LEFT, regardless of playerNumber
+    return {
+      name: currentUser?.displayName || "Player",
+      avatar: currentUser?.avatar || "",
+      displayName: currentUser?.displayName || "Player",
+      isCurrentPlayer: true,
+      playerNumber: playerNumber,
+    };
+  };
+
+  const getRightSidePlayer = () => {
+    // Frontend always shows opponent on RIGHT
+    const opponentPlayerNumber = playerNumber === 1 ? 2 : 1;
+    const opponentInfo = playerNumber === 1 ? player2Info : player1Info;
+
+    return {
+      name: opponentInfo.displayName || opponent.name || "Opponent",
+      avatar: opponentInfo.avatar || "",
+      displayName: opponentInfo.displayName || opponent.name || "Opponent",
+      isCurrentPlayer: false,
+      playerNumber: opponentPlayerNumber,
+    };
+  };
 
   // Monitor gameState changes
   useEffect(() => {
@@ -174,17 +226,24 @@ export default function GamePage() {
 
   // Update paddle positions when player number changes
   useEffect(() => {
-    if (playerNumber === 1) {
-      gameObjects.current.playerPaddle.x = PADDLE_WIDTH / 2;
-      gameObjects.current.opponentPaddle.x = CANVAS_WIDTH - PADDLE_WIDTH * 1.5;
-    } else {
-      gameObjects.current.playerPaddle.x = CANVAS_WIDTH - PADDLE_WIDTH * 1.5;
-      gameObjects.current.opponentPaddle.x = PADDLE_WIDTH / 2;
-    }
+    // Frontend Perspective: ALWAYS render current player on LEFT, opponent on RIGHT
+    // Regardless of backend player number assignment
+
+    // Current player's paddle is ALWAYS on the LEFT
+    gameObjects.current.playerPaddle.x = PADDLE_WIDTH / 2;
+
+    // Opponent's paddle is ALWAYS on the RIGHT
+    gameObjects.current.opponentPaddle.x = CANVAS_WIDTH - PADDLE_WIDTH * 1.5;
+
+    // Set paddle dimensions
     gameObjects.current.playerPaddle.width = PADDLE_WIDTH;
     gameObjects.current.playerPaddle.height = PADDLE_HEIGHT;
     gameObjects.current.opponentPaddle.width = PADDLE_WIDTH;
     gameObjects.current.opponentPaddle.height = PADDLE_HEIGHT;
+
+    console.log(
+      `🎮 Paddle positions set - Current player (backend player${playerNumber}): LEFT, Opponent: RIGHT`
+    );
   }, [playerNumber]);
 
   // Keyboard controls
@@ -377,6 +436,40 @@ export default function GamePage() {
                       avatar: "OP",
                       difficulty: "intermediate",
                     });
+
+                    // Update the appropriate player info slot for the opponent
+                    const opponentPlayerNumber =
+                      message.playerNumber === 1 ? 2 : 1;
+                    if (opponentPlayerNumber === 1) {
+                      setPlayer1Info({
+                        name: message.opponent,
+                        avatar: "",
+                        displayName: message.opponent,
+                      });
+                    } else {
+                      setPlayer2Info({
+                        name: message.opponent,
+                        avatar: "",
+                        displayName: message.opponent,
+                      });
+                    }
+                  }
+
+                  // Update current player info
+                  if (currentUser && message.playerNumber) {
+                    if (message.playerNumber === 1) {
+                      setPlayer1Info({
+                        name: currentUser.displayName || "Player 1",
+                        avatar: currentUser.avatar || "",
+                        displayName: currentUser.displayName || "Player 1",
+                      });
+                    } else {
+                      setPlayer2Info({
+                        name: currentUser.displayName || "Player 2",
+                        avatar: currentUser.avatar || "",
+                        displayName: currentUser.displayName || "Player 2",
+                      });
+                    }
                   }
                   if (message.waitingForOpponent) {
                     setWaitingForOpponent(true);
@@ -651,92 +744,55 @@ export default function GamePage() {
       };
     }
 
-    // In multiplayer mode, server is authoritative for ALL paddle positions
-    // Update BOTH player and opponent paddles from server data
-    if (playerNumber === 1) {
-      // Current player is player1 (left paddle)
-      if (player1) {
-        const serverY = player1.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
-        const targetY = Math.max(
-          0,
-          Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
-        );
+    // Frontend Perspective: ALWAYS render current player on LEFT, opponent on RIGHT
+    // Regardless of whether backend identifies them as player1 or player2
 
-        console.log(
-          "Player 1 - Updating own paddle from server:",
-          player1.paddleY,
-          "->",
-          targetY
-        );
+    // Determine which backend data corresponds to current player vs opponent
+    const currentPlayerData = playerNumber === 1 ? player1 : player2;
+    const opponentPlayerData = playerNumber === 1 ? player2 : player1;
 
-        // Update own paddle position from server (authoritative)
-        gameObjects.current.playerPaddle.y = targetY;
-      }
+    // Update current player's paddle (ALWAYS LEFT side in frontend)
+    if (currentPlayerData) {
+      const serverY = currentPlayerData.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
+      const targetY = Math.max(
+        0,
+        Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
+      );
 
-      if (player2) {
-        const serverY = player2.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
-        const targetY = Math.max(
-          0,
-          Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
-        );
+      console.log(
+        `Current Player (backend player${playerNumber}) - Updating LEFT paddle from server:`,
+        currentPlayerData.paddleY,
+        "->",
+        targetY
+      );
 
-        console.log(
-          "Player 1 - Updating opponent paddle from server:",
-          player2.paddleY,
-          "->",
-          targetY
-        );
-
-        // Smooth interpolation for opponent paddle to reduce jerkiness
-        const currentY = gameObjects.current.opponentPaddle.y;
-        const lerpFactor = 0.6; // More responsive for opponent paddle
-        gameObjects.current.opponentPaddle.y =
-          currentY + (targetY - currentY) * lerpFactor;
-      }
-    } else {
-      // Current player is player2 (right paddle)
-      if (player2) {
-        const serverY = player2.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
-        const targetY = Math.max(
-          0,
-          Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
-        );
-
-        console.log(
-          "Player 2 - Updating own paddle from server:",
-          player2.paddleY,
-          "->",
-          targetY
-        );
-
-        // Update own paddle position from server (authoritative)
-        gameObjects.current.playerPaddle.y = targetY;
-      }
-
-      if (player1) {
-        const serverY = player1.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
-        const targetY = Math.max(
-          0,
-          Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
-        );
-
-        console.log(
-          "Player 2 - Updating opponent paddle from server:",
-          player1.paddleY,
-          "->",
-          targetY
-        );
-
-        // Smooth interpolation for opponent paddle to reduce jerkiness
-        const currentY = gameObjects.current.opponentPaddle.y;
-        const lerpFactor = 0.6; // More responsive for opponent paddle
-        gameObjects.current.opponentPaddle.y =
-          currentY + (targetY - currentY) * lerpFactor;
-      }
+      // Update left paddle (current player) - direct update for responsiveness
+      gameObjects.current.playerPaddle.y = targetY;
     }
-  };
 
-  // Update score based on player number
+    // Update opponent's paddle (ALWAYS RIGHT side in frontend)
+    if (opponentPlayerData) {
+      const serverY = opponentPlayerData.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
+      const targetY = Math.max(
+        0,
+        Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
+      );
+
+      const opponentPlayerNum = playerNumber === 1 ? 2 : 1;
+      console.log(
+        `Opponent (backend player${opponentPlayerNum}) - Updating RIGHT paddle from server:`,
+        opponentPlayerData.paddleY,
+        "->",
+        targetY
+      );
+
+      // Smooth interpolation for opponent paddle to reduce jerkiness
+      const currentY = gameObjects.current.opponentPaddle.y;
+      const lerpFactor = 0.6; // More responsive for opponent paddle
+      gameObjects.current.opponentPaddle.y =
+        currentY + (targetY - currentY) * lerpFactor;
+    }
+  }; // Update score based on player number
   const updateScoreFromServer = (
     serverScore: Score,
     currentPlayerNumber: number
@@ -1048,39 +1104,39 @@ export default function GamePage() {
     }
 
     // Ball collision with paddles
-    // Left paddle collision (player paddle when player is 1, opponent when player is 2)
-    const leftPaddle = playerNumber === 1 ? playerPaddle : opponentPaddle;
+    // Now with consistent positioning: playerPaddle = LEFT, opponentPaddle = RIGHT
+
+    // Left paddle collision (always player paddle in new consistent layout)
     if (
-      ball.x - ball.radius <= leftPaddle.x + leftPaddle.width &&
+      ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
       ball.vx < 0
     ) {
       if (
-        ball.y >= leftPaddle.y &&
-        ball.y <= leftPaddle.y + leftPaddle.height
+        ball.y >= playerPaddle.y &&
+        ball.y <= playerPaddle.y + playerPaddle.height
       ) {
         ball.vx = -ball.vx;
-        ball.x = leftPaddle.x + leftPaddle.width + ball.radius;
+        ball.x = playerPaddle.x + playerPaddle.width + ball.radius;
         // Add some angle variation based on where ball hits paddle
         const hitPos =
-          (ball.y - (leftPaddle.y + leftPaddle.height / 2)) /
-          (leftPaddle.height / 2);
+          (ball.y - (playerPaddle.y + playerPaddle.height / 2)) /
+          (playerPaddle.height / 2);
         ball.vy += hitPos * 2;
       }
     }
 
-    // Right paddle collision (opponent paddle when player is 1, player when player is 2)
-    const rightPaddle = playerNumber === 1 ? opponentPaddle : playerPaddle;
-    if (ball.x + ball.radius >= rightPaddle.x && ball.vx > 0) {
+    // Right paddle collision (always opponent paddle in new consistent layout)
+    if (ball.x + ball.radius >= opponentPaddle.x && ball.vx > 0) {
       if (
-        ball.y >= rightPaddle.y &&
-        ball.y <= rightPaddle.y + rightPaddle.height
+        ball.y >= opponentPaddle.y &&
+        ball.y <= opponentPaddle.y + opponentPaddle.height
       ) {
         ball.vx = -ball.vx;
-        ball.x = rightPaddle.x - ball.radius;
+        ball.x = opponentPaddle.x - ball.radius;
         // Add some angle variation
         const hitPos =
-          (ball.y - (rightPaddle.y + rightPaddle.height / 2)) /
-          (rightPaddle.height / 2);
+          (ball.y - (opponentPaddle.y + opponentPaddle.height / 2)) /
+          (opponentPaddle.height / 2);
         ball.vy += hitPos * 2;
       }
     }
@@ -1127,8 +1183,9 @@ export default function GamePage() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw paddles - player paddle is always orange, opponent is always pink
-    ctx.fillStyle = "#f97316"; // Orange for player
+    // Draw paddles
+    // Current player is ALWAYS on the LEFT (orange)
+    ctx.fillStyle = "#f97316"; // Orange for current player (LEFT side)
     ctx.fillRect(
       playerPaddle.x,
       playerPaddle.y,
@@ -1136,7 +1193,8 @@ export default function GamePage() {
       playerPaddle.height
     );
 
-    ctx.fillStyle = "#ec4899"; // Pink for opponent
+    // Opponent is ALWAYS on the RIGHT (pink)
+    ctx.fillStyle = "#ec4899"; // Pink for opponent (RIGHT side)
     ctx.fillRect(
       opponentPaddle.x,
       opponentPaddle.y,
@@ -1150,7 +1208,7 @@ export default function GamePage() {
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Draw scores
+    // Draw scores - current player score on left, opponent score on right
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 48px Arial";
     ctx.textAlign = "center";
@@ -1309,105 +1367,135 @@ export default function GamePage() {
     </div>
   );
 
-  const renderGameUI = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      {/* Game Header */}
-      <div className="w-full max-w-4xl mb-4">
-        <div className="flex items-center justify-between bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-4">
-          <div className="flex items-center space-x-4">
-            {currentUser?.avatar ? (
-              <img
-                src={API_URL + `/${currentUser.avatar}`}
-                alt={currentUser.displayName}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">
-                  {currentUser?.displayName
-                    ?.split(" ")
-                    .map((n) => n[0])
-                    .join("") || "U"}
-                </span>
-              </div>
-            )}
-            <div>
-              <div className="text-white font-semibold">
-                {currentUser?.displayName || "Player"}
-              </div>
-              <div className="text-gray-400 text-sm">Player {playerNumber}</div>
-            </div>
-          </div>
+  const renderGameUI = () => {
+    const leftPlayer = getLeftSidePlayer();
+    const rightPlayer = getRightSidePlayer();
 
-          <div className="text-center">
-            <div className="text-white font-bold text-lg">
-              Sets: {sets.player} - {sets.opponent}
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        {/* Game Header */}
+        <div className="w-full max-w-4xl mb-4">
+          <div className="flex items-center justify-between bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-4">
+            {/* LEFT SIDE PLAYER (Current Player) */}
+            <div className="flex items-center space-x-4">
+              {leftPlayer.avatar ? (
+                <img
+                  src={API_URL + `/${leftPlayer.avatar}`}
+                  alt={leftPlayer.displayName}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">
+                    {leftPlayer.displayName
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("") || "P"}
+                  </span>
+                </div>
+              )}
+              <div>
+                <div className="text-white font-semibold">
+                  {leftPlayer.displayName}
+                </div>
+                <div className="text-gray-400 text-sm">
+                  {leftPlayer.isCurrentPlayer
+                    ? `You (Player ${leftPlayer.playerNumber})`
+                    : `Player ${leftPlayer.playerNumber}`}
+                </div>
+              </div>
             </div>
-            <div className="text-gray-400 text-sm">{formatTime(gameTime)}</div>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            <div>
-              <div className="text-white font-semibold">{opponent.name}</div>
-              <div className="text-gray-400 text-sm">Opponent</div>
+            <div className="text-center">
+              <div className="text-white font-bold text-lg">
+                Sets: {sets.player} - {sets.opponent}
+              </div>
+              <div className="text-gray-400 text-sm">
+                {formatTime(gameTime)}
+              </div>
             </div>
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">
-                {opponent.avatar}
-              </span>
+
+            {/* RIGHT SIDE PLAYER (Opponent) */}
+            <div className="flex items-center space-x-4">
+              <div>
+                <div className="text-white font-semibold">
+                  {rightPlayer.displayName}
+                </div>
+                <div className="text-gray-400 text-sm">
+                  {rightPlayer.isCurrentPlayer
+                    ? `You (Player ${rightPlayer.playerNumber})`
+                    : `Player ${rightPlayer.playerNumber}`}
+                </div>
+              </div>
+              {rightPlayer.avatar ? (
+                <img
+                  src={API_URL + `/${rightPlayer.avatar}`}
+                  alt={rightPlayer.displayName}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">
+                    {rightPlayer.displayName
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("") || "P"}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Game Canvas */}
-      <div className="relative">
-        <canvas
-          ref={canvasRef}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          className="border-2 border-gray-700 rounded-xl bg-slate-800"
-        />
+        {/* Game Canvas */}
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            className="border-2 border-gray-700 rounded-xl bg-slate-800"
+          />
 
-        {gameState === "paused" && (
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-xl flex items-center justify-center">
-            <div className="bg-gray-800/90 border border-gray-700 rounded-xl p-6 text-center">
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Game Paused
-              </h3>
-              <button
-                onClick={() => setGameState("playing")}
-                className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
-              >
-                Resume Game
-              </button>
+          {gameState === "paused" && (
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-xl flex items-center justify-center">
+              <div className="bg-gray-800/90 border border-gray-700 rounded-xl p-6 text-center">
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Game Paused
+                </h3>
+                <button
+                  onClick={() => setGameState("playing")}
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+                >
+                  Resume Game
+                </button>
+              </div>
             </div>
+          )}
+        </div>
+
+        {/* Game Controls */}
+        <div className="w-full max-w-4xl mt-4">
+          <div className="flex items-center justify-center space-x-4">
+            <button
+              onClick={() =>
+                setGameState(gameState === "paused" ? "playing" : "paused")
+              }
+              className="bg-gray-700 text-white px-6 py-2 rounded-xl hover:bg-gray-600 transition-all"
+            >
+              {gameState === "paused" ? "Resume" : "Pause"}
+            </button>
+
+            <button
+              onClick={() => setGameState("menu")}
+              className="bg-red-600 text-white px-6 py-2 rounded-xl hover:bg-red-700 transition-all"
+            >
+              Quit Game
+            </button>
           </div>
-        )}
-      </div>
-
-      {/* Game Controls */}
-      <div className="w-full max-w-4xl mt-4">
-        <div className="flex items-center justify-center space-x-4">
-          <button
-            onClick={() =>
-              setGameState(gameState === "paused" ? "playing" : "paused")
-            }
-            className="bg-gray-700 text-white px-6 py-2 rounded-xl hover:bg-gray-600 transition-all"
-          >
-            {gameState === "paused" ? "Resume" : "Pause"}
-          </button>
-
-          <button
-            onClick={() => setGameState("menu")}
-            className="bg-red-600 text-white px-6 py-2 rounded-xl hover:bg-red-700 transition-all"
-          >
-            Quit Game
-          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderGameResults = () => (
     <div className="flex items-center justify-center min-h-screen p-4">
