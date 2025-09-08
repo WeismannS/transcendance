@@ -15,7 +15,6 @@ import {
 import { redirect } from "Miku/Router";
 import { useNotifications } from "../pages/use-notification.ts";
 import { Notification } from "../types/user.ts";
-import { userInfo } from "os";
 export const API_URL = "http://localhost:3000";
 
 // Utility function to check if user is authenticated
@@ -33,11 +32,25 @@ export async function checkAuthStatus(): Promise<boolean> {
 }
 
 interface GameUpdate {
-  type: "gameUpdate" | "gameEnd" | "scoreUpdate" | "reconnection" | "connected";
+  type:
+    | "gameUpdate"
+    | "gameEnd"
+    | "scoreUpdate"
+    | "reconnection"
+    | "connected"
+    | "gamePaused"
+    | "gameResumed"
+    | "playerDisconnected";
   gameId: string;
   gameBoard: GameBoard;
   score: Score;
   gameStarted: boolean;
+  playerNumber?: number;
+  isPaused?: boolean;
+  pauseReason?: string;
+  reason?: string;
+  message?: string;
+  disconnectedPlayer?: string;
 }
 
 interface GameBoard {

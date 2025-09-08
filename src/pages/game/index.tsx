@@ -15,7 +15,9 @@ interface GameUpdate {
     | "connected"
     | "gameCreated"
     | "playerDisconnected"
-    | "gameRejected";
+    | "gameRejected"
+    | "gamePaused"
+    | "gameResumed";
   gameId?: string;
   gameBoard?: GameBoard;
   score?: Score;
@@ -27,6 +29,10 @@ interface GameUpdate {
   winner?: string;
   finalScore?: Score;
   message?: string;
+  reason?: string;
+  isPaused?: boolean;
+  pauseReason?: string;
+  disconnectedPlayer?: string;
 }
 
 interface GameBoard {
@@ -91,6 +97,11 @@ export default function GamePage() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [playerNumber, setPlayerNumber] = useState<number>(1); // 1 or 2
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [pauseReason, setPauseReason] = useState<string | null>(null);
+  const [reconnectingPlayer, setReconnectingPlayer] = useState<string | null>(
+    null
+  );
 
   const gameId = getGameId();
 
@@ -213,8 +224,8 @@ export default function GamePage() {
 
   // Game timer
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    if (gameState === "playing") {
+    let interval: any;
+    if (gameState === "playing" && !isPaused) {
       interval = setInterval(() => {
         setGameTime((prev) => prev + 1);
       }, 1000);
@@ -222,7 +233,7 @@ export default function GamePage() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [gameState]);
+  }, [gameState, isPaused]);
 
   // Update paddle positions when player number changes
   useEffect(() => {
@@ -563,16 +574,51 @@ export default function GamePage() {
                       message.playerNumber || 1
                     );
                   }
-                  console.log(
-                    "🎮 Setting gameState to 'playing' from reconnection"
-                  );
-                  setGameState("playing");
+
+                  // Handle pause state from reconnection
+                  if (message.isPaused) {
+                    setIsPaused(true);
+                    setPauseReason(message.pauseReason || "unknown");
+                    setGameState("paused");
+                  } else {
+                    setIsPaused(false);
+                    setPauseReason(null);
+                    console.log(
+                      "🎮 Setting gameState to 'playing' from reconnection"
+                    );
+                    setGameState("playing");
+                  }
                   break;
 
                 case "playerDisconnected":
                   console.log("Opponent disconnected:", message.message);
-                  // Show waiting message but keep game state
-                  setWaitingForOpponent(true);
+                  setReconnectingPlayer(
+                    message.disconnectedPlayer || "opponent"
+                  );
+                  setIsPaused(true);
+                  setPauseReason("disconnection");
+                  setGameState("paused");
+                  break;
+
+                case "gamePaused":
+                  console.log("Game paused:", message.reason);
+                  setIsPaused(true);
+                  setPauseReason(message.reason || "unknown");
+                  setGameState("paused");
+                  break;
+
+                case "gameResumed":
+                  console.log("Game resumed!");
+                  setIsPaused(false);
+                  setPauseReason(null);
+                  setReconnectingPlayer(null);
+                  setGameState("playing");
+                  if (message.gameBoard) {
+                    updateGameFromServer(message.gameBoard);
+                  }
+                  if (message.score) {
+                    updateScoreFromServer(message.score, playerNumber);
+                  }
                   break;
 
                 case "gameRejected":
@@ -703,11 +749,31 @@ export default function GamePage() {
         // The socket should remain open for the game
       };
     } else if (gameId && !currentUser?.id) {
-      console.log("❌ Missing currentUser.id, cannot connect");
-      setConnectionError("User not loaded. Please try refreshing the page.");
-      setGameState("menu");
+      console.log(
+        "❌ Missing currentUser.id, cannot connect - checking if user data is loading"
+      );
+      // Don't immediately set error state - user data might still be loading
+      // Only set connecting state if we don't already have an error
+      if (!connectionError) {
+        setGameState("connecting");
+      }
     }
-  }, [gameId]);
+  }, [gameId, currentUser]); // Added currentUser dependency
+
+  // Additional useEffect to handle when currentUser loads after initial mount
+  useEffect(() => {
+    // If we have a gameId, no currentUser initially, but then currentUser loads
+    // and we're in connecting state, retry the connection
+    if (
+      gameId &&
+      currentUser?.id &&
+      gameState === "connecting" &&
+      !gameSocket.current
+    ) {
+      console.log("🔄 User data loaded, retrying WebSocket connection...");
+      // The main WebSocket useEffect will handle the connection since currentUser is now available
+    }
+  }, [currentUser, gameState, gameId]);
 
   // Monitor socket changes for debugging
   useEffect(() => {
@@ -821,6 +887,12 @@ export default function GamePage() {
 
     // Define handleMultiplayerLogic inside useEffect to access fresh socket reference
     const handleMultiplayerLogic = () => {
+      // Only handle input if not paused
+      if (isPaused) {
+        console.log("🔇 Game is paused, not handling input");
+        return;
+      }
+
       // In multiplayer mode, client only sends input to server
       // Server is authoritative for ALL paddle positions, including player's own
       let isMoving = false;
@@ -942,12 +1014,14 @@ export default function GamePage() {
       animationRef.current = requestAnimationFrame(gameLoop);
     };
 
-    if (gameState === "playing") {
+    if (gameState === "playing" || gameState === "paused") {
       console.log(
         "🎯 STARTING GAME LOOP - gameId:",
         gameId,
         "gameState:",
-        gameState
+        gameState,
+        "isPaused:",
+        isPaused
       );
       animationRef.current = requestAnimationFrame(gameLoop);
     } else {
@@ -960,7 +1034,7 @@ export default function GamePage() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [gameState, gameId, keys]); // Added keys dependency to fix closure issue
+  }, [gameState, gameId, keys, isPaused]); // Added isPaused dependency
 
   // Direct paddle movement functions that always access current socket state
   const sendPaddleMoveDirectly = (direction: "up" | "down") => {
@@ -1283,6 +1357,31 @@ export default function GamePage() {
         CANVAS_WIDTH / 2,
         CANVAS_HEIGHT / 2
       );
+    }
+
+    // Show pause overlay if game is paused
+    if (isPaused) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 32px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("GAME PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 40);
+
+      ctx.font = "18px Arial";
+      let pauseMessage = "";
+      if (pauseReason === "disconnection") {
+        if (reconnectingPlayer) {
+          pauseMessage = `Waiting for ${reconnectingPlayer} to reconnect...`;
+        } else {
+          pauseMessage = "Waiting for player to reconnect...";
+        }
+      } else {
+        pauseMessage = "Game paused";
+      }
+
+      ctx.fillText(pauseMessage, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
     }
   };
 
@@ -1634,6 +1733,40 @@ export default function GamePage() {
     </div>
   );
 
+  const renderPausedGame = () => (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="relative">
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          className="border-2 border-gray-600 rounded-lg bg-slate-800"
+        />
+      </div>
+      <div className="mt-4 bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 max-w-md w-full text-center">
+        <h2 className="text-2xl font-bold text-white mb-2">Game Paused</h2>
+        {pauseReason === "disconnection" ? (
+          <div>
+            <p className="text-gray-300 mb-2">
+              {reconnectingPlayer
+                ? `${reconnectingPlayer} disconnected`
+                : "Player disconnected"}
+            </p>
+            <p className="text-orange-400 text-sm">
+              Waiting for reconnection...
+            </p>
+            <div className="flex items-center justify-center mt-3">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mr-2"></div>
+              <span className="text-sm text-gray-400">Reconnecting</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-300">Game is paused</p>
+        )}
+      </div>
+    </div>
+  );
+
   const renderConnecting = () => (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
@@ -1642,7 +1775,9 @@ export default function GamePage() {
           Connecting to Game
         </h2>
         <p className="text-gray-400">
-          Please wait while we connect you to the game...
+          {!currentUser?.id
+            ? "Loading user data..."
+            : "Please wait while we connect you to the game..."}
         </p>
         {connectionError && (
           <div className="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-xl">
@@ -1668,7 +1803,8 @@ export default function GamePage() {
       >
         {gameState === "connecting" && renderConnecting()}
         {gameState === "menu" && !gameId && renderGameMenu()}
-        {(gameState === "playing" || gameState === "paused") && renderGameUI()}
+        {gameState === "playing" && renderGameUI()}
+        {gameState === "paused" && renderPausedGame()}
         {gameState === "finished" && renderGameResults()}
       </div>
     </div>
