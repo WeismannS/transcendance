@@ -1103,40 +1103,95 @@ export default function GamePage() {
       );
     }
 
-    // Ball collision with paddles
+    // Ball collision with paddles - Using AABB collision detection
     // Now with consistent positioning: playerPaddle = LEFT, opponentPaddle = RIGHT
 
-    // Left paddle collision (always player paddle in new consistent layout)
-    if (
-      ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
-      ball.vx < 0
-    ) {
+    // Debug paddle positions
+    if (Math.random() < 0.01) {
+      // Log occasionally to avoid spam
+      console.log("Paddle positions:", {
+        playerPaddle: {
+          x: playerPaddle.x,
+          y: playerPaddle.y,
+          width: playerPaddle.width,
+          height: playerPaddle.height,
+        },
+        opponentPaddle: {
+          x: opponentPaddle.x,
+          y: opponentPaddle.y,
+          width: opponentPaddle.width,
+          height: opponentPaddle.height,
+        },
+        ball: {
+          x: ball.x,
+          y: ball.y,
+          radius: ball.radius,
+          vx: ball.vx,
+          vy: ball.vy,
+        },
+      });
+    }
+
+    // Left paddle collision (AABB method)
+    if (ball.vx < 0) {
+      // Ball moving left
+      const ballLeft = ball.x - ball.radius;
+      const ballRight = ball.x + ball.radius;
+      const ballTop = ball.y - ball.radius;
+      const ballBottom = ball.y + ball.radius;
+
+      const paddleLeft = playerPaddle.x;
+      const paddleRight = playerPaddle.x + playerPaddle.width;
+      const paddleTop = playerPaddle.y;
+      const paddleBottom = playerPaddle.y + playerPaddle.height;
+
+      // Check AABB collision
       if (
-        ball.y >= playerPaddle.y &&
-        ball.y <= playerPaddle.y + playerPaddle.height
+        ballLeft <= paddleRight &&
+        ballRight >= paddleLeft &&
+        ballTop <= paddleBottom &&
+        ballBottom >= paddleTop
       ) {
-        ball.vx = -ball.vx;
-        ball.x = playerPaddle.x + playerPaddle.width + ball.radius;
-        // Add some angle variation based on where ball hits paddle
+        console.log("Left paddle AABB collision detected!");
+        ball.vx = Math.abs(ball.vx); // Ensure ball goes right
+        ball.x = paddleRight + ball.radius; // Position ball to the right of paddle
+
+        // Add angle variation based on hit position
         const hitPos =
-          (ball.y - (playerPaddle.y + playerPaddle.height / 2)) /
-          (playerPaddle.height / 2);
+          (ball.y - (paddleTop + (paddleBottom - paddleTop) / 2)) /
+          ((paddleBottom - paddleTop) / 2);
         ball.vy += hitPos * 2;
       }
     }
 
-    // Right paddle collision (always opponent paddle in new consistent layout)
-    if (ball.x + ball.radius >= opponentPaddle.x && ball.vx > 0) {
+    // Right paddle collision (AABB method)
+    if (ball.vx > 0) {
+      // Ball moving right
+      const ballLeft = ball.x - ball.radius;
+      const ballRight = ball.x + ball.radius;
+      const ballTop = ball.y - ball.radius;
+      const ballBottom = ball.y + ball.radius;
+
+      const paddleLeft = opponentPaddle.x;
+      const paddleRight = opponentPaddle.x + opponentPaddle.width;
+      const paddleTop = opponentPaddle.y;
+      const paddleBottom = opponentPaddle.y + opponentPaddle.height;
+
+      // Check AABB collision
       if (
-        ball.y >= opponentPaddle.y &&
-        ball.y <= opponentPaddle.y + opponentPaddle.height
+        ballLeft <= paddleRight &&
+        ballRight >= paddleLeft &&
+        ballTop <= paddleBottom &&
+        ballBottom >= paddleTop
       ) {
-        ball.vx = -ball.vx;
-        ball.x = opponentPaddle.x - ball.radius;
-        // Add some angle variation
+        console.log("Right paddle AABB collision detected!");
+        ball.vx = -Math.abs(ball.vx); // Ensure ball goes left
+        ball.x = paddleLeft - ball.radius; // Position ball to the left of paddle
+
+        // Add angle variation based on hit position
         const hitPos =
-          (ball.y - (opponentPaddle.y + opponentPaddle.height / 2)) /
-          (opponentPaddle.height / 2);
+          (ball.y - (paddleTop + (paddleBottom - paddleTop) / 2)) /
+          ((paddleBottom - paddleTop) / 2);
         ball.vy += hitPos * 2;
       }
     }
