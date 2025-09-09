@@ -62,7 +62,7 @@ const Routing = () => {
                     const [userResponse, achievementsResponse, onlineCountResponse] = await Promise.all([
                         fetch(API_URL + "/api/user-management/me", { credentials: "include" }),
                         fetch(API_URL + "/api/user-management/allachievements", { credentials: "include" }),
-                        fetch(`${API_URL}/api/notifications/users/online`, { credentials: "include" })
+                        fetch(`http://${IP}:3000/api/notifications/users/online`, { credentials: "include" })
                     ]);
 
                     if (userResponse.status === 200 && achievementsResponse.status === 200 && onlineCountResponse.status === 200) {
