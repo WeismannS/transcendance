@@ -182,7 +182,7 @@ export async function acceptFriendRequest(requestId: string, user: any) {
 export async function isOnline(userId: number): Promise<boolean> {
   try {
     const response = await fetch(
-      `${API_URL}/api/notifications/user/${userId}/online`,
+      `http://${IP}:3005/api/notifications/user/${userId}/online`,
       {
         method: "GET",
         credentials: "include",
