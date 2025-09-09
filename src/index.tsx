@@ -7,7 +7,7 @@ import SignInPage from "./pages/sign_in/index.tsx";
 import TournamentsPage from "./pages/tournaments/index.tsx";
 import LeaderboardPage from "./pages/leaderboard/index.tsx";
 import GamePage from "./pages/game/index.tsx";
-import { API_URL, initializeNotificationWs, getAllConversations, initializeChatWebSocket } from "./services/api.ts";
+import { IP, API_URL, initializeNotificationWs, getAllConversations, initializeChatWebSocket } from "./services/api.ts";
 import { stateManager } from "./store/StateManager.ts";
 import { NotificationContainer } from "./pages/notification.tsx";
 
@@ -62,7 +62,7 @@ const Routing = () => {
                     const [userResponse, achievementsResponse, onlineCountResponse] = await Promise.all([
                         fetch(API_URL + "/api/user-management/me", { credentials: "include" }),
                         fetch(API_URL + "/api/user-management/allachievements", { credentials: "include" }),
-                        fetch("http://localhost:3005/api/notifications/users/online", { credentials: "include" })
+                        fetch(`http://${IP}:3005/api/notifications/users/online`, { credentials: "include" })
                     ]);
 
                     if (userResponse.status === 200 && achievementsResponse.status === 200 && onlineCountResponse.status === 200) {
