@@ -291,7 +291,7 @@ export async function updateProfile(profileData: any) {
 
 export function initializeChatWebSocket() {
   const ws = new WebSocket(
-    `ws://${API_URL}/ws/chat/live?` + document.cookie
+    `ws://${IP}:3000/ws/chat/live?` + document.cookie
   );
 
   ws.onmessage = (event) => {
@@ -358,7 +358,7 @@ export function initializeChatWebSocket() {
 export function initializeNotificationWs() {
   const { addNotification } = useNotifications();
   const ws = new WebSocket(
-    `ws://${API_URL}/ws/notifications/live?` + document.cookie
+    `ws://${IP}:3000/ws/notifications/live?` + document.cookie
   );
 
   ws.onmessage = (event) => {
