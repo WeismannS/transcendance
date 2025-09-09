@@ -15,7 +15,8 @@ import {
 import { redirect } from "Miku/Router";
 import { useNotifications } from "../pages/use-notification.ts";
 import { Notification } from "../types/user.ts";
-export const API_URL = "http://localhost:3000";
+export const API_URL = "http://68.183.57.106:3000";
+export const IP = "68.183.57.106"
 
 // Utility function to check if user is authenticated
 export async function checkAuthStatus(): Promise<boolean> {
@@ -181,7 +182,7 @@ export async function acceptFriendRequest(requestId: string, user: any) {
 export async function isOnline(userId: number): Promise<boolean> {
   try {
     const response = await fetch(
-      `http://localhost:3005/api/notifications/user/${userId}/online`,
+      `http://${IP}:3005/api/notifications/user/${userId}/online`,
       {
         method: "GET",
         credentials: "include",
