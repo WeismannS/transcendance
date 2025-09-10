@@ -1,11 +1,21 @@
 export interface Tournament {
-  id: number;
+  id: string;
   name: string;
-  status: "live" | "upcoming" | "completed";
-  players: number;
-  prize: string;
+  status: "upcoming" | "ongoing" | "done" | "cancelled" | "pending";
+  players?: {
+    id: string;
+    userId: string;
+    username: string;
+    tournamentId: string;
+  }[];
+  playersCount: number;
+  startTime: string | null;
+  createdBy?: string;
+  createdAt: string;
+  winnerId?: string | null;
+  // Computed fields for UI
+  prize?: string;
   timeLeft?: string;
-  startTime?: string;
   result?: string;
 }
 
