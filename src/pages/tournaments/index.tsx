@@ -6,11 +6,14 @@ import { useUserProfile } from "../../hooks/useStates.ts";
 import {
   API_URL,
   getTournaments,
+  getTournamentMatches,
   createTournament,
   joinTournament,
   leaveTournament,
   startTournament,
   stopTournament,
+  sendTournamentChallenge,
+  sendChallenge,
 } from "../../services/api.ts";
 
 interface Tournament {
@@ -48,11 +51,14 @@ export default function TournamentsPage() {
     useState<Tournament | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showBracket, setShowBracket] = useState(false);
+  const [showTournamentDetails, setShowTournamentDetails] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Tournament data from backend
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [tournamentMatches, setTournamentMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [matchesLoading, setMatchesLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Create tournament form
@@ -109,6 +115,47 @@ export default function TournamentsPage() {
       console.error("Failed to load tournaments:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTournamentMatches = async (tournamentId: string) => {
+    try {
+      setMatchesLoading(true);
+      const matches = await getTournamentMatches(tournamentId);
+      setTournamentMatches(matches);
+    } catch (err: any) {
+      setError(err.message || "Failed to load tournament matches");
+      console.error("Failed to load tournament matches:", err);
+    } finally {
+      setMatchesLoading(false);
+    }
+  };
+
+  const handleTournamentChallenge = async (match: any) => {
+    if (!userProfile) return;
+
+    try {
+      // Determine the opponent ID and opponent name
+      const opponentId =
+        match.player1Id === userProfile.id ? match.player2Id : match.player1Id;
+
+      const opponentName =
+        match.player1Id === userProfile.id
+          ? match.player2?.displayName
+          : match.player1?.displayName;
+
+      const result = await sendChallenge(opponentId, "tournament");
+      console.log("Tournament challenge sent:", result);
+
+      // Show success message
+      alert(`Tournament challenge sent to ${opponentName}!`);
+    } catch (err: any) {
+      setError(err.message || "Failed to send tournament challenge");
+      console.error("Failed to send tournament challenge:", err);
+
+      // Show error message
+      const errorMessage = err.message || "Unknown error";
+      alert(`Failed to send tournament challenge: ${errorMessage}`);
     }
   };
 
@@ -477,7 +524,12 @@ export default function TournamentsPage() {
 
         {/* Details button (always available) */}
         <button
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedTournament(tournament);
+            setShowTournamentDetails(true);
+            loadTournamentMatches(tournament.id);
+          }}
           className="px-6 py-3 bg-gray-700 bg-opacity-50 text-white rounded-xl hover:bg-gray-700 transition-all font-semibold"
         >
           Details
@@ -602,8 +654,145 @@ export default function TournamentsPage() {
     </div>
   );
 
+  // Render tournament details modal
+  const renderTournamentDetails = () => {
+    if (!showTournamentDetails || !selectedTournament) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-gray-800 rounded-xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-2xl font-bold text-white">
+              {selectedTournament.name} - Matches
+            </h3>
+            <button
+              onClick={() => setShowTournamentDetails(false)}
+              className="text-gray-400 hover:text-white text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {matchesLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                <p className="text-gray-300 mt-4">Loading matches...</p>
+              </div>
+            ) : tournamentMatches.length > 0 ? (
+              <div className="space-y-6">
+                {/* Group matches by round */}
+                {Array.from(
+                  new Set(tournamentMatches.map((match) => match.round))
+                )
+                  .sort()
+                  .map((round) => (
+                    <div key={round} className="bg-gray-700 rounded-lg p-4">
+                      <h4 className="text-lg font-semibold text-white mb-4">
+                        {round === 1
+                          ? "Semi-Finals"
+                          : round === 2
+                          ? "Finals"
+                          : `Round ${round}`}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {tournamentMatches
+                          .filter((match) => match.round === round)
+                          .map((match) => (
+                            <div
+                              key={match.id}
+                              className="bg-gray-800 rounded-lg p-4"
+                            >
+                              <div className="flex justify-between items-center mb-3">
+                                <div className="text-center flex-1">
+                                  <p className="text-white font-medium">
+                                    {match.player1?.displayName || "TBD"}
+                                  </p>
+                                  {match.status === "COMPLETED" && (
+                                    <p className="text-sm text-gray-400">
+                                      Score: {match.player1Score || 0}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="px-4 text-gray-400 font-bold">
+                                  VS
+                                </div>
+                                <div className="text-center flex-1">
+                                  <p className="text-white font-medium">
+                                    {match.player2?.displayName || "TBD"}
+                                  </p>
+                                  {match.status === "COMPLETED" && (
+                                    <p className="text-sm text-gray-400">
+                                      Score: {match.player2Score || 0}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="text-center">
+                                <p
+                                  className={`text-sm font-medium mb-2 ${
+                                    match.status === "COMPLETED"
+                                      ? "text-green-400"
+                                      : match.status === "IN_PROGRESS"
+                                      ? "text-yellow-400"
+                                      : "text-gray-400"
+                                  }`}
+                                >
+                                  {match.status === "COMPLETED"
+                                    ? "Completed"
+                                    : match.status === "IN_PROGRESS"
+                                    ? "In Progress"
+                                    : "Pending"}
+                                </p>
+
+                                {/* Show start button only for user's pending matches */}
+                                {match.status === "PENDING" &&
+                                  userProfile &&
+                                  (match.player1Id === userProfile.id ||
+                                    match.player2Id === userProfile.id) && (
+                                    <button
+                                      onClick={() =>
+                                        handleTournamentChallenge(match)
+                                      }
+                                      className="px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all font-medium"
+                                    >
+                                      Challenge
+                                    </button>
+                                  )}
+
+                                {match.status === "COMPLETED" &&
+                                  match.winnerId && (
+                                    <p className="text-sm text-blue-400">
+                                      Winner:{" "}
+                                      {match.winnerId === match.player1Id
+                                        ? match.player1?.displayName
+                                        : match.player2?.displayName}
+                                    </p>
+                                  )}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-300">
+                  No matches found for this tournament.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+      {renderTournamentDetails()}
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>

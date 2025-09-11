@@ -423,6 +423,34 @@ export function initializeNotificationWs() {
             });
           },
         });
+      } else if (isNotificationType(data, "TOURNAMENT_MATCH")) {
+        console.log("Tournament match notification:", data);
+        addNotification({
+          title: data.title,
+          avatar: data.opponent.avatar,
+          type: "tournament_match",
+          message: data.content,
+          onAccept: () => {
+            // Create a game challenge between the two tournament players
+            sendTournamentChallenge(data.matchId, data.opponent.id).then(() => {
+              console.log("Tournament match accepted", data.matchId);
+            });
+          },
+          onReject: () => {
+            // Navigate to tournaments page to view bracket
+            redirect("/tournaments");
+          },
+        });
+      } else if (isNotificationType(data, "TOURNAMENT_UPDATE")) {
+        console.log("Tournament update notification:", data);
+        addNotification({
+          title: data.title,
+          type: "info",
+          message: data.content,
+          onView: () => {
+            redirect("/tournaments");
+          },
+        });
       } else if (isNotificationType(data, "GAME_ACCEPTED")) {
         redirect("/game/" + data.gameId);
         addNotification({
@@ -776,6 +804,44 @@ export async function sendChallenge(
   }
 }
 
+export async function sendTournamentChallenge(
+  matchId: string,
+  opponentId: string
+) {
+  try {
+    const response = await fetch(
+      API_URL + `/api/tournament/match/${matchId}/challenge`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ opponentId }),
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Authentication failed. Please log in again.");
+      } else if (response.status === 404) {
+        throw new Error("Match not found or tournament service unavailable.");
+      } else {
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new Error(
+          `Failed to start tournament match (${response.status}): ${errorText}`
+        );
+      }
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error starting tournament match:", error);
+    throw error;
+  }
+}
+
 export async function rejectChallenge(challengeId: string) {
   try {
     const response = await fetch(API_URL + "/api/game/reject/" + challengeId, {
@@ -864,17 +930,14 @@ export async function createTournament(tournamentData: {
   username: string;
 }) {
   try {
-    const response = await fetch(
-      API_URL + "/api/tournament/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(tournamentData),
-      }
-    );
+    const response = await fetch(API_URL + "/api/tournament/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(tournamentData),
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -1004,13 +1067,10 @@ export async function getTournaments() {
 
 export async function getTournament(tournamentId: string) {
   try {
-    const response = await fetch(
-      API_URL + `/api/tournament/${tournamentId}`,
-      {
-        method: "GET",
-        credentials: "include",
-      }
-    );
+    const response = await fetch(API_URL + `/api/tournament/${tournamentId}`, {
+      method: "GET",
+      credentials: "include",
+    });
 
     if (!response.ok) {
       throw new Error("Failed to fetch tournament");
@@ -1020,6 +1080,28 @@ export async function getTournament(tournamentId: string) {
     return result.tournament;
   } catch (error) {
     console.error("Failed to fetch tournament:", error);
+    throw error;
+  }
+}
+
+export async function getTournamentMatches(tournamentId: string) {
+  try {
+    const response = await fetch(
+      API_URL + `/api/tournament/${tournamentId}/matches`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch tournament matches");
+    }
+
+    const result = await response.json();
+    return result.matches;
+  } catch (error) {
+    console.error("Failed to fetch tournament matches:", error);
     throw error;
   }
 }

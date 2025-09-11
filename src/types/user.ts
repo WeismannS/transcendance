@@ -68,7 +68,12 @@ export type FriendEvent =
   | "FRIEND_REQUEST_ACCEPTED"
   | "FRIEND_REQUEST_DECLINED";
 
-export type GameEvent = "GAME_INVITE" | "GAME_ACCEPTED" | "GAME_REJECTED";
+export type GameEvent =
+  | "GAME_INVITE"
+  | "GAME_ACCEPTED"
+  | "GAME_REJECTED"
+  | "TOURNAMENT_MATCH"
+  | "TOURNAMENT_UPDATE";
 
 export type Notification<T extends EventType> = {
   type: T;
@@ -83,6 +88,15 @@ export type Notification<T extends EventType> = {
   gameId: T extends "GAME_INVITE" | "GAME_REJECTED" | "GAME_ACCEPTED"
     ? string
     : never;
+  matchId: T extends "TOURNAMENT_MATCH" ? string : never;
+  tournamentId: T extends "TOURNAMENT_MATCH" | "TOURNAMENT_UPDATE"
+    ? string
+    : never;
+  tournamentName: T extends "TOURNAMENT_MATCH" | "TOURNAMENT_UPDATE"
+    ? string
+    : never;
+  opponent: T extends "TOURNAMENT_MATCH" ? ProfileOverview : never;
+  round: T extends "TOURNAMENT_MATCH" ? number : never;
 };
 
 export function isNotificationType<T extends EventType>(

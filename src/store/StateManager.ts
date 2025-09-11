@@ -86,7 +86,9 @@ export type EventType =
   | "FRIEND_REMOVED"
   | "GAME_INVITE"
   | "GAME_REJECTED"
-  | "GAME_ACCEPTED";
+  | "GAME_ACCEPTED"
+  | "TOURNAMENT_MATCH"
+  | "TOURNAMENT_UPDATE";
 
 interface StateEvent {
   type: EventType;
