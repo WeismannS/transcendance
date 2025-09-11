@@ -146,7 +146,7 @@ export default function TournamentsPage() {
           ? match.player2?.displayName
           : match.player1?.displayName;
 
-      const result = await sendChallenge(opponentId, "tournament");
+      const result = await sendChallenge(opponentId, "tournament", match.id);
       console.log("Tournament challenge sent:", result);
 
       // Show success message
@@ -751,12 +751,6 @@ export default function TournamentsPage() {
                                 </p>
 
                                 {/* Show start button only for user's pending matches */}
-                                {console.log(
-                                  "Debug - match:",
-                                  match,
-                                  "userProfile:",
-                                  userProfile
-                                )}
                                 {match.status?.toLowerCase() === "pending" &&
                                   userProfile &&
                                   (match.player1Id === String(userProfile.id) ||
@@ -771,24 +765,6 @@ export default function TournamentsPage() {
                                       Challenge
                                     </button>
                                   )}
-
-                                {/* Debug info - remove this later */}
-                                <div className="text-xs text-gray-500 mt-2">
-                                  <div>Match Status: {match.status}</div>
-                                  <div>Player1 ID: {match.player1Id}</div>
-                                  <div>Player2 ID: {match.player2Id}</div>
-                                  <div>Current User ID: {userProfile?.id}</div>
-                                  <div>
-                                    Is User Player:{" "}
-                                    {userProfile &&
-                                    (match.player1Id ===
-                                      String(userProfile.id) ||
-                                      match.player2Id ===
-                                        String(userProfile.id))
-                                      ? "YES"
-                                      : "NO"}
-                                  </div>
-                                </div>
 
                                 {match.status?.toLowerCase() === "completed" &&
                                   match.winnerId && (
