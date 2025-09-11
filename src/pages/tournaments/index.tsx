@@ -149,8 +149,13 @@ export default function TournamentsPage() {
       const result = await sendChallenge(opponentId, "tournament", match.id);
       console.log("Tournament challenge sent:", result);
 
-      // Show success message
-      alert(`Tournament challenge sent to ${opponentName}!`);
+      // Redirect to game if gameId is returned
+      if (result && result.gameId) {
+        window.location.href = `/game/${result.gameId}`;
+      } else {
+        // Show success message if no immediate redirect
+        alert(`Tournament challenge sent to ${opponentName}!`);
+      }
     } catch (err: any) {
       setError(err.message || "Failed to send tournament challenge");
       console.error("Failed to send tournament challenge:", err);

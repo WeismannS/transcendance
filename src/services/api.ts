@@ -802,6 +802,10 @@ export async function sendChallenge(
         );
       }
     }
+
+    // Return the response data so the caller can get the gameId
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error("Failed to send challenge:", error);
     throw error;
