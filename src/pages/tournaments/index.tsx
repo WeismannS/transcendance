@@ -137,10 +137,12 @@ export default function TournamentsPage() {
     try {
       // Determine the opponent ID and opponent name
       const opponentId =
-        match.player1Id === userProfile.id ? match.player2Id : match.player1Id;
+        match.player1Id === String(userProfile.id)
+          ? match.player2Id
+          : match.player1Id;
 
       const opponentName =
-        match.player1Id === userProfile.id
+        match.player1Id === String(userProfile.id)
           ? match.player2?.displayName
           : match.player1?.displayName;
 
@@ -732,25 +734,34 @@ export default function TournamentsPage() {
                               <div className="text-center">
                                 <p
                                   className={`text-sm font-medium mb-2 ${
-                                    match.status === "COMPLETED"
+                                    match.status?.toLowerCase() === "completed"
                                       ? "text-green-400"
-                                      : match.status === "IN_PROGRESS"
+                                      : match.status?.toLowerCase() ===
+                                        "in_progress"
                                       ? "text-yellow-400"
                                       : "text-gray-400"
                                   }`}
                                 >
-                                  {match.status === "COMPLETED"
+                                  {match.status?.toLowerCase() === "completed"
                                     ? "Completed"
-                                    : match.status === "IN_PROGRESS"
+                                    : match.status?.toLowerCase() ===
+                                      "in_progress"
                                     ? "In Progress"
                                     : "Pending"}
                                 </p>
 
                                 {/* Show start button only for user's pending matches */}
-                                {match.status === "PENDING" &&
+                                {console.log(
+                                  "Debug - match:",
+                                  match,
+                                  "userProfile:",
+                                  userProfile
+                                )}
+                                {match.status?.toLowerCase() === "pending" &&
                                   userProfile &&
-                                  (match.player1Id === userProfile.id ||
-                                    match.player2Id === userProfile.id) && (
+                                  (match.player1Id === String(userProfile.id) ||
+                                    match.player2Id ===
+                                      String(userProfile.id)) && (
                                     <button
                                       onClick={() =>
                                         handleTournamentChallenge(match)
@@ -761,7 +772,25 @@ export default function TournamentsPage() {
                                     </button>
                                   )}
 
-                                {match.status === "COMPLETED" &&
+                                {/* Debug info - remove this later */}
+                                <div className="text-xs text-gray-500 mt-2">
+                                  <div>Match Status: {match.status}</div>
+                                  <div>Player1 ID: {match.player1Id}</div>
+                                  <div>Player2 ID: {match.player2Id}</div>
+                                  <div>Current User ID: {userProfile?.id}</div>
+                                  <div>
+                                    Is User Player:{" "}
+                                    {userProfile &&
+                                    (match.player1Id ===
+                                      String(userProfile.id) ||
+                                      match.player2Id ===
+                                        String(userProfile.id))
+                                      ? "YES"
+                                      : "NO"}
+                                  </div>
+                                </div>
+
+                                {match.status?.toLowerCase() === "completed" &&
                                   match.winnerId && (
                                     <p className="text-sm text-blue-400">
                                       Winner:{" "}
