@@ -13,7 +13,6 @@ import {
   startTournament,
   stopTournament,
   sendTournamentChallenge,
-  sendChallenge,
 } from "../../services/api.ts";
 
 interface Tournament {
@@ -131,33 +130,19 @@ export default function TournamentsPage() {
     }
   };
 
-  const handleTournamentChallenge = async (match: any) => {
-    if (!userProfile) return;
-
+  const handleTournamentChallenge = async (
+    matchId: string,
+    opponentId: string
+  ) => {
     try {
-      // Determine the opponent ID and opponent name
-      const opponentId =
-        match.player1Id === String(userProfile.id)
-          ? match.player2Id
-          : match.player1Id;
-
-      const opponentName =
-        match.player1Id === String(userProfile.id)
-          ? match.player2?.displayName
-          : match.player1?.displayName;
-
-      const result = await sendChallenge(opponentId, "tournament", match.id);
-      console.log("Tournament challenge sent:", result);
-
-      // Show success message
-      alert(`Tournament challenge sent to ${opponentName}!`);
+      const result = await sendTournamentChallenge(matchId, opponentId);
+      if (result.gameId) {
+        // Redirect to game
+        window.location.href = `/game/${result.gameId}`;
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to send tournament challenge");
-      console.error("Failed to send tournament challenge:", err);
-
-      // Show error message
-      const errorMessage = err.message || "Unknown error";
-      alert(`Failed to send tournament challenge: ${errorMessage}`);
+      setError(err.message || "Failed to start tournament match");
+      console.error("Failed to start tournament match:", err);
     }
   };
 
@@ -750,7 +735,29 @@ export default function TournamentsPage() {
                                     : "Pending"}
                                 </p>
 
+                                {/* Show scores for completed matches */}
+                                {match.status?.toLowerCase() ===
+                                  "completed" && (
+                                  <div className="text-sm text-gray-300 mb-2">
+                                    <span>
+                                      {match.player1?.displayName || "Player 1"}
+                                      : {match.player1Score || 0}
+                                    </span>
+                                    <span className="mx-2">-</span>
+                                    <span>
+                                      {match.player2?.displayName || "Player 2"}
+                                      : {match.player2Score || 0}
+                                    </span>
+                                  </div>
+                                )}
+
                                 {/* Show start button only for user's pending matches */}
+                                {console.log(
+                                  "Debug - match:",
+                                  match,
+                                  "userProfile:",
+                                  userProfile
+                                )}
                                 {match.status?.toLowerCase() === "pending" &&
                                   userProfile &&
                                   (match.player1Id === String(userProfile.id) ||
@@ -758,13 +765,37 @@ export default function TournamentsPage() {
                                       String(userProfile.id)) && (
                                     <button
                                       onClick={() =>
-                                        handleTournamentChallenge(match)
+                                        handleTournamentChallenge(
+                                          match.id,
+                                          match.player1Id ===
+                                            String(userProfile.id)
+                                            ? match.player2Id
+                                            : match.player1Id
+                                        )
                                       }
                                       className="px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all font-medium"
                                     >
                                       Challenge
                                     </button>
                                   )}
+
+                                {/* Debug info - remove this later */}
+                                <div className="text-xs text-gray-500 mt-2">
+                                  <div>Match Status: {match.status}</div>
+                                  <div>Player1 ID: {match.player1Id}</div>
+                                  <div>Player2 ID: {match.player2Id}</div>
+                                  <div>Current User ID: {userProfile?.id}</div>
+                                  <div>
+                                    Is User Player:{" "}
+                                    {userProfile &&
+                                    (match.player1Id ===
+                                      String(userProfile.id) ||
+                                      match.player2Id ===
+                                        String(userProfile.id))
+                                      ? "YES"
+                                      : "NO"}
+                                  </div>
+                                </div>
 
                                 {match.status?.toLowerCase() === "completed" &&
                                   match.winnerId && (

@@ -769,24 +769,20 @@ export async function getProfileByUsername(
 
 export async function sendChallenge(
   opponentId: string,
-  mode: "classic" | "tournament" = "classic",
-  matchId?: string
+  mode: "classic" | "tournament" = "classic"
 ) {
   try {
-    let url =
+    const response = await fetch(
       API_URL +
-      "/api/game/challenge?opponentId=" +
-      opponentId +
-      "&mode=" +
-      mode;
-    if (matchId) {
-      url += "&matchId=" + matchId;
-    }
-
-    const response = await fetch(url, {
-      method: "POST",
-      credentials: "include",
-    });
+        "/api/game/challenge?opponentId=" +
+        opponentId +
+        "&mode=" +
+        mode,
+      {
+        method: "POST",
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       if (response.status === 401) {
