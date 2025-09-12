@@ -289,8 +289,26 @@ export async function updateProfile(profileData: any) {
 // WebSocket connection for real-time updates
 
 export function initializeChatWebSocket() {
+  // Extract token from cookies
+  const extractTokenFromCookies = (): string | null => {
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "token") {
+        return value;
+      }
+    }
+    return null;
+  };
+
+  const token = extractTokenFromCookies();
+  if (!token) {
+    console.error("No token found for chat WebSocket");
+    return null;
+  }
+
   const ws = new WebSocket(
-    "ws://localhost:3004/ws/chat/live?" + document.cookie
+    `ws://localhost:3004/ws/chat/live?token=${encodeURIComponent(token)}`
   );
 
   ws.onmessage = (event) => {
@@ -356,8 +374,29 @@ export function initializeChatWebSocket() {
 }
 export function initializeNotificationWs() {
   const { addNotification } = useNotifications();
+
+  // Extract token from cookies
+  const extractTokenFromCookies = (): string | null => {
+    const cookies = document.cookie.split(";");
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "token") {
+        return value;
+      }
+    }
+    return null;
+  };
+
+  const token = extractTokenFromCookies();
+  if (!token) {
+    console.error("No token found for notification WebSocket");
+    return null;
+  }
+
   const ws = new WebSocket(
-    "ws://localhost:3005/ws/notifications/live?" + document.cookie
+    `ws://localhost:3005/ws/notifications/live?token=${encodeURIComponent(
+      token
+    )}`
   );
 
   ws.onmessage = (event) => {
