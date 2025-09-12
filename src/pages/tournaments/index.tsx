@@ -166,50 +166,6 @@ export default function TournamentsPage() {
     }
   };
 
-  const bracketData = {
-    quarterFinals: [
-      {
-        player1: "Alex Chen",
-        player2: "Maria Rodriguez",
-        winner: "Alex Chen",
-        score: "3-1",
-      },
-      {
-        player1: "David Kim",
-        player2: "Sarah Wilson",
-        winner: "David Kim",
-        score: "3-2",
-      },
-      {
-        player1: "Mike Johnson",
-        player2: "Emma Davis",
-        winner: "Mike Johnson",
-        score: "3-0",
-      },
-      {
-        player1: "John Doe",
-        player2: "Lisa Park",
-        winner: "John Doe",
-        score: "3-1",
-      },
-    ],
-    semiFinals: [
-      {
-        player1: "Alex Chen",
-        player2: "David Kim",
-        winner: null,
-        score: "Live",
-      },
-      {
-        player1: "Mike Johnson",
-        player2: "John Doe",
-        winner: null,
-        score: "Upcoming",
-      },
-    ],
-    finals: [{ player1: "TBD", player2: "TBD", winner: null, score: "TBD" }],
-  };
-
   useEffect(() => {
     setIsVisible(true);
 
@@ -508,6 +464,8 @@ export default function TournamentsPage() {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              loadTournamentMatches(tournament.id);
+              setSelectedTournament(tournament);
               setShowBracket(true);
             }}
             className="flex-1 py-3 bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30 rounded-xl hover:bg-red-500 hover:bg-opacity-30 transition-all font-semibold"
@@ -521,6 +479,8 @@ export default function TournamentsPage() {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              loadTournamentMatches(tournament.id);
+              setSelectedTournament(tournament);
               setShowBracket(true);
             }}
             className="flex-1 py-3 bg-gray-600 bg-opacity-20 text-gray-400 border border-gray-600 border-opacity-30 rounded-xl hover:bg-gray-600 hover:bg-opacity-30 transition-all font-semibold"
@@ -549,7 +509,13 @@ export default function TournamentsPage() {
     <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-gray-800 bg-opacity-90 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-6xl w-full max-h-screen overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold text-white">Tournament Bracket</h2>
+          <h2 className="text-3xl font-bold text-white">
+            {selectedTournament?.status === "started"
+              ? `🔴 Live: ${selectedTournament?.name || "Tournament"}`
+              : selectedTournament?.status === "completed"
+              ? `🏆 Results: ${selectedTournament?.name || "Tournament"}`
+              : `Tournament Bracket`}
+          </h2>
           <button
             onClick={() => setShowBracket(false)}
             className="text-gray-400 hover:text-white transition-colors text-2xl"
@@ -558,105 +524,249 @@ export default function TournamentsPage() {
           </button>
         </div>
 
-        <div className="space-y-8">
-          {/* Quarter Finals */}
-          <div>
-            <h3 className="text-xl font-bold text-orange-400 mb-4">
-              Quarter Finals
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {bracketData.quarterFinals.map((match, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-700 bg-opacity-50 rounded-xl p-4"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`${
-                        match.winner === match.player1
-                          ? "text-green-400 font-bold"
-                          : "text-white"
-                      }`}
-                    >
-                      {match.player1}
-                    </span>
-                    <span className="text-gray-400 text-sm">{match.score}</span>
-                  </div>
-                  <div className="text-center text-gray-400 text-sm mb-2">
-                    vs
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`${
-                        match.winner === match.player2
-                          ? "text-green-400 font-bold"
-                          : "text-white"
-                      }`}
-                    >
-                      {match.player2}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {matchesLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+            <p className="text-white text-lg mt-4">
+              Loading tournament data...
+            </p>
           </div>
-
-          {/* Semi Finals */}
-          <div>
-            <h3 className="text-xl font-bold text-orange-400 mb-4">
-              Semi Finals
+        ) : tournamentMatches.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🏓</div>
+            <h3 className="text-2xl font-bold text-gray-400 mb-2">
+              No matches found
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {bracketData.semiFinals.map((match, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-700 bg-opacity-50 rounded-xl p-4"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-white">{match.player1}</span>
-                    <span
-                      className={`text-sm ${
-                        match.score === "Live"
-                          ? "text-red-400 animate-pulse"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      {match.score}
-                    </span>
-                  </div>
-                  <div className="text-center text-gray-400 text-sm mb-2">
-                    vs
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white">{match.player2}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-gray-500">
+              Tournament matches will appear here once the tournament starts
+            </p>
           </div>
-
-          {/* Finals */}
-          <div>
-            <h3 className="text-xl font-bold text-orange-400 mb-4">Finals</h3>
-            <div className="max-w-md mx-auto">
-              <div className="bg-gradient-to-r from-orange-500 to-pink-500 bg-opacity-20 border border-orange-500 border-opacity-50 rounded-xl p-6">
-                <div className="text-center">
-                  <div className="text-2xl mb-4">🏆</div>
-                  <div className="text-white text-lg mb-2">
-                    {bracketData.finals[0]?.player1}
-                  </div>
-                  <div className="text-gray-400 text-sm mb-2">vs</div>
-                  <div className="text-white text-lg mb-4">
-                    {bracketData.finals[0]?.player2}
-                  </div>
-                  <div className="text-orange-400 font-semibold">
-                    {bracketData.finals?.[0]?.score}
-                  </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Dynamic Tournament Status Info */}
+            {selectedTournament?.status === "started" && (
+              <div className="bg-red-500 bg-opacity-20 border border-red-500 border-opacity-30 rounded-xl p-4 mb-6">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-red-400 font-semibold">
+                    Tournament is Live!
+                  </span>
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {selectedTournament?.status === "completed" && (
+              <div className="bg-green-500 bg-opacity-20 border border-green-500 border-opacity-30 rounded-xl p-4 mb-6">
+                <div className="text-center">
+                  <span className="text-green-400 font-semibold">
+                    🏆 Tournament Completed!
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Group matches by round and display them */}
+            {Array.from(new Set(tournamentMatches.map((match) => match.round)))
+              .sort((a, b) => a - b)
+              .map((round) => {
+                const roundMatches = tournamentMatches.filter(
+                  (match) => match.round === round
+                );
+                const getRoundName = (round: number) => {
+                  const totalRounds = Math.max(
+                    ...tournamentMatches.map((m) => m.round)
+                  );
+                  if (totalRounds === 1) return "Finals";
+                  if (round === totalRounds) return "Finals";
+                  if (round === totalRounds - 1) return "Semi-Finals";
+                  if (round === totalRounds - 2) return "Quarter-Finals";
+                  return `Round ${round}`;
+                };
+
+                return (
+                  <div key={round}>
+                    <h3 className="text-xl font-bold text-orange-400 mb-4">
+                      {getRoundName(round)}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {roundMatches.map((match) => {
+                        const player1Name = match.player1?.displayName || "TBD";
+                        const player2Name = match.player2?.displayName || "TBD";
+                        const isLive =
+                          match.status === "active" ||
+                          match.status === "ACTIVE";
+                        const isCompleted =
+                          match.status === "completed" ||
+                          match.status === "COMPLETED";
+
+                        // Parse score for better display
+                        let scoreDisplay = "";
+                        let player1Score = "";
+                        let player2Score = "";
+
+                        if (match.score) {
+                          try {
+                            const parsedScore = JSON.parse(match.score);
+                            player1Score = parsedScore.player1 || "0";
+                            player2Score = parsedScore.player2 || "0";
+                            scoreDisplay = `${player1Score} - ${player2Score}`;
+
+                            // If we have a score but no explicit completion status, consider it completed
+                            if (
+                              !isCompleted &&
+                              (parsedScore.player1 > 0 ||
+                                parsedScore.player2 > 0)
+                            ) {
+                              // This might be a completed match that wasn't properly marked
+                              console.log(
+                                "Match has score but not marked completed:",
+                                match
+                              );
+                            }
+                          } catch {
+                            scoreDisplay = match.score;
+                          }
+                        }
+
+                        // Additional check: if match has a winner, it should be considered completed
+                        const hasWinner =
+                          match.winnerId &&
+                          (match.winnerId === match.player1Id ||
+                            match.winnerId === match.player2Id);
+                        const isActuallyCompleted =
+                          isCompleted ||
+                          hasWinner ||
+                          (match.score && match.score !== "null");
+
+                        return (
+                          <div
+                            key={match.id}
+                            className="bg-gray-700 bg-opacity-50 rounded-xl p-4 hover:bg-gray-600 hover:bg-opacity-50 transition-all"
+                          >
+                            {/* Match Header */}
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center space-x-2">
+                                <span className="text-orange-400 font-semibold text-sm">
+                                  Match #{match.id.slice(-4)}
+                                </span>
+                                {isLive && (
+                                  <span className="px-2 py-1 bg-red-500 bg-opacity-20 text-red-400 text-xs rounded-full animate-pulse">
+                                    🔴 LIVE
+                                  </span>
+                                )}
+                                {isActuallyCompleted && (
+                                  <span className="px-2 py-1 bg-green-500 bg-opacity-20 text-green-400 text-xs rounded-full">
+                                    ✅ COMPLETED
+                                  </span>
+                                )}
+                                {!isLive && !isActuallyCompleted && (
+                                  <span className="px-2 py-1 bg-orange-500 bg-opacity-20 text-orange-400 text-xs rounded-full">
+                                    ⏳ PENDING
+                                  </span>
+                                )}
+                              </div>
+                              {isActuallyCompleted && scoreDisplay && (
+                                <span className="text-white font-bold bg-gray-800 px-3 py-1 rounded-lg">
+                                  {scoreDisplay}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Players */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    {player1Name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span
+                                    className={`font-medium ${
+                                      isActuallyCompleted &&
+                                      match.winnerId === match.player1Id
+                                        ? "text-green-400 font-bold"
+                                        : "text-white"
+                                    }`}
+                                  >
+                                    {player1Name}
+                                    {isActuallyCompleted &&
+                                      match.winnerId === match.player1Id && (
+                                        <span className="ml-2">🏆</span>
+                                      )}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="text-center text-gray-400 text-sm font-semibold">
+                                VS
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    {player2Name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span
+                                    className={`font-medium ${
+                                      isActuallyCompleted &&
+                                      match.winnerId === match.player2Id
+                                        ? "text-green-400 font-bold"
+                                        : "text-white"
+                                    }`}
+                                  >
+                                    {player2Name}
+                                    {isActuallyCompleted &&
+                                      match.winnerId === match.player2Id && (
+                                        <span className="ml-2">🏆</span>
+                                      )}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action buttons based on match status and tournament status */}
+                            {selectedTournament?.status === "started" &&
+                              isLive &&
+                              match.gameId && (
+                                <div className="mt-4">
+                                  <button
+                                    onClick={() =>
+                                      (window.location.href = `/game?gameId=${match.gameId}`)
+                                    }
+                                    className="w-full py-2 bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30 rounded-lg hover:bg-red-500 hover:bg-opacity-30 transition-all font-semibold"
+                                  >
+                                    🔴 Watch Live Game
+                                  </button>
+                                </div>
+                              )}
+
+                            {isActuallyCompleted && match.winnerId && (
+                              <div className="mt-4 text-center">
+                                <div className="text-green-400 font-semibold">
+                                  🏆 Winner:{" "}
+                                  {match.winnerId === match.player1Id
+                                    ? player1Name
+                                    : player2Name}
+                                </div>
+                              </div>
+                            )}
+
+                            {!isLive && !isActuallyCompleted && (
+                              <div className="mt-4 text-center">
+                                <span className="text-gray-400 text-sm">
+                                  Waiting for players to start the match
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
