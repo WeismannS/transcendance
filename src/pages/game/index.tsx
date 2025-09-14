@@ -152,15 +152,15 @@ export default function GamePage() {
       vx: 6,
       vy: 4,
     },
-    playerPaddle: {
-      // Current player is ALWAYS on the LEFT side in frontend view
+    leftPaddle: {
+      // Player 1 is ALWAYS on the LEFT side
       x: PADDLE_WIDTH / 2,
       y: CANVAS_HEIGHT / 2,
       width: PADDLE_WIDTH,
       height: PADDLE_HEIGHT,
     },
-    opponentPaddle: {
-      // Opponent is ALWAYS on the RIGHT side in frontend view
+    rightPaddle: {
+      // Player 2 is ALWAYS on the RIGHT side
       x: CANVAS_WIDTH - PADDLE_WIDTH * 1.5,
       y: CANVAS_HEIGHT / 2,
       width: PADDLE_WIDTH,
@@ -213,28 +213,51 @@ export default function GamePage() {
 
   // Helper functions to determine which player info to show on which side
   const getLeftSidePlayer = () => {
-    // Frontend always shows current player on LEFT, regardless of playerNumber
-    return {
-      name: currentUser?.displayName || "Player",
-      avatar: currentUser?.avatar || "",
-      displayName: currentUser?.displayName || "Player",
-      isCurrentPlayer: true,
-      playerNumber: playerNumber,
-    };
+    // Left paddle is controlled by Player 1 in backend
+    // So left side should show Player 1's info
+    if (playerNumber === 1) {
+      // Current user is Player 1, so they control left paddle
+      return {
+        name: currentUser?.displayName || "Player 1",
+        avatar: currentUser?.avatar || "",
+        displayName: currentUser?.displayName || "Player 1",
+        isCurrentPlayer: true,
+        playerNumber: 1,
+      };
+    } else {
+      // Current user is Player 2, so opponent (Player 1) controls left paddle
+      return {
+        name: player1Info.displayName || "Player 1",
+        avatar: player1Info.avatar || "",
+        displayName: player1Info.displayName || "Player 1",
+        isCurrentPlayer: false,
+        playerNumber: 1,
+      };
+    }
   };
 
   const getRightSidePlayer = () => {
-    // Frontend always shows opponent on RIGHT
-    const opponentPlayerNumber = playerNumber === 1 ? 2 : 1;
-    const opponentInfo = playerNumber === 1 ? player2Info : player1Info;
-
-    return {
-      name: opponentInfo.displayName || opponent.name || "Opponent",
-      avatar: opponentInfo.avatar || "",
-      displayName: opponentInfo.displayName || opponent.name || "Opponent",
-      isCurrentPlayer: false,
-      playerNumber: opponentPlayerNumber,
-    };
+    // Right paddle is controlled by Player 2 in backend
+    // So right side should show Player 2's info
+    if (playerNumber === 2) {
+      // Current user is Player 2, so they control right paddle
+      return {
+        name: currentUser?.displayName || "Player 2",
+        avatar: currentUser?.avatar || "",
+        displayName: currentUser?.displayName || "Player 2",
+        isCurrentPlayer: true,
+        playerNumber: 2,
+      };
+    } else {
+      // Current user is Player 1, so opponent (Player 2) controls right paddle
+      return {
+        name: player2Info.displayName || "Player 2",
+        avatar: player2Info.avatar || "",
+        displayName: player2Info.displayName || "Player 2",
+        isCurrentPlayer: false,
+        playerNumber: 2,
+      };
+    }
   };
 
   // Monitor gameState changes
@@ -263,16 +286,16 @@ export default function GamePage() {
     // Regardless of backend player number assignment
 
     // Current player's paddle is ALWAYS on the LEFT
-    gameObjects.current.playerPaddle.x = PADDLE_WIDTH / 2;
+    gameObjects.current.leftPaddle.x = PADDLE_WIDTH / 2;
 
     // Opponent's paddle is ALWAYS on the RIGHT
-    gameObjects.current.opponentPaddle.x = CANVAS_WIDTH - PADDLE_WIDTH * 1.5;
+    gameObjects.current.rightPaddle.x = CANVAS_WIDTH - PADDLE_WIDTH * 1.5;
 
     // Set paddle dimensions
-    gameObjects.current.playerPaddle.width = PADDLE_WIDTH;
-    gameObjects.current.playerPaddle.height = PADDLE_HEIGHT;
-    gameObjects.current.opponentPaddle.width = PADDLE_WIDTH;
-    gameObjects.current.opponentPaddle.height = PADDLE_HEIGHT;
+    gameObjects.current.leftPaddle.width = PADDLE_WIDTH;
+    gameObjects.current.leftPaddle.height = PADDLE_HEIGHT;
+    gameObjects.current.rightPaddle.width = PADDLE_WIDTH;
+    gameObjects.current.rightPaddle.height = PADDLE_HEIGHT;
 
     console.log(
       `🎮 Paddle positions set - Current player (backend player${playerNumber}): LEFT, Opponent: RIGHT`
@@ -980,53 +1003,63 @@ export default function GamePage() {
       };
     }
 
-    // Frontend Perspective: ALWAYS render current player on LEFT, opponent on RIGHT
-    // Regardless of whether backend identifies them as player1 or player2
+    // Backend Player Mapping: Player 1 = LEFT paddle, Player 2 = RIGHT paddle
+    // This should match the actual game logic and display
 
-    // Determine which backend data corresponds to current player vs opponent
-    const currentPlayerData = playerNumber === 1 ? player1 : player2;
-    const opponentPlayerData = playerNumber === 1 ? player2 : player1;
-
-    // Update current player's paddle (ALWAYS LEFT side in frontend)
-    if (currentPlayerData) {
-      const serverY = currentPlayerData.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
+    // Update Player 1's paddle (LEFT side)
+    if (player1) {
+      const serverY = player1.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
       const targetY = Math.max(
         0,
         Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
       );
 
       console.log(
-        `Current Player (backend player${playerNumber}) - Updating LEFT paddle from server:`,
-        currentPlayerData.paddleY,
+        `Player 1 (LEFT paddle) - Updating from server:`,
+        player1.paddleY,
         "->",
         targetY
       );
 
-      // Update left paddle (current player) - direct update for responsiveness
-      gameObjects.current.playerPaddle.y = targetY;
+      // Update left paddle (Player 1)
+      if (playerNumber === 1) {
+        // Current player is Player 1, so direct update for responsiveness
+        gameObjects.current.leftPaddle.y = targetY;
+      } else {
+        // Opponent is Player 1, so smooth interpolation
+        const currentY = gameObjects.current.leftPaddle.y;
+        const lerpFactor = 0.6;
+        gameObjects.current.leftPaddle.y =
+          currentY + (targetY - currentY) * lerpFactor;
+      }
     }
 
-    // Update opponent's paddle (ALWAYS RIGHT side in frontend)
-    if (opponentPlayerData) {
-      const serverY = opponentPlayerData.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
+    // Update Player 2's paddle (RIGHT side)
+    if (player2) {
+      const serverY = player2.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
       const targetY = Math.max(
         0,
         Math.min(serverY, CANVAS_HEIGHT - PADDLE_HEIGHT)
       );
 
-      const opponentPlayerNum = playerNumber === 1 ? 2 : 1;
       console.log(
-        `Opponent (backend player${opponentPlayerNum}) - Updating RIGHT paddle from server:`,
-        opponentPlayerData.paddleY,
+        `Player 2 (RIGHT paddle) - Updating from server:`,
+        player2.paddleY,
         "->",
         targetY
       );
 
-      // Smooth interpolation for opponent paddle to reduce jerkiness
-      const currentY = gameObjects.current.opponentPaddle.y;
-      const lerpFactor = 0.6; // More responsive for opponent paddle
-      gameObjects.current.opponentPaddle.y =
-        currentY + (targetY - currentY) * lerpFactor;
+      // Update right paddle (Player 2)
+      if (playerNumber === 2) {
+        // Current player is Player 2, so direct update for responsiveness
+        gameObjects.current.rightPaddle.y = targetY;
+      } else {
+        // Opponent is Player 2, so smooth interpolation
+        const currentY = gameObjects.current.rightPaddle.y;
+        const lerpFactor = 0.6;
+        gameObjects.current.rightPaddle.y =
+          currentY + (targetY - currentY) * lerpFactor;
+      }
     }
   }; // Update score based on player number
   const updateScoreFromServer = (
@@ -1300,32 +1333,40 @@ export default function GamePage() {
 
   const runLocalGameLogic = () => {
     console.log("Running local game logic");
-    const { ball, playerPaddle, opponentPaddle } = gameObjects.current;
+    const { ball, leftPaddle, rightPaddle } = gameObjects.current;
+
+    // Determine which paddle the current player controls based on their player number
+    const currentPlayerPaddle = playerNumber === 1 ? leftPaddle : rightPaddle;
+    const opponentPlayerPaddle = playerNumber === 1 ? rightPaddle : leftPaddle;
 
     // Move player paddle - using realistic speed (20px per frame at 60fps)
     const paddleSpeed = 8;
-    if (keys.up && playerPaddle.y > 0) {
-      playerPaddle.y = Math.max(0, playerPaddle.y - paddleSpeed);
+    if (keys.up && currentPlayerPaddle.y > 0) {
+      currentPlayerPaddle.y = Math.max(0, currentPlayerPaddle.y - paddleSpeed);
     }
-    if (keys.down && playerPaddle.y < CANVAS_HEIGHT - playerPaddle.height) {
-      playerPaddle.y = Math.min(
-        CANVAS_HEIGHT - playerPaddle.height,
-        playerPaddle.y + paddleSpeed
+    if (
+      keys.down &&
+      currentPlayerPaddle.y < CANVAS_HEIGHT - currentPlayerPaddle.height
+    ) {
+      currentPlayerPaddle.y = Math.min(
+        CANVAS_HEIGHT - currentPlayerPaddle.height,
+        currentPlayerPaddle.y + paddleSpeed
       );
     }
 
     // AI opponent movement - track ball with some lag for challenge
-    const paddleCenter = opponentPaddle.y + opponentPaddle.height / 2;
+    const paddleCenter =
+      opponentPlayerPaddle.y + opponentPlayerPaddle.height / 2;
     const ballY = ball.y;
     const aiSpeed = 6;
 
     if (paddleCenter < ballY - 20) {
-      opponentPaddle.y = Math.min(
-        opponentPaddle.y + aiSpeed,
-        CANVAS_HEIGHT - opponentPaddle.height
+      opponentPlayerPaddle.y = Math.min(
+        opponentPlayerPaddle.y + aiSpeed,
+        CANVAS_HEIGHT - opponentPlayerPaddle.height
       );
     } else if (paddleCenter > ballY + 20) {
-      opponentPaddle.y = Math.max(opponentPaddle.y - aiSpeed, 0);
+      opponentPlayerPaddle.y = Math.max(opponentPlayerPaddle.y - aiSpeed, 0);
     }
 
     // Initialize ball velocity if not set
@@ -1348,23 +1389,23 @@ export default function GamePage() {
     }
 
     // Ball collision with paddles - Using AABB collision detection
-    // Now with consistent positioning: playerPaddle = LEFT, opponentPaddle = RIGHT
+    // Now with consistent positioning: leftPaddle = LEFT, rightPaddle = RIGHT
 
     // Debug paddle positions
     if (Math.random() < 0.01) {
       // Log occasionally to avoid spam
       console.log("Paddle positions:", {
-        playerPaddle: {
-          x: playerPaddle.x,
-          y: playerPaddle.y,
-          width: playerPaddle.width,
-          height: playerPaddle.height,
+        leftPaddle: {
+          x: leftPaddle.x,
+          y: leftPaddle.y,
+          width: leftPaddle.width,
+          height: leftPaddle.height,
         },
-        opponentPaddle: {
-          x: opponentPaddle.x,
-          y: opponentPaddle.y,
-          width: opponentPaddle.width,
-          height: opponentPaddle.height,
+        rightPaddle: {
+          x: rightPaddle.x,
+          y: rightPaddle.y,
+          width: rightPaddle.width,
+          height: rightPaddle.height,
         },
         ball: {
           x: ball.x,
@@ -1384,10 +1425,10 @@ export default function GamePage() {
       const ballTop = ball.y - ball.radius;
       const ballBottom = ball.y + ball.radius;
 
-      const paddleLeft = playerPaddle.x;
-      const paddleRight = playerPaddle.x + playerPaddle.width;
-      const paddleTop = playerPaddle.y;
-      const paddleBottom = playerPaddle.y + playerPaddle.height;
+      const paddleLeft = leftPaddle.x;
+      const paddleRight = leftPaddle.x + leftPaddle.width;
+      const paddleTop = leftPaddle.y;
+      const paddleBottom = leftPaddle.y + leftPaddle.height;
 
       // Check AABB collision
       if (
@@ -1416,10 +1457,10 @@ export default function GamePage() {
       const ballTop = ball.y - ball.radius;
       const ballBottom = ball.y + ball.radius;
 
-      const paddleLeft = opponentPaddle.x;
-      const paddleRight = opponentPaddle.x + opponentPaddle.width;
-      const paddleTop = opponentPaddle.y;
-      const paddleBottom = opponentPaddle.y + opponentPaddle.height;
+      const paddleLeft = rightPaddle.x;
+      const paddleRight = rightPaddle.x + rightPaddle.width;
+      const paddleTop = rightPaddle.y;
+      const paddleBottom = rightPaddle.y + rightPaddle.height;
 
       // Check AABB collision
       if (
@@ -1467,7 +1508,7 @@ export default function GamePage() {
   };
 
   const render = (ctx: CanvasRenderingContext2D) => {
-    const { ball, playerPaddle, opponentPaddle } = gameObjects.current;
+    const { ball, leftPaddle, rightPaddle } = gameObjects.current;
 
     // Clear canvas
     ctx.fillStyle = "#1e293b";
@@ -1484,21 +1525,24 @@ export default function GamePage() {
 
     // Draw paddles
     // Current player is ALWAYS on the LEFT (orange)
+    const currentPlayerPaddle = playerNumber === 1 ? leftPaddle : rightPaddle;
+    const opponentPlayerPaddle = playerNumber === 1 ? rightPaddle : leftPaddle;
+
     ctx.fillStyle = "#f97316"; // Orange for current player (LEFT side)
     ctx.fillRect(
-      playerPaddle.x,
-      playerPaddle.y,
-      playerPaddle.width,
-      playerPaddle.height
+      currentPlayerPaddle.x,
+      currentPlayerPaddle.y,
+      currentPlayerPaddle.width,
+      currentPlayerPaddle.height
     );
 
     // Opponent is ALWAYS on the RIGHT (pink)
     ctx.fillStyle = "#ec4899"; // Pink for opponent (RIGHT side)
     ctx.fillRect(
-      opponentPaddle.x,
-      opponentPaddle.y,
-      opponentPaddle.width,
-      opponentPaddle.height
+      opponentPlayerPaddle.x,
+      opponentPlayerPaddle.y,
+      opponentPlayerPaddle.width,
+      opponentPlayerPaddle.height
     );
 
     // Draw ball
@@ -1572,13 +1616,13 @@ export default function GamePage() {
         vx: 6 * (Math.random() > 0.5 ? 1 : -1),
         vy: 4 * (Math.random() > 0.5 ? 1 : -1),
       },
-      playerPaddle: {
+      leftPaddle: {
         x: PADDLE_WIDTH / 2,
         y: CANVAS_HEIGHT / 2 - PADDLE_HEIGHT / 2,
         width: PADDLE_WIDTH,
         height: PADDLE_HEIGHT,
       },
-      opponentPaddle: {
+      rightPaddle: {
         x: CANVAS_WIDTH - PADDLE_WIDTH * 1.5,
         y: CANVAS_HEIGHT / 2 - PADDLE_HEIGHT / 2,
         width: PADDLE_WIDTH,
