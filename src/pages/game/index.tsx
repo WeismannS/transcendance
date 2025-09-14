@@ -4,7 +4,7 @@ import Miku, { useState, useEffect, useRef } from "Miku";
 import { Link } from "Miku/Router";
 import { stateManager } from "../../store/StateManager.ts";
 import { UserProfileState } from "../../store/StateManager.ts";
-import { API_URL, gameConnect } from "../../services/api.ts";
+import { API_URL, gameConnect, getPlayerProfile } from "../../services/api.ts";
 
 interface GameUpdate {
   type:
@@ -23,7 +23,7 @@ interface GameUpdate {
   score?: Score;
   gameStarted?: boolean;
   playerNumber?: number;
-  opponent?: string;
+  opponent?: string; // User ID of the opponent
   mode?: string;
   waitingForOpponent?: boolean;
   winner?: string;
@@ -172,18 +172,40 @@ export default function GamePage() {
     setIsVisible(true);
 
     // Initialize current user as one of the players
+    // Only set if we don't have proper player info yet or if player number changed
     if (currentUser) {
+      console.log(
+        `useEffect: Setting current user ${currentUser.displayName} as player ${playerNumber}`
+      );
       if (playerNumber === 1) {
-        setPlayer1Info({
-          name: currentUser.displayName || "Player 1",
-          avatar: currentUser.avatar || "",
-          displayName: currentUser.displayName || "Player 1",
+        setPlayer1Info((prev) => {
+          // Only update if it's a generic placeholder or if it's already our user
+          if (
+            prev.name === "Player 1" ||
+            prev.displayName === currentUser.displayName
+          ) {
+            return {
+              name: currentUser.displayName || "Player 1",
+              avatar: currentUser.avatar || "",
+              displayName: currentUser.displayName || "Player 1",
+            };
+          }
+          return prev; // Don't overwrite opponent info
         });
       } else {
-        setPlayer2Info({
-          name: currentUser.displayName || "Player 2",
-          avatar: currentUser.avatar || "",
-          displayName: currentUser.displayName || "Player 2",
+        setPlayer2Info((prev) => {
+          // Only update if it's a generic placeholder or if it's already our user
+          if (
+            prev.name === "Player 2" ||
+            prev.displayName === currentUser.displayName
+          ) {
+            return {
+              name: currentUser.displayName || "Player 2",
+              avatar: currentUser.avatar || "",
+              displayName: currentUser.displayName || "Player 2",
+            };
+          }
+          return prev; // Don't overwrite opponent info
         });
       }
     }
@@ -441,33 +463,12 @@ export default function GamePage() {
                     console.log("Setting player number:", message.playerNumber);
                     setPlayerNumber(message.playerNumber);
                   }
-                  if (message.opponent) {
-                    setOpponent({
-                      name: message.opponent,
-                      avatar: "OP",
-                      difficulty: "intermediate",
-                    });
 
-                    // Update the appropriate player info slot for the opponent
-                    const opponentPlayerNumber =
-                      message.playerNumber === 1 ? 2 : 1;
-                    if (opponentPlayerNumber === 1) {
-                      setPlayer1Info({
-                        name: message.opponent,
-                        avatar: "",
-                        displayName: message.opponent,
-                      });
-                    } else {
-                      setPlayer2Info({
-                        name: message.opponent,
-                        avatar: "",
-                        displayName: message.opponent,
-                      });
-                    }
-                  }
-
-                  // Update current player info
+                  // Update current user info first
                   if (currentUser && message.playerNumber) {
+                    console.log(
+                      `Setting current user ${currentUser.displayName} as player ${message.playerNumber}`
+                    );
                     if (message.playerNumber === 1) {
                       setPlayer1Info({
                         name: currentUser.displayName || "Player 1",
@@ -481,6 +482,80 @@ export default function GamePage() {
                         displayName: currentUser.displayName || "Player 2",
                       });
                     }
+                  }
+
+                  if (message.opponent) {
+                    // message.opponent is actually the opponent's user ID
+                    const opponentId = message.opponent;
+
+                    // Fetch opponent profile from user management service
+                    getPlayerProfile(opponentId)
+                      .then((opponentProfile) => {
+                        setOpponent({
+                          name:
+                            opponentProfile.displayName ||
+                            `Player ${opponentId}`,
+                          avatar: opponentProfile.avatar || "OP",
+                          difficulty: "intermediate",
+                        });
+
+                        // Update the appropriate player info slot for the opponent
+                        // Opponent goes in the slot opposite to current player's number
+                        const opponentPlayerNumber =
+                          message.playerNumber === 1 ? 2 : 1;
+                        console.log(
+                          `Setting opponent ${opponentProfile.displayName} as player ${opponentPlayerNumber}`
+                        );
+                        if (opponentPlayerNumber === 1) {
+                          setPlayer1Info({
+                            name:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                            avatar: opponentProfile.avatar || "",
+                            displayName:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                          });
+                        } else {
+                          setPlayer2Info({
+                            name:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                            avatar: opponentProfile.avatar || "",
+                            displayName:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                          });
+                        }
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "Failed to fetch opponent profile:",
+                          error
+                        );
+                        // Fallback to using the ID as name
+                        setOpponent({
+                          name: `Player ${opponentId}`,
+                          avatar: "OP",
+                          difficulty: "intermediate",
+                        });
+
+                        const opponentPlayerNumber =
+                          message.playerNumber === 1 ? 2 : 1;
+                        if (opponentPlayerNumber === 1) {
+                          setPlayer1Info({
+                            name: `Player ${opponentId}`,
+                            avatar: "",
+                            displayName: `Player ${opponentId}`,
+                          });
+                        } else {
+                          setPlayer2Info({
+                            name: `Player ${opponentId}`,
+                            avatar: "",
+                            displayName: `Player ${opponentId}`,
+                          });
+                        }
+                      });
                   }
                   if (message.waitingForOpponent) {
                     setWaitingForOpponent(true);
@@ -565,6 +640,101 @@ export default function GamePage() {
                     );
                     setPlayerNumber(message.playerNumber);
                   }
+
+                  // Update current user info first (same as gameCreated)
+                  if (currentUser && message.playerNumber) {
+                    console.log(
+                      `useEffect: Setting current user ${currentUser.displayName} as player ${message.playerNumber} (reconnection)`
+                    );
+                    if (message.playerNumber === 1) {
+                      setPlayer1Info({
+                        name: currentUser.displayName || "Player 1",
+                        avatar: currentUser.avatar || "",
+                        displayName: currentUser.displayName || "Player 1",
+                      });
+                    } else {
+                      setPlayer2Info({
+                        name: currentUser.displayName || "Player 2",
+                        avatar: currentUser.avatar || "",
+                        displayName: currentUser.displayName || "Player 2",
+                      });
+                    }
+                  }
+
+                  // Fetch opponent profile if available (same as gameCreated)
+                  if (message.opponent) {
+                    const opponentId = message.opponent;
+                    console.log(
+                      `🔄 Fetching opponent profile for reconnection: ${opponentId}`
+                    );
+
+                    getPlayerProfile(opponentId)
+                      .then((opponentProfile) => {
+                        setOpponent({
+                          name:
+                            opponentProfile.displayName ||
+                            `Player ${opponentId}`,
+                          avatar: opponentProfile.avatar || "OP",
+                          difficulty: "intermediate",
+                        });
+
+                        const opponentPlayerNumber =
+                          message.playerNumber === 1 ? 2 : 1;
+                        console.log(
+                          `Setting opponent ${opponentProfile.displayName} as player ${opponentPlayerNumber} (reconnection)`
+                        );
+                        if (opponentPlayerNumber === 1) {
+                          setPlayer1Info({
+                            name:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                            avatar: opponentProfile.avatar || "",
+                            displayName:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                          });
+                        } else {
+                          setPlayer2Info({
+                            name:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                            avatar: opponentProfile.avatar || "",
+                            displayName:
+                              opponentProfile.displayName ||
+                              `Player ${opponentId}`,
+                          });
+                        }
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "Failed to fetch opponent profile on reconnection:",
+                          error
+                        );
+                        // Fallback
+                        setOpponent({
+                          name: `Player ${opponentId}`,
+                          avatar: "OP",
+                          difficulty: "intermediate",
+                        });
+
+                        const opponentPlayerNumber =
+                          message.playerNumber === 1 ? 2 : 1;
+                        if (opponentPlayerNumber === 1) {
+                          setPlayer1Info({
+                            name: `Player ${opponentId}`,
+                            avatar: "",
+                            displayName: `Player ${opponentId}`,
+                          });
+                        } else {
+                          setPlayer2Info({
+                            name: `Player ${opponentId}`,
+                            avatar: "",
+                            displayName: `Player ${opponentId}`,
+                          });
+                        }
+                      });
+                  }
+
                   if (message.gameBoard) {
                     updateGameFromServer(message.gameBoard);
                   }

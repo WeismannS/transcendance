@@ -46,6 +46,7 @@ interface GameUpdate {
   score: Score;
   gameStarted: boolean;
   playerNumber?: number;
+  opponent?: string; // User ID of the opponent (for reconnection messages)
   isPaused?: boolean;
   pauseReason?: string;
   reason?: string;
@@ -1149,6 +1150,32 @@ export async function getTournamentMatches(tournamentId: string) {
     return result.matches;
   } catch (error) {
     console.error("Failed to fetch tournament matches:", error);
+    throw error;
+  }
+}
+
+// Get player profile by ID
+export async function getPlayerProfile(userId: string) {
+  try {
+    const response = await fetch(
+      `${API_URL}/api/user-management/users/${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch player profile");
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Failed to fetch player profile:", error);
     throw error;
   }
 }
