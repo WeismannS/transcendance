@@ -110,6 +110,7 @@ export default function GamePage() {
 
   // Game state
   const [score, setScore] = useState({ player: 0, opponent: 0 });
+  const scoreRef = useRef(score);
   const [sets, setSets] = useState({ player: 0, opponent: 0 });
   const [gameTime, setGameTime] = useState(0);
 
@@ -436,6 +437,10 @@ export default function GamePage() {
       throttleRef.lastDirection = direction;
     }
   };
+
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
 
   // WebSocket connection for multiplayer games
   useEffect(() => {
@@ -1552,11 +1557,12 @@ export default function GamePage() {
     ctx.fill();
 
     // Draw scores - current player score on left, opponent score on right
+    const currentScore = scoreRef.current;
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 48px Arial";
     ctx.textAlign = "center";
-    ctx.fillText(score.player.toString(), CANVAS_WIDTH / 4, 60);
-    ctx.fillText(score.opponent.toString(), (CANVAS_WIDTH * 3) / 4, 60);
+    ctx.fillText(currentScore.player.toString(), CANVAS_WIDTH / 4, 60);
+    ctx.fillText(currentScore.opponent.toString(), (CANVAS_WIDTH * 3) / 4, 60);
 
     // Show waiting message if opponent not connected
     if (waitingForOpponent && gameId) {
