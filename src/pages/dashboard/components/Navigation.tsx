@@ -24,7 +24,7 @@ export default function Navigation({ activeSection, setActiveSection }: Navigati
               onClick={() => setActiveSection(section.id)} 
               className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all ${
                 activeSection === section.id 
-                  ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white" 
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white" 
                   : "text-gray-400 hover:text-white hover:bg-gray-800/50"
               }`}
             >

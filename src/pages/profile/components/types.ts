@@ -3,7 +3,7 @@ export interface ProfileUser {
   avatar: string
   name: string
   username: string
-  rank: number
+  rank: number | null
   level: number
   wins: number
   losses: number

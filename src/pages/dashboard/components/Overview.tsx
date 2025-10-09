@@ -21,8 +21,7 @@ export default function Overview() {
   const onlineFriends = socialState?.friends?.filter(friend => friend.status == "online") || [] 
   const unlockedAchievements = achievementsState?.userAchievementIds?.length || 0
   
-  // Calculate user rank from wins (simple ranking system)
-  const userRank = userStats.wins > 0 ? Math.max(1, 1000 - userStats.wins * 10) : 999
+
 
   const handleQuickMatch = () => {
     redirect('/game')
@@ -46,7 +45,7 @@ export default function Overview() {
         <h2 className="text-3xl font-bold text-white">Dashboard Overview</h2>
         <button
           onClick={handleQuickMatch}
-          className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105"
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105"
         >
           🚀 Quick Match
         </button>
@@ -54,11 +53,11 @@ export default function Overview() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all">
+        <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-cyan-500/50 transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Global Rank</p>
-              <p className="text-3xl font-bold text-orange-400">#{userRank}</p>
+              <p className="text-3xl font-bold text-cyan-400">{userProfile?.rank !== null ? "#" + userProfile?.rank : "Unranked"}</p>
             </div>
             <div className="text-4xl">🏆</div>
           </div>
@@ -84,11 +83,11 @@ export default function Overview() {
           </div>
         </div>
 
-        <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition-all">
+        <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-cyan-500/50 transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-sm">Online Friends</p>
-              <p className="text-3xl font-bold text-purple-400">{onlineFriends.length}</p>
+              <p className="text-3xl font-bold text-cyan-400">{onlineFriends.length}</p>
             </div>
             <div className="text-4xl">👥</div>
           </div>
@@ -165,7 +164,7 @@ export default function Overview() {
               <p className="text-sm">Start playing to see your match history here!</p>
               <button
                 onClick={handleQuickMatch}
-                className="mt-4 px-6 py-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+                className="mt-4 px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
               >
                 Play Your First Game
               </button>

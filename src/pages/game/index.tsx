@@ -1690,7 +1690,7 @@ export default function GamePage() {
       <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               Ping Pong Pro
             </span>
           </h1>
@@ -1700,7 +1700,7 @@ export default function GamePage() {
         <div className="space-y-4">
           <button
             onClick={() => startGame("quickmatch")}
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105"
+            className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-bold text-lg hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105"
           >
             Quick Match
           </button>
@@ -1714,7 +1714,7 @@ export default function GamePage() {
 
           <button
             onClick={() => startGame("tournament")}
-            className="w-full py-4 bg-purple-600 text-white rounded-xl font-bold text-lg hover:bg-purple-700 transition-all"
+            className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all"
           >
             Tournament Match
           </button>
@@ -1759,7 +1759,7 @@ export default function GamePage() {
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-sm">
                     {leftPlayer.displayName
                       ?.split(" ")
@@ -1808,7 +1808,7 @@ export default function GamePage() {
                   className="w-10 h-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-sm">
                     {rightPlayer.displayName
                       ?.split(" ")
@@ -1838,7 +1838,7 @@ export default function GamePage() {
                 </h3>
                 <button
                   onClick={() => setGameState("playing")}
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
                 >
                   Resume Game
                 </button>
@@ -1930,7 +1930,7 @@ export default function GamePage() {
         <div className="space-y-3">
           <button
             onClick={() => startGame(gameMode)}
-            className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-bold hover:from-orange-600 hover:to-pink-600 transition-all"
+            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-bold hover:from-cyan-600 hover:to-blue-600 transition-all"
           >
             Play Again
           </button>
@@ -1944,7 +1944,7 @@ export default function GamePage() {
 
           <Link
             to="/dashboard"
-            className="block w-full py-3 bg-purple-600 text-white text-center rounded-xl hover:bg-purple-700 transition-all"
+            className="block w-full py-3 bg-blue-600 text-white text-center rounded-xl hover:bg-blue-700 transition-all"
           >
             Back to Dashboard
           </Link>
@@ -2015,7 +2015,7 @@ export default function GamePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       <div
         className={`transition-all duration-1000 ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"

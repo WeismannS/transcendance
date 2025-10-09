@@ -147,15 +147,9 @@ export default function LeaderboardPage() {
       }))
     }, 3000)
 
-    // Simulate rank changes
-    const rankInterval = setInterval(() => {
-      const change = Math.floor(Math.random() * 3) - 1 // -1, 0, or 1
-      setCurrentUserRank((prev) => Math.max(1, Math.min(100, prev + change)))
-    }, 10000)
 
     return () => {
       clearInterval(ballInterval)
-      clearInterval(rankInterval)
     }
   }, [])
 
@@ -177,10 +171,10 @@ export default function LeaderboardPage() {
           key={player.rank}
           className={`relative bg-gray-800/50 backdrop-blur-lg border rounded-2xl p-6 text-center ${
             index === 0
-              ? "border-yellow-500/50 bg-gradient-to-br from-yellow-500/10 to-orange-500/10"
+              ? "border-yellow-500/50 bg-gradient-to-br from-yellow-500/10 to-yellow-600/10"
               : index === 1
                 ? "border-gray-400/50 bg-gradient-to-br from-gray-400/10 to-gray-500/10"
-                : "border-orange-600/50 bg-gradient-to-br from-orange-600/10 to-red-500/10"
+                : "border-cyan-600/50 bg-gradient-to-br from-cyan-600/10 to-blue-500/10"
           }`}
         >
           {/* Crown for #1 */}
@@ -190,10 +184,10 @@ export default function LeaderboardPage() {
             <div
               className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center text-2xl font-bold ${
                 index === 0
-                  ? "bg-gradient-to-r from-yellow-400 to-orange-500"
+                  ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
                   : index === 1
                     ? "bg-gradient-to-r from-gray-400 to-gray-600"
-                    : "bg-gradient-to-r from-orange-600 to-red-500"
+                    : "bg-gradient-to-r from-cyan-500 to-blue-500"
               }`}
             >
               <span className="text-white">{player.avatar}</span>
@@ -204,7 +198,7 @@ export default function LeaderboardPage() {
                   ? "bg-yellow-500 text-black"
                   : index === 1
                     ? "bg-gray-400 text-black"
-                    : "bg-orange-600 text-white"
+                    : "bg-cyan-500 text-white"
               }`}
             >
               #{player.rank}
@@ -229,7 +223,7 @@ export default function LeaderboardPage() {
             </div>
           </div>
 
-          <button className="w-full mt-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
+          <button className="w-full mt-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
             View Profile
           </button>
         </div>
@@ -262,14 +256,14 @@ export default function LeaderboardPage() {
                 key={player.rank}
                 className={`border-b border-gray-700/50 hover:bg-gray-700/30 transition-all cursor-pointer ${
                   //@ts-ignore
-                  player.isCurrentUser ? "bg-gradient-to-r from-orange-500/20 to-pink-500/20 border-orange-500/50" : ""
+                  player.isCurrentUser ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-500/50" : ""
                 }`}
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-3">
                     <span
                       className={`text-lg font-bold ${
-                        player.rank <= 3 ? "text-orange-400" : player.rank <= 10 ? "text-yellow-400" : "text-white"
+                        player.rank <= 3 ? "text-cyan-400" : player.rank <= 10 ? "text-yellow-400" : "text-white"
                       }`}
                     >
                       #{player.rank}
@@ -277,13 +271,13 @@ export default function LeaderboardPage() {
             
                     {
                         //@ts-ignore
-                    player.isCurrentUser && <span className="text-orange-400 text-sm">YOU</span>}
+                    player.isCurrentUser && <span className="text-cyan-400 text-sm">YOU</span>}
                   </div>
                 </td>
 
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
                       <span className="text-white font-bold text-sm">{player.avatar}</span>
                     </div>
                     <div>
@@ -358,16 +352,16 @@ export default function LeaderboardPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
         <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-        <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+        <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
 
         {/* Animated Ping Pong Ball */}
         <div
-          className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-3000 ease-in-out"
+          className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full shadow-lg transition-all duration-3000 ease-in-out"
           style={{
             left: `${ballPosition.x}%`,
             top: `${ballPosition.y}%`,
@@ -380,10 +374,10 @@ export default function LeaderboardPage() {
       <header className="relative z-10 px-6 py-4 border-b border-gray-700/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">🏓</span>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               PingPong Pro
             </span>
           </div>
@@ -401,7 +395,7 @@ export default function LeaderboardPage() {
           </nav>
 
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">JD</span>
             </div>
             <span className="text-white font-semibold">John Doe</span>
@@ -418,7 +412,7 @@ export default function LeaderboardPage() {
             {/* Page Header */}
             <div className="text-center mb-8">
               <h1 className="text-5xl md:text-6xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                   Leaderboard
                 </span>
               </h1>
@@ -428,10 +422,10 @@ export default function LeaderboardPage() {
             </div>
 
             {/* Your Rank Card */}
-            <div className="bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/50 rounded-2xl p-6 mb-8">
+            <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/50 rounded-2xl p-6 mb-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-xl">JD</span>
                   </div>
                   <div>
@@ -440,7 +434,7 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-4xl font-bold text-orange-400">#{currentUserRank}</div>
+                  <div className="text-4xl font-bold text-cyan-400">#{currentUserRank}</div>
                   <div className="text-green-400 text-sm flex items-center justify-end">
                     <span>↗️ +3 this week</span>
                   </div>
@@ -456,7 +450,7 @@ export default function LeaderboardPage() {
                   placeholder="Search players..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                 />
               </div>
 
@@ -471,7 +465,7 @@ export default function LeaderboardPage() {
                     onClick={() => setActiveCategory(category.id)}
                     className={`px-4 py-2 rounded-xl font-semibold transition-all ${
                       activeCategory === category.id
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                         : "bg-gray-800/50 text-gray-400 hover:text-white"
                     }`}
                   >
@@ -489,7 +483,7 @@ export default function LeaderboardPage() {
                     onClick={() => setActiveTimeframe(timeframe.id)}
                     className={`px-4 py-2 rounded-xl font-semibold transition-all ${
                       activeTimeframe === timeframe.id
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                         : "bg-gray-800/50 text-gray-400 hover:text-white"
                     }`}
                   >
@@ -508,7 +502,7 @@ export default function LeaderboardPage() {
                     onClick={() => setActiveRegion(region.id)}
                     className={`px-4 py-2 rounded-xl font-semibold transition-all ${
                       activeRegion === region.id
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                         : "bg-gray-800/50 text-gray-400 hover:text-white"
                     }`}
                   >
@@ -538,9 +532,9 @@ export default function LeaderboardPage() {
                   {risingStars.map((player) => (
                     <div
                       key={player.rank}
-                      className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-4 text-center hover:border-orange-500/50 transition-all cursor-pointer"
+                      className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-xl p-4 text-center hover:border-cyan-500/50 transition-all cursor-pointer"
                     >
-                      <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
                         <span className="text-white font-bold text-sm">{player.avatar}</span>
                       </div>
                       <h4 className="text-white font-semibold text-sm mb-1">{player.name}</h4>

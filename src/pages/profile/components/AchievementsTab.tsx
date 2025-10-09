@@ -15,7 +15,7 @@ export default function AchievementsTab({ achievements }: AchievementsTabProps) 
             key={index}
             className={`p-4 rounded-xl border transition-all ${
               achievement.unlocked
-                ? "bg-gradient-to-br from-orange-500/20 to-pink-500/20 border-orange-500/50"
+                ? "bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-cyan-500/50"
                 : "bg-gray-700/30 border-gray-600 opacity-50"
             }`}
           >

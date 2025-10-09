@@ -23,11 +23,11 @@ export default function OverviewTab({ profileUser, mutualHistory }: OverviewTabP
               <div className="text-gray-400 text-sm">Losses</div>
             </div>
             <div className="text-center p-4 bg-gray-700/30 rounded-xl">
-              <div className="text-2xl font-bold text-orange-400">{profileUser.winRate}%</div>
+              <div className="text-2xl font-bold text-cyan-400">{profileUser.winRate}%</div>
               <div className="text-gray-400 text-sm">Win Rate</div>
             </div>
             <div className="text-center p-4 bg-gray-700/30 rounded-xl">
-              <div className="text-2xl font-bold text-purple-400">{profileUser.tournamentsWon}</div>
+              <div className="text-2xl font-bold text-cyan-400">{profileUser.tournamentsWon}</div>
               <div className="text-gray-400 text-sm">Tournaments Won</div>
             </div>
           </div>
@@ -38,7 +38,7 @@ export default function OverviewTab({ profileUser, mutualHistory }: OverviewTabP
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Current Streak:</span>
-              <span className="text-orange-400 font-bold flex items-center">🔥 {profileUser.currentStreak} wins</span>
+              <span className="text-cyan-400 font-bold flex items-center">🔥 {profileUser.currentStreak} wins</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Best Streak:</span>
@@ -67,10 +67,10 @@ export default function OverviewTab({ profileUser, mutualHistory }: OverviewTabP
             </div>
           ))}
         </div>
-        <div className="mt-4 p-4 bg-gradient-to-r from-orange-500/20 to-pink-500/20 rounded-xl border border-orange-500/30">
+        <div className="mt-4 p-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl border border-cyan-500/30">
           <div className="text-center">
             <div className="text-white font-semibold mb-1">Overall Record</div>
-            <div className="text-orange-400 font-bold">You: {profileUser.overallRecord.wins} - {profileUser.overallRecord.losses} : {profileUser.name.split(" ")[0]}</div>
+            <div className="text-cyan-400 font-bold">You: {profileUser.overallRecord.wins} - {profileUser.overallRecord.losses} : {profileUser.name.split(" ")[0]}</div>
           </div>
         </div>
       </div>

@@ -51,16 +51,16 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-        <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-300 rounded-full animate-ping"></div>
+        <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
 
         {/* Animated Ping Pong Ball */}
         <div
-          className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-2000 ease-in-out"
+          className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full shadow-lg transition-all duration-2000 ease-in-out"
           style={{
             left: `${ballPosition.x}%`,
             top: `${ballPosition.y}%`,
@@ -73,10 +73,10 @@ export default function HomePage() {
       <header className="relative z-10 px-6 py-8">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">🏓</span>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               PingPong Pro
             </span>
           </div>
@@ -91,7 +91,7 @@ export default function HomePage() {
             <Link to="/leaderboard" className="text-gray-300 hover:text-white transition-colors">
               Leaderboard
             </Link>
-            <Link to="/sign_in" className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105">
+            <Link to="/sign_in" className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105">
               Sign Up
             </Link>
           </div>
@@ -105,7 +105,7 @@ export default function HomePage() {
             className={`text-center py-20 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
           >
             <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-600 bg-clip-text text-transparent">
                 PING PONG
               </span>
               <br />
@@ -118,7 +118,7 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Link to="/sign_in" className="bg-gradient-to-r from-orange-500 to-pink-500 px-12 py-4 rounded-full text-xl font-bold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-2xl">
+              <Link to="/sign_in" className="bg-gradient-to-r from-cyan-500 to-blue-500 px-12 py-4 rounded-full text-xl font-bold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-2xl">
                 Play Now
               </Link>
             </div>
@@ -127,19 +127,19 @@ export default function HomePage() {
           {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-16 border-t border-gray-700">
             <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent mb-2">
+              <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
                 50K+
               </div>
               <div className="text-gray-400">Active Players</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent mb-2">
+              <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
                 1M+
               </div>
               <div className="text-gray-400">Matches Played</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent mb-2">
+              <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
                 24/7
               </div>
               <div className="text-gray-400">Online Tournaments</div>
@@ -149,7 +149,7 @@ export default function HomePage() {
           {/* Features Section */}
           <div className="py-20">
             <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-              <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 Game Features
               </span>
             </h2>
@@ -160,7 +160,7 @@ export default function HomePage() {
                   key={index}
                   className={`p-8 rounded-2xl transition-all duration-500 cursor-pointer ${
                     activeFeature === index
-                      ? "bg-gradient-to-br from-orange-500/20 to-pink-500/20 border-2 border-orange-500/50 transform scale-105"
+                      ? "bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50 transform scale-105"
                       : "bg-gray-800/50 border-2 border-gray-700 hover:border-gray-600"
                   }`}
                   onClick={() => setActiveFeature(index)}
@@ -177,7 +177,7 @@ export default function HomePage() {
           <div className="text-center py-20 border-t border-gray-700">
             <h2 className="text-4xl md:text-5xl font-bold mb-8">
               Ready to{" "}
-              <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 Dominate
               </span>
               ?
@@ -186,7 +186,7 @@ export default function HomePage() {
               Join thousands of players in the ultimate ping pong experience. Your journey to becoming a champion starts
               now.
             </p>
-            <Link to="/sign_in" className="bg-gradient-to-r from-orange-500 to-pink-500 px-16 py-5 rounded-full text-2xl font-bold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-2xl">
+            <Link to="/sign_in" className="bg-gradient-to-r from-cyan-500 to-blue-500 px-16 py-5 rounded-full text-2xl font-bold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-2xl">
               Start Playing
             </Link>
           </div>
@@ -197,10 +197,10 @@ export default function HomePage() {
       <footer className="relative z-10 border-t border-gray-700 px-6 py-12">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 mb-6">
-            <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-xs">🏓</span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               PingPong Pro
             </span>
           </div>

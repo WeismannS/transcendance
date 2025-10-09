@@ -48,7 +48,7 @@ export default function TournamentsSection({
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold text-white">Tournaments</h2>
           <Link to="/tournaments">
-            <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
+            <button className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
               View All Tournaments
             </button>
           </Link>
@@ -79,7 +79,7 @@ export default function TournamentsSection({
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold text-white">Tournaments</h2>
           <Link to="/tournaments">
-            <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
+            <button className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
               View All Tournaments
             </button>
           </Link>
@@ -99,7 +99,7 @@ export default function TournamentsSection({
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-white">Tournaments</h2>
         <Link to="/tournaments">
-          <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
+          <button className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
             View All Tournaments
           </button>
         </Link>

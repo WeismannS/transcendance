@@ -272,7 +272,7 @@ export default function TournamentsPage() {
     >
       {tournament.featured && (
         <div className="flex items-center justify-between mb-4">
-          <span className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+          <span className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
             FEATURED
           </span>
           <span className="text-2xl">⭐</span>
@@ -288,7 +288,7 @@ export default function TournamentsPage() {
             tournament.status === "live"
               ? "bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30"
               : tournament.status === "upcoming"
-              ? "bg-orange-500 bg-opacity-20 text-orange-400 border border-orange-500 border-opacity-30"
+              ? "bg-cyan-500 bg-opacity-20 text-cyan-400 border border-cyan-500 border-opacity-30"
               : "bg-green-500 bg-opacity-20 text-green-400 border border-green-500 border-opacity-30"
           }`}
         >
@@ -365,18 +365,12 @@ export default function TournamentsPage() {
         </div>
       </div>
 
-      {tournament.status === "completed" && tournament.userPlacement && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-orange-500 to-pink-500 bg-opacity-20 rounded-xl border border-orange-500 border-opacity-30">
+            {tournament.status === "completed" && tournament.userPlacement && (
+        <div className="mb-4 p-3 bg-gradient-to-r from-cyan-500 to-blue-500 bg-opacity-20 rounded-xl border border-cyan-500 border-opacity-30">
           <div className="flex justify-between items-center">
             <span className="text-white font-semibold">Your Result:</span>
-            <span className="text-orange-400 font-bold">
+            <span className="text-cyan-400 font-bold">
               {tournament.userPlacement}
-            </span>
-          </div>
-          <div className="flex justify-between items-center mt-1">
-            <span className="text-gray-300 text-sm">Winner:</span>
-            <span className="text-green-400 text-sm font-medium">
-              {tournament.winner}
             </span>
           </div>
         </div>
@@ -446,7 +440,7 @@ export default function TournamentsPage() {
                     e.stopPropagation();
                     handleRegister(tournament.id);
                   }}
-                  className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={
                     tournament.participants >= tournament.maxParticipants
                   }
@@ -661,7 +655,7 @@ export default function TournamentsPage() {
                                   </span>
                                 )}
                                 {!isLive && !isActuallyCompleted && (
-                                  <span className="px-2 py-1 bg-orange-500 bg-opacity-20 text-orange-400 text-xs rounded-full">
+                                  <span className="px-2 py-1 bg-cyan-500 bg-opacity-20 text-cyan-400 text-xs rounded-full">
                                     ⏳ PENDING
                                   </span>
                                 )}
@@ -703,7 +697,7 @@ export default function TournamentsPage() {
 
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                                     {player2Name.charAt(0).toUpperCase()}
                                   </div>
                                   <span
@@ -875,7 +869,7 @@ export default function TournamentsPage() {
                                       onClick={() =>
                                         handleTournamentChallenge(match)
                                       }
-                                      className="px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg transition-all font-medium"
+                                      className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-all font-medium"
                                     >
                                       Challenge
                                     </button>
@@ -911,17 +905,17 @@ export default function TournamentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       {renderTournamentDetails()}
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
         <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-        <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+        <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
 
         {/* Animated Ping Pong Ball */}
         <div
-          className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-3500 ease-in-out"
+          className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full shadow-lg transition-all duration-3500 ease-in-out"
           style={{
             left: `${ballPosition.x}%`,
             top: `${ballPosition.y}%`,
@@ -934,10 +928,10 @@ export default function TournamentsPage() {
       <header className="relative z-10 px-6 py-4 border-b border-gray-700 border-opacity-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">🏓</span>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               PingPong Pro
             </span>
           </div>
@@ -964,7 +958,7 @@ export default function TournamentsPage() {
           </nav>
 
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
               {userProfile?.avatar ? (
                 <img
                   src={API_URL + `/${userProfile.avatar}`}
@@ -999,7 +993,7 @@ export default function TournamentsPage() {
             {/* Page Header */}
             <div className="text-center mb-8">
               <h1 className="text-5xl md:text-6xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                   Tournaments
                 </span>
               </h1>
@@ -1048,7 +1042,7 @@ export default function TournamentsPage() {
                     onClick={() => setActiveFilter(filter.id)}
                     className={`px-4 py-3 rounded-xl font-semibold transition-all flex items-center space-x-2 whitespace-nowrap ${
                       activeFilter === filter.id
-                        ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                         : "bg-gray-800 bg-opacity-50 text-gray-400 hover:text-white hover:bg-gray-700 hover:bg-opacity-50"
                     }`}
                   >
@@ -1124,7 +1118,7 @@ export default function TournamentsPage() {
             <div className="fixed bottom-8 right-8">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-orange-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-110 shadow-2xl"
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center text-2xl hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-110 shadow-2xl"
               >
                 ➕
               </button>
@@ -1213,7 +1207,7 @@ export default function TournamentsPage() {
                 <button
                   onClick={handleCreateTournament}
                   disabled={!newTournament.name.trim()}
-                  className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Create Tournament
                 </button>

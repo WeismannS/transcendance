@@ -28,7 +28,8 @@ export interface UserProfileState {
   displayName: string;
   bio: string;
   avatar: string;
-  createdAt: string; // ISO date string
+  createdAt: string;
+  rank : number | null;
 }
 
 export interface GameState {
@@ -264,7 +265,7 @@ class StateManager {
         break;
 
       case "ACHIEVEMENT_UNLOCKED":
-        this.unlockAchievement(event.payload);
+        this.unlockAchievement(event.payload.requestId);
         this.addNotification({
           id: Date.now(),
           type: "achievement",
@@ -326,6 +327,7 @@ class StateManager {
                 // unreadCount: prev.unreadCount + (event.payload.conversation.unreadCount || 0)
               }
         );
+      
         break;
     }
   }
@@ -461,10 +463,10 @@ class StateManager {
     }));
   }
 
-  private unlockAchievement(achievement: Achievement) {
+  private unlockAchievement(achievement: string) {
     this.updateState<AchievementsState>("achievements", (prev) => ({
       ...prev,
-      userAchievementIds: [...prev.userAchievementIds, achievement.id],
+      userAchievementIds: [...prev.userAchievementIds, achievement],
     }));
   }
 

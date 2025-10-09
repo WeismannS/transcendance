@@ -162,7 +162,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
             profile: {
               ...currentUser,
               status: "online" as const,
-              rank: 1, // Default rank, should be in UserProfileState
+              rank: 7, // Default rank, should be in UserProfileState
               createdAt: currentUser.createdAt || new Date().toISOString(), // Use current date if not available
             },
             gameHistory: gameState?.history || [],
@@ -230,8 +230,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
       const updatedProfile: Profile = {
         profile: {
           ...currentUser,
-          status: "online" as const,
-          rank: 1
+          status : isOnline ? "online" : "offline",
         },
         gameHistory: gameState.history || [],
         gameStats: gameState.stats || { totalGames: 0, wins: 0, losses: 0, tournaments: 0, tournamentWins: 0, bestStreak: 0, currentStreak: 0 },
@@ -384,16 +383,16 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+          <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
           <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-          <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+          <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
 
           {/* Animated Ping Pong Ball */}
           <div
-            className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
+            className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
             style={{
               left: `${ballPosition.x}%`,
               top: `${ballPosition.y}%`,
@@ -402,8 +401,8 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
           ></div>
 
           {/* Geometric shapes */}
-          <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-orange-500/10 rounded-full"></div>
-          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-pink-500/10 rounded-full"></div>
+          <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-cyan-500/10 rounded-full"></div>
+          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-blue-500/10 rounded-full"></div>
         </div>
 
 
@@ -416,12 +415,12 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
               <div key="loading-card" className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-12 shadow-2xl">
                 {/* Loading Spinner */}
                 <div key="loading-spinner" className="mb-6">
-                  <div className="w-16 h-16 mx-auto border-4 border-gray-600 border-t-orange-500 rounded-full animate-spin"></div>
+                  <div className="w-16 h-16 mx-auto border-4 border-gray-600 border-t-cyan-500 rounded-full animate-spin"></div>
                 </div>
                 
                 {/* Loading Text */}
                 <h2 key="loading-title" className="text-3xl font-bold mb-4">
-                  <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                     Loading Profile
                   </span>
                 </h2>
@@ -446,16 +445,16 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
 
   if (error || !profileData || !profileUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+          <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
           <div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-          <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+          <div className="absolute bottom-32 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
 
           {/* Animated Ping Pong Ball */}
           <div
-            className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
+            className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
             style={{
               left: `${ballPosition.x}%`,
               top: `${ballPosition.y}%`,
@@ -464,8 +463,8 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
           ></div>
 
           {/* Geometric shapes */}
-          <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-orange-500/10 rounded-full"></div>
-          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-pink-500/10 rounded-full"></div>
+          <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-cyan-500/10 rounded-full"></div>
+          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-blue-500/10 rounded-full"></div>
         </div>
 
 
@@ -481,7 +480,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
                 
                 {/* Error Title */}
                 <h1 key="error-title" className="text-4xl font-bold mb-4">
-                  <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                     Profile Not Found
                   </span>
                 </h1>
@@ -518,7 +517,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
                   <button
                     key="dashboard-button"
                     onClick={() => redirect('/dashboard')}
-                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg"
+                    className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-lg"
                   >
                     🏠 Go to Dashboard
                   </button>
@@ -540,7 +539,7 @@ export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       <AnimatedBackground ballPosition={ballPosition} />
 
       <main className="relative z-10 px-6 py-8">

@@ -63,11 +63,11 @@ export default function UniversalHeader({
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-lg">🏓</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               PingPong Pro
             </span>
             {currentPage && (
@@ -86,7 +86,7 @@ export default function UniversalHeader({
               to={item.path}
               className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center space-x-2 ${
                 isActivePage(item.path)
-                  ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg transform scale-105"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg transform scale-105"
                   : "text-gray-300 hover:text-white hover:bg-gray-700/50"
               }`}
             >
@@ -130,7 +130,7 @@ export default function UniversalHeader({
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center space-x-3 hover:bg-gray-700/50 rounded-xl px-3 py-2 transition-all"
               >
-                <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                   {userProfile.avatar ? (
                     <img 
                       src={`${API_URL}/${userProfile.avatar}`} 
@@ -187,7 +187,7 @@ export default function UniversalHeader({
                           setDropdownOpen(false)
                           redirect('/dashboard')
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-purple-500/20 hover:text-purple-300 transition-colors flex items-center space-x-3"
+                        className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-cyan-500/20 hover:text-cyan-300 transition-colors flex items-center space-x-3"
                       >
                         <span className="text-lg">⚙️</span>
                       </button>
@@ -239,7 +239,7 @@ export default function UniversalHeader({
                   onClick={() => handleNavigation(item.path)}
                   className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center space-x-3 ${
                     isActivePage(item.path)
-                      ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                       : "text-gray-300 hover:text-white hover:bg-gray-700/50"
                   }`}
                 >
@@ -252,7 +252,7 @@ export default function UniversalHeader({
               {userProfile && (
                 <div className="pt-4 mt-4 border-t border-gray-700">
                   <div className="flex items-center space-x-3 px-4 py-2">
-                    <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                       {userProfile.avatar ? (
                         <img 
                           src={`${API_URL}/${userProfile.avatar}`} 

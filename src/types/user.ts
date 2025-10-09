@@ -59,7 +59,7 @@ export type ProfileOverview = {
   avatar: string;
   bio: string;
   status: "online" | "offline" | "In Game" | "in Tournament";
-  rank: number;
+  rank: number | null;
   createdAt: string; // ISO date string
 };
 

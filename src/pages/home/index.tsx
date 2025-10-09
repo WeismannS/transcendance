@@ -142,16 +142,16 @@ export default function UserHomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
         <div className="absolute top-60 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-        <div className="absolute bottom-40 left-1/3 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>
+        <div className="absolute bottom-40 left-1/3 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
 
         {/* Animated Ping Pong Ball */}
         <div
-          className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-3500 ease-in-out"
+          className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full shadow-lg transition-all duration-3500 ease-in-out"
           style={{
             left: `${ballPosition.x}%`,
             top: `${ballPosition.y}%`,
@@ -160,18 +160,18 @@ export default function UserHomePage() {
         ></div>
 
         {/* Geometric shapes */}
-        <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-orange-500/10 rounded-full"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-pink-500/10 rounded-full"></div>
+        <div className="absolute top-1/3 right-1/4 w-32 h-32 border border-cyan-500/10 rounded-full"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-blue-500/10 rounded-full"></div>
       </div>
 
       {/* Header */}
       <header className="relative z-10 px-6 py-4 border-b border-gray-700/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">🏓</span>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               PingPong Pro
             </span>
           </div>
@@ -195,7 +195,7 @@ export default function UserHomePage() {
             </div>
 
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">JD</span>
               </div>
               <span className="text-white font-semibold">{user.name}</span>
@@ -213,7 +213,7 @@ export default function UserHomePage() {
             {/* Welcome Section */}
             <div className="mb-8">
               <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                   {getGreeting()}, {user.name.split(" ")[0]}!
                 </span>
               </h1>
@@ -224,8 +224,8 @@ export default function UserHomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Current Rank */}
               <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent mb-2">
-                  #{user.rank}
+                <div className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
+                  #{user.rank !== null ? user.rank : "Unranked"}
                 </div>
                 <div className="text-gray-400">Global Rank</div>
               </div>
@@ -246,14 +246,14 @@ export default function UserHomePage() {
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-orange-500 to-pink-500 h-2 rounded-full transition-all duration-1000"
+                    className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-1000"
                     style={{ width: `${(user.xp / user.nextLevelXp) * 100}%` }}
                   ></div>
                 </div>
               </div>
 
               {/* Quick Play */}
-              <div className="bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl p-6 text-center cursor-pointer hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105">
+              <div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl p-6 text-center cursor-pointer hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105">
                 <div className="text-2xl mb-2">⚡</div>
                 <div className="font-bold">Quick Match</div>
                 <div className="text-sm opacity-90">Find opponent</div>
@@ -306,7 +306,7 @@ export default function UserHomePage() {
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-2 rounded-xl font-semibold transition-all ${
                           activeTab === tab.id
-                            ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                             : "text-gray-400 hover:text-white"
                         }`}
                       >
@@ -322,7 +322,7 @@ export default function UserHomePage() {
                           key={activity.id}
                           className="flex items-center space-x-4 p-3 rounded-xl hover:bg-gray-700/30 transition-all"
                         >
-                          <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+                          <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
                             <span className="text-white font-bold text-sm">{activity.avatar}</span>
                           </div>
                           <div className="flex-1">
@@ -409,7 +409,7 @@ export default function UserHomePage() {
                 <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
                   <h3 className="text-xl font-bold text-white mb-4">Quick Actions</h3>
                   <div className="space-y-3">
-                    <button className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
+                    <button className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
                       Challenge Friend
                     </button>
                     <button className="w-full py-3 bg-gray-700/50 text-white rounded-xl hover:bg-gray-700 transition-all">

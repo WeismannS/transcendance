@@ -107,7 +107,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
   }
 
   const [toast, setToast] = useState({ message: "", type: "" })
-  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const toastTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (toast.message) {
@@ -282,20 +282,20 @@ export default function AuthPage({setIsLoggedIn} : any) {
 
   // Create consistent component arrays to help reconciliation
   const backgroundElements = [
-    <div key="bg-dot-1" className="absolute top-20 left-10 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>,
-    <div key="bg-dot-2" className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>,
-    <div key="bg-dot-3" className="absolute bottom-32 right-1/4 w-1 h-1 bg-pink-400 rounded-full animate-bounce"></div>,
+    <div key="bg-dot-1" className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>,
+    <div key="bg-dot-2" className="absolute top-40 right-20 w-1 h-1 bg-cyan-300 rounded-full animate-ping"></div>,
+    <div key="bg-dot-3" className="absolute bottom-32 right-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>,
     <div
       key="ping-pong-ball"
-      className="absolute w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full shadow-lg transition-all duration-3000 ease-in-out"
+      className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full shadow-lg transition-all duration-3000 ease-in-out"
       style={{
         left: `${ballPosition.x}%`,
         top: `${ballPosition.y}%`,
         transform: "translate(-50%, -50%)",
       }}
     ></div>,
-    <div key="shape-1" className="absolute top-1/4 left-1/4 w-32 h-32 border border-orange-500/20 rounded-full"></div>,
-    <div key="shape-2" className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-pink-500/20 rounded-full"></div>
+    <div key="shape-1" className="absolute top-1/4 left-1/4 w-32 h-32 border border-cyan-500/20 rounded-full"></div>,
+    <div key="shape-2" className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-blue-500/20 rounded-full"></div>
   ]
 
   // Build form fields array consistently
@@ -316,7 +316,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
         className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
           errors.name
             ? "border-red-500 focus:ring-red-500"
-            : "border-gray-600 focus:ring-orange-500 focus:border-orange-500"
+            : "border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"
         }`}
         placeholder="Enter your full name"
       />
@@ -339,7 +339,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
         className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
           errors.email
             ? "border-red-500 focus:ring-red-500"
-            : "border-gray-600 focus:ring-orange-500 focus:border-orange-500"
+            : "border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"
         }`}
         placeholder="Enter your email"
       />
@@ -363,7 +363,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all pr-12 ${
             errors.password
               ? "border-red-500 focus:ring-red-500"
-              : "border-gray-600 focus:ring-orange-500 focus:border-orange-500"
+              : "border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"
           }`}
           placeholder="Enter your password"
         />
@@ -396,7 +396,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
           className={`w-full px-4 py-3 bg-gray-700/50 border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all pr-12 ${
             errors.confirmPassword
               ? "border-red-500 focus:ring-red-500"
-              : "border-gray-600 focus:ring-orange-500 focus:border-orange-500"
+              : "border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"
           }`}
           placeholder="Confirm your password"
         />
@@ -414,7 +414,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
   )
 
   return (
-    <div key="auth-page" className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden">
+    <div key="auth-page" className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
       {/* Animated Background Elements */}
       <div key="background-container" className="absolute inset-0 overflow-hidden">
         {backgroundElements}
@@ -424,10 +424,10 @@ export default function AuthPage({setIsLoggedIn} : any) {
       <header key="header" className="relative z-10 px-6 py-8">
         <nav key="nav" className="flex items-center justify-between max-w-7xl mx-auto">
           <div key="logo" className="flex items-center space-x-2">
-            <div key="logo-icon" className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
+            <div key="logo-icon" className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">🏓</span>
             </div>
-            <span key="logo-text" className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+            <span key="logo-text" className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               PingPong Pro
             </span>
           </div>
@@ -439,7 +439,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
             <button 
               key="nav-toggle"
               onClick={toggleAuthMode}
-              className="border-2 border-orange-500 text-orange-400 px-6 py-2 rounded-full font-semibold hover:bg-orange-500 hover:text-white transition-all"
+              className="border-2 border-cyan-500 text-cyan-400 px-6 py-2 rounded-full font-semibold hover:bg-cyan-500 hover:text-white transition-all"
             >
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
@@ -458,7 +458,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
             <div key="auth-card" className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-3xl p-8 shadow-2xl">
               <div key="card-header" className="text-center mb-8">
                 <h1 key="card-title" className="text-4xl font-bold mb-2">
-                  <span className="bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                     {isSignUp ? "Join the Game" : "Welcome Back"}
                   </span>
                 </h1>
@@ -505,13 +505,13 @@ export default function AuthPage({setIsLoggedIn} : any) {
                     <input
                       key="checkbox"
                       type="checkbox"
-                      className="w-4 h-4 text-orange-500 bg-gray-700 border-gray-600 rounded focus:ring-orange-500"
+                      className="w-4 h-4 text-cyan-500 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
                     />
                   </label>
                   <button 
                     key="forgot-password" 
                     type="button" 
-                    className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
+                    className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                     style={{ display: !isSignUp ? 'block' : 'none' }}
                   >
                     Forgot password?
@@ -523,7 +523,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
                   type="button"
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-3 px-4 rounded-xl font-bold text-white hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 py-3 px-4 rounded-xl font-bold text-white hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isLoading ? (
                     <div key="loading-content" className="flex items-center justify-center space-x-2">
@@ -543,7 +543,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
                   <button 
                     key="footer-toggle"
                     onClick={toggleAuthMode}
-                    className="text-orange-400 hover:text-orange-300 transition-colors font-semibold"
+                    className="text-cyan-400 hover:text-cyan-300 transition-colors font-semibold"
                   >
                     {isSignUp ? "Sign in here" : "Sign up for free"}
                   </button>
@@ -555,9 +555,9 @@ export default function AuthPage({setIsLoggedIn} : any) {
             <div key="additional-info" className="text-center mt-8">
               <p key="terms-text" className="text-gray-400 text-sm">
                 By {isSignUp ? "creating an account" : "signing in"}, you agree to our{" "}
-                <button key="terms-link" className="text-orange-400 hover:text-orange-300 transition-colors">Terms of Service</button>
+                <button key="terms-link" className="text-cyan-400 hover:text-cyan-300 transition-colors">Terms of Service</button>
                 {" and "}
-                <button key="privacy-link" className="text-orange-400 hover:text-orange-300 transition-colors">Privacy Policy</button>
+                <button key="privacy-link" className="text-cyan-400 hover:text-cyan-300 transition-colors">Privacy Policy</button>
               </p>
             </div>
           </div>
@@ -574,7 +574,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
                 Please enter the 6-digit code from your authenticator app
               </p>
               {pendingUser && (
-                <p className="text-sm text-orange-400 mt-2">
+                <p className="text-sm text-cyan-400 mt-2">
                   Signing in as {pendingUser.email}
                 </p>
               )}
@@ -586,7 +586,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
                 value={twoFACode}
                 onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 maxLength={6}
               />
             </div>
@@ -606,7 +606,7 @@ export default function AuthPage({setIsLoggedIn} : any) {
               <button
                 onClick={handle2FASubmit}
                 disabled={twoFACode.length !== 6}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Verify
               </button>

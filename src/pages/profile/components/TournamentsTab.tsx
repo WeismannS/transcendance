@@ -29,7 +29,7 @@ export default function TournamentsTab({ tournamentHistory }: TournamentsTabProp
                     : tournament.placement.includes("2nd")
                       ? "text-gray-300"
                       : tournament.placement.includes("3rd")
-                        ? "text-orange-400"
+                        ? "text-cyan-400"
                         : "text-gray-400"
                 }`}
               >

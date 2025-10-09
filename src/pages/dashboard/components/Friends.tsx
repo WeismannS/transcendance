@@ -120,7 +120,7 @@ export default function Friends({
         <h2 className="text-3xl font-bold text-white">Friends</h2>
         <button
           onClick={handleAddFriends}
-          className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
         >
           Add Friends
         </button>
@@ -227,7 +227,7 @@ export default function Friends({
                         className="flex items-center justify-between p-4 bg-gray-700/30 rounded-xl hover:bg-gray-700/50 transition-all"
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                          <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                             {user.avatar ? (
                               <img
                                 src={API_URL + "/" + user.avatar}
@@ -255,7 +255,7 @@ export default function Friends({
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="text-right text-sm mr-3">
-                            <div className="text-orange-400 font-bold">
+                            <div className="text-cyan-400 font-bold">
                               #{user.rank}
                             </div>
                             <div className="text-gray-400">{user.status}</div>
@@ -283,7 +283,7 @@ export default function Friends({
                                   avatar: user.avatar,
                                 })
                               }
-                              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+                              className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg text-sm font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
                             >
                               Add Friend
                             </button>
@@ -329,7 +329,7 @@ export default function Friends({
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
-                          <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                          <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                             {friend.avatar ? (
                               <img
                                 src={API_URL + "/" + friend.avatar}
@@ -399,7 +399,7 @@ export default function Friends({
                         className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
                           friend.status !== "online"
                             ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                            : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
                         }`}
                       >
                         Challenge
@@ -442,7 +442,7 @@ export default function Friends({
                 >
                   <div className="flex items-center space-x-3">
                     <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                      <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                         {friend.avatar ? (
                           <img
                             src={API_URL + "/" + friend.avatar}
@@ -517,7 +517,7 @@ export default function Friends({
                         className={`flex-1 px-3 py-1  rounded-lg text-sm font-semibold transition-all ${
                           friend.status !== "online"
                             ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                            : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
                         }`}
                       >
                         Challenge
@@ -578,7 +578,7 @@ export default function Friends({
                     className="bg-gray-700/30 rounded-xl p-4"
                   >
                     <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                      <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                         {request.user.avatar ? (
                           <img
                             src={API_URL + "/" + request.user.avatar}

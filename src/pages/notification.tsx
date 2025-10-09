@@ -9,7 +9,7 @@ const NotificationToast = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const { removeNotification } = useNotifications();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Trigger entrance animation
@@ -89,9 +89,9 @@ const NotificationToast = ({
       case "info":
         return "border-blue-500/50 bg-blue-500/10 text-blue-400";
       case "game_invite":
-        return "border-purple-500/50 bg-purple-500/10 text-purple-400";
+        return "border-cyan-500/50 bg-cyan-500/10 text-cyan-400";
       case "tournament_match":
-        return "border-orange-500/50 bg-orange-500/10 text-orange-400";
+        return "border-cyan-500/50 bg-cyan-500/10 text-cyan-400";
       default:
         return "border-gray-500/50 bg-gray-500/10 text-gray-400";
     }
@@ -168,7 +168,7 @@ const NotificationToast = ({
             notification.action && (
               <button
                 onClick={notification.action.onClick}
-                className="mt-2 text-orange-400 hover:text-orange-300 text-sm font-semibold transition-colors"
+                className="mt-2 text-cyan-400 hover:text-cyan-300 text-sm font-semibold transition-colors"
               >
                 {notification.action.label}
               </button>

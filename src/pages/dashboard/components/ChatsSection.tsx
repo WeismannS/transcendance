@@ -3,7 +3,6 @@ import { useMessages, useUserProfile } from "../../../hooks/useStates.ts";
 import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL, formatTime } from "../../../services/api.ts";
 import { Conversation, Message, ProfileOverview } from "../../../types/user.ts";
 import { stateManager } from "../../../store/StateManager.ts";
-import { CursorPos } from "readline";
 
 export default function ChatsSection() {
   const messagesState = useMessages();
@@ -102,7 +101,7 @@ export default function ChatsSection() {
         </div>
         <div className="flex items-center justify-center h-64 text-gray-400">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto mb-4"></div>
             <p>Loading messages...</p>
           </div>
         </div>
@@ -114,7 +113,7 @@ export default function ChatsSection() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-white">Messages</h2>
-        <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105">
+        <button className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105">
           New Chat
         </button>
       </div>
@@ -138,14 +137,14 @@ export default function ChatsSection() {
                   onClick={() => handleConversationSelect(conversation.id)}
                   className={`bg-gray-800/50 backdrop-blur-lg border rounded-2xl p-4 transition-all cursor-pointer transform hover:scale-[1.02] ${
                     selectedConversationId === conversation.id 
-                      ? 'border-orange-500/70 bg-gray-800/70 shadow-lg shadow-orange-500/20' 
-                      : 'border-gray-700 hover:border-orange-500/50'
+                      ? 'border-cyan-500/70 bg-gray-800/70 shadow-lg shadow-cyan-500/20' 
+                      : 'border-gray-700 hover:border-cyan-500/50'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <div className="relative">
-                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                        <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                           {otherMember.avatar ? (
                             <img 
                               src={`${API_URL}/${otherMember.avatar}`} 
@@ -170,7 +169,7 @@ export default function ChatsSection() {
                       </div>
                     </div>
                     {conversation.unreadCount > 0 && (
-                      <div className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                      <div className="bg-cyan-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
                         {conversation.unreadCount}
                       </div>
                     )}
@@ -198,7 +197,7 @@ export default function ChatsSection() {
                     // console.log("Other member:", otherMember);
                     return (
                       <>
-                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+                        <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
                           {otherMember.avatar ? (
                             <img 
                               src={`${API_URL}/${otherMember.avatar}`} 
@@ -222,14 +221,14 @@ export default function ChatsSection() {
                   })()}
                 </div>
                 <div className="flex space-x-2">
-                  <button  className="bg-gradient-to-r from-orange-500 to-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105">
+                  <button  className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 rounded-xl text-sm font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105">
                     Challenge
                   </button>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="space-y-4 mb-6 h-64 overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-orange-500">
+              <div className="space-y-4 mb-6 h-64 overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-cyan-500">
                 {selectedConversation.messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-gray-400">
                     <p>No messages yet. Start the conversation!</p>
@@ -239,7 +238,7 @@ export default function ChatsSection() {
                     <div key={message.id} className={`flex ${isMessageFromCurrentUser(message) ? 'justify-end' : 'justify-start'}`}>
                       <div className={`px-4 py-2 rounded-2xl max-w-xs ${
                         isMessageFromCurrentUser(message)
-                          ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-br-sm'
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-br-sm'
                           : 'bg-gray-700 text-white rounded-bl-sm'
                       }`}>
                         <p>{message.content}</p>
@@ -260,13 +259,13 @@ export default function ChatsSection() {
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder="Type a message..." 
-                  className="flex-1 bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" 
+                  className="flex-1 bg-gray-700/50 border border-gray-600 rounded-xl px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all" 
                   disabled={isLoading}
                   ref={input_ref}
                 />
                 <button 
                   onClick={handleSendMessage}
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
                   disabled={!newMessage.trim() || isLoading}
                   
                 >

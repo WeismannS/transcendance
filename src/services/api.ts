@@ -507,6 +507,7 @@ export function initializeNotificationWs() {
           message: data.content,
         });
       } else if (isNotificationType(data, "ACHIEVEMENT_UNLOCKED")) {
+        stateManager.emit("ACHIEVEMENT_UNLOCKED", data);
       } else {
         console.log("Unknown websocket message type:", data.type);
       }

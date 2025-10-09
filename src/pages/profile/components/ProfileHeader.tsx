@@ -29,7 +29,7 @@ export default function ProfileHeader({
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center space-x-6">
           <div className="relative">
-            <div className="w-24 h-24 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
               {profileUser.avatar ? (
                 <img 
                   src={API_URL + "/"+profileUser.avatar} 
@@ -56,7 +56,7 @@ export default function ProfileHeader({
             <div className="flex items-center space-x-4 text-sm text-gray-300">
               <span className="flex items-center space-x-1">
                 <span>🏆</span>
-                <span>Rank #{profileUser.rank}</span>
+                <span>Rank #{profileUser.rank ? profileUser.rank : "Unranked"}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <span>📅</span>
@@ -88,7 +88,7 @@ export default function ProfileHeader({
                         className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                           !isOnline
                             ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                            : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
                         }`}
                       >
                         Challenge
@@ -110,7 +110,7 @@ export default function ProfileHeader({
           {isOwnProfile && (
             <button 
               onClick={onEditProfile}
-              className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all"
+              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all"
             >
               Edit Profile
             </button>
