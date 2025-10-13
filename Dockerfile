@@ -4,10 +4,9 @@ WORKDIR /app
 
 COPY . /app
 
-RUN bun install \
- && bunx @tailwindcss/cli -i public/input.css -o public/output.css \
- && bun run build \
- && rm -rf node_modules src
+RUN bun install && bun run build \
+ && rm -rf node_modules src \
+ && bun pm cache rm
 
 EXPOSE 4000
 
