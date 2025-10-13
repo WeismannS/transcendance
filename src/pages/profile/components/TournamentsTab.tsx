@@ -1,4 +1,4 @@
-import Miku from "Miku"
+import Miku from "../../../Miku/src/index"
 import { Tournament } from "./types"
 
 interface TournamentsTabProps {

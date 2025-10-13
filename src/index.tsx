@@ -1,8 +1,8 @@
-import Miku, { useEffect, workLoop } from "Miku";
+import Miku, { useEffect, workLoop } from "./Miku/src/index";
 import HomePage from "./pages/app_home/index.tsx";
 import DashboardPage from "./pages/dashboard/index.tsx";
 import UserHomePage from "./pages/profile/index.tsx";
-import { redirect, Router } from "Miku/Router";
+import { redirect, Router } from "./Miku/src/Router/Router";
 import SignInPage from "./pages/sign_in/index.tsx";
 import TournamentsPage from "./pages/tournaments/index.tsx";
 import LeaderboardPage from "./pages/leaderboard/index.tsx";

@@ -15,7 +15,7 @@ import {
   initializeNotificationWs,
   isOnline,
 } from "../services/api.ts";
-import { redirect } from "Miku/Router";
+import { redirect } from "../Miku/src/Router/Router";
 // State Fragments based on your User schema
 export interface UserIdentityState {
   id: string;

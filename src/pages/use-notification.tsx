@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "Miku";
+import { useState, useEffect, useRef } from "../Miku/src/index";
 
 export interface Notification {
   id: string;

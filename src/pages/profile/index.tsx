@@ -1,6 +1,6 @@
 
-import Miku, { useState, useEffect } from "Miku"
-import { Link } from "Miku/Router"
+import Miku, { useState, useEffect } from "../../Miku/src/index"
+import { Link } from "../../Miku/src/Router/Router"
 import {
   AnimatedBackground,
   ProfileHeader,
@@ -15,12 +15,12 @@ import {
   Tournament,
   MutualMatch,
   Tab,
-} from "./components/index.tsx"
+} from "./components/index.ts"
 import { getProfileByUsername, sendFriendRequest, removeFriend, getOrCreateConversation } from "../../services/api.ts"
 import { stateManager } from "../../store/StateManager.ts"
 import { Profile, GameHistory, Achievement as UserAchievement, Friend } from "../../types/user.ts"
 import { UserProfileState, SocialState, AchievementsState, GameState, MessagesState } from "../../store/StateManager.ts"
-import { redirect } from "Miku/Router"
+import { redirect } from "../../Miku/src/Router/Router"
 
 export default function UserProfilePage({isLoggedIn}: {isLoggedIn: boolean}) {
   console.log("UserProfilePage rendered with isLoggedIn:", stateManager.getState<SocialState>('social')?.friends, isLoggedIn)

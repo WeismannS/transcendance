@@ -1,7 +1,7 @@
 "use client";
 
-import Miku, { useState, useEffect, useRef } from "Miku";
-import { Link } from "Miku/Router";
+import Miku, { useState, useEffect, useRef } from "../../Miku/src/index";
+import { Link } from "../../Miku/src/Router/Router";
 import { stateManager } from "../../store/StateManager.ts";
 import { UserProfileState } from "../../store/StateManager.ts";
 import { API_URL, gameConnect, getPlayerProfile } from "../../services/api.ts";

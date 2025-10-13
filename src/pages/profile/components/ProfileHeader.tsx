@@ -1,4 +1,4 @@
-import Miku from "Miku"
+import Miku from "../../../Miku/src/index"
 import { ProfileUser } from "./types.ts"
 import { API_URL } from "../../../services/api.ts"
 interface ProfileHeaderProps {

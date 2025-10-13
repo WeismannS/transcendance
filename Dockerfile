@@ -1,30 +1,19 @@
-FROM oven/bun:latest
-
+FROM oven/bun:alpine
 
 WORKDIR /app
 
-COPY public /app/public
+COPY . /app
 
-COPY src /app/src
-
-COPY package.json /app/
-
-
-COPY Miku /app/Miku
-
-COPY server.ts /app/
-
-COPY tsconfig.json /app/
-
-RUN bun install 
-RUN  bunx tsc  || true
-RUN bunx @tailwindcss/cli -i public/input.css -o public/output.css 
-
-
-
-
-
+RUN bun install \
+ && bunx @tailwindcss/cli -i public/input.css -o public/output.css \
+ && bun build --minify --entrypoints ./src/index.tsx --outfile public/index.js \
+ && rm -rf node_modules src
+ 
 EXPOSE 4000
 
-
-CMD ["bun", "server.ts"]
+CMD sh -c '\
+if [ -f "/run/secrets/ssl_cert" ] && [ -f "/run/secrets/ssl_key" ]; then \
+    exec bun x serve -s -l 4000 --ssl-cert /run/secrets/ssl_cert --ssl-key /run/secrets/ssl_key public; \
+else \
+    exec bun x serve -s -l 4000 public; \
+fi'

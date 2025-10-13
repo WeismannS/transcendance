@@ -1,6 +1,6 @@
-import Miku, { useState, useRef, useEffect } from "Miku";
-import { Notification, useNotifications } from "./use-notification.ts";
-import { Props } from "src/types/types";
+import Miku, { useState, useRef, useEffect } from "../Miku/src/index";
+import { Notification, useNotifications } from "./use-notification.tsx";
+import { Props } from "../Miku/src/types/types";
 import { API_URL } from "../services/api.ts";
 
 const NotificationToast = ({

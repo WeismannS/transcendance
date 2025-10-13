@@ -1,5 +1,5 @@
-import Miku from "Miku";
-import { Link } from "Miku/Router";
+import Miku from "../../../Miku/src/index";
+import { Link } from "../../../Miku/src/Router/Router";
 import { Tournament } from "./types";
 
 interface TournamentsSectionProps {

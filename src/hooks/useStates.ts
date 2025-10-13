@@ -1,4 +1,4 @@
-import Miku from "Miku";
+import Miku from "../Miku/src/index";
 import { stateManager, UserIdentityState, UserProfileState, GameState, SocialState, AchievementsState, NotificationsState, MessagesState } from "../store/StateManager.ts";
 
 export function useUserIdentity() {

@@ -1,8 +1,8 @@
-import { useState } from "Miku";
-import Miku from "Miku";
+import { useState } from "../../../Miku/src/index";
+import Miku from "../../../Miku/src/index";
 import { UserProfileState } from "../../../store/StateManager.ts";
 import { API_URL } from "../../../services/api.ts";
-import { Link } from "Miku/Router";
+import { Link } from "../../../Miku/src/Router/Router";
 interface HeaderProps {
   profile: UserProfileState | null;
   onlineUsers: number;

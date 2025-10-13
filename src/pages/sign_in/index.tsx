@@ -1,5 +1,5 @@
-import Miku, { useState, useEffect, useRef } from "Miku"
-import { redirect } from "Miku/Router"
+import Miku, { useState, useEffect, useRef } from "../../Miku/src/index"
+import { redirect } from "../../Miku/src/Router/Router"
 import { API_URL } from "../../services/api.ts"
 
 export default function AuthPage({setIsLoggedIn} : any) {

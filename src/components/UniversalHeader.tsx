@@ -1,9 +1,9 @@
-import Miku, { useState } from "Miku"
-import { Link } from "Miku/Router"
+import Miku, { useState } from "../Miku/src/index"
+import { Link } from "../Miku/src/Router/Router"
 import { stateManager } from "../store/StateManager.ts"
 import { UserProfileState, SocialState, NotificationsState } from "../store/StateManager.ts"
 import { API_URL, logOut } from "../services/api.ts"
-import { redirect } from "Miku/Router"
+import { redirect } from "../Miku/src/Router/Router"
 
 interface UniversalHeaderProps {
   currentPage?: string

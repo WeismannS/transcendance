@@ -28,7 +28,7 @@
     
     /* Modules */
     "module": "es2022", 
-    "baseUrl": "./Miku",
+    "baseUrl": "src/Miku",
     "paths": {
       "Miku" : ["./src/index.ts"],
       "Miku/Router": ["./src/Router/Router.tsx"],

@@ -12,8 +12,8 @@ import {
   Conversation,
   Profile,
 } from "../types/user.ts";
-import { redirect } from "Miku/Router";
-import { useNotifications } from "../pages/use-notification.ts";
+import { redirect } from "../Miku/src/Router/Router";
+import { useNotifications } from "../pages/use-notification.tsx";
 import { Notification } from "../types/user.ts";
 export const API_URL = "http://localhost:3000";
 

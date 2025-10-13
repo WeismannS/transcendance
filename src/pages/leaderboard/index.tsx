@@ -1,7 +1,7 @@
 "use client"
 
-import Miku, { useState, useEffect } from "Miku"
-import { Link } from "Miku/Router"
+import Miku, { useState, useEffect } from "../../Miku/src/index"
+import { Link } from "../../Miku/src/Router/Router"
 
 export default function LeaderboardPage() {
   const [isVisible, setIsVisible] = useState(false)

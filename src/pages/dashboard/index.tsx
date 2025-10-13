@@ -1,4 +1,4 @@
-import Miku, { useState, useEffect } from "Miku";
+import Miku, { useState, useEffect } from "../../Miku/src/index";
 import { Achievement, User } from "../../types/user.ts";
 import {
   Header,
@@ -10,7 +10,7 @@ import {
   AnimatedBackground,
   Friends,
   Overview,
-} from "./components/index.tsx";
+} from "./components/index.ts";
 import { useDashboardData } from "../../hooks/useStates.ts";
 import {
   API_URL,
@@ -57,7 +57,7 @@ export default function DashboardPage() {
   const [userStats, setUserStats] = useState({
     wins: gameState?.stats.wins ?? 0,
     losses: gameState?.stats.losses ?? 0,
-    rank: 42,
+    rank: profile?.rank ?? 0,
     winRate:
       gameState?.stats.totalGames && gameState.stats.totalGames > 0
         ? ((gameState.stats.wins / gameState.stats.totalGames) * 100).toFixed(1)
@@ -127,7 +127,7 @@ export default function DashboardPage() {
       setUserStats({
         wins: gameState.stats.wins,
         losses: gameState.stats.losses,
-        rank: 42,
+        rank: profile?.rank ?? 0,
         winRate:
           gameState.stats.totalGames > 0
             ? (

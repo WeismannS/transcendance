@@ -1,9 +1,9 @@
 "use client"
 
-import Miku from "Miku"
+import Miku from "../../../Miku/src/index"
 import { stateManager } from "../../../store/StateManager.ts"
 import { UserProfileState, GameState, SocialState, AchievementsState, NotificationsState } from "../../../store/StateManager.ts"
-import { redirect } from "Miku/Router"
+import { redirect } from "../../../Miku/src/Router/Router"
 import { formatTime } from "../../../services/api.ts"
 
 export default function Overview() {

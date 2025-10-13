@@ -1,5 +1,5 @@
-import Miku from "Miku";
-import { Link } from "Miku/Router";
+import Miku from "../../../Miku/src/index";
+import { Link } from "../../../Miku/src/Router/Router";
 import { Achievement, GameHistory } from "../../../types/user.ts";
 import { UserProfileState, GameState } from "../../../store/StateManager.ts";
 

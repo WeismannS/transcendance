@@ -1,4 +1,4 @@
-import Miku, { useState, useEffect, useRef } from "Miku";
+import Miku, { useState, useEffect, useRef } from "../../../Miku/src/index";
 import { useMessages, useUserProfile } from "../../../hooks/useStates.ts";
 import { sendMessage, getOrCreateConversation, markConversationAsRead, API_URL, formatTime } from "../../../services/api.ts";
 import { Conversation, Message, ProfileOverview } from "../../../types/user.ts";
