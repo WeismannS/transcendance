@@ -1,9 +1,9 @@
-export { default as AnimatedBackground } from "./AnimatedBackground.tsx"
-export { default as Header } from "./Header.tsx"
-export { default as ProfileHeader } from "./ProfileHeader.tsx"
-export { default as TabNavigation } from "./TabNavigation.tsx"
-export { default as OverviewTab } from "./OverviewTab.tsx"
-export { default as MatchesTab } from "./MatchesTab.tsx"
-export { default as AchievementsTab } from "./AchievementsTab.tsx"
-export { default as TournamentsTab } from "./TournamentsTab.tsx"
-export * from "./types.ts"
+export { default as AchievementsTab } from "./AchievementsTab.tsx";
+export { default as AnimatedBackground } from "./AnimatedBackground.tsx";
+export { default as Header } from "./Header.tsx";
+export { default as MatchesTab } from "./MatchesTab.tsx";
+export { default as OverviewTab } from "./OverviewTab.tsx";
+export { default as ProfileHeader } from "./ProfileHeader.tsx";
+export { default as TabNavigation } from "./TabNavigation.tsx";
+export { default as TournamentsTab } from "./TournamentsTab.tsx";
+export * from "./types.ts";

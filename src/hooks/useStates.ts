@@ -1,106 +1,117 @@
 import Miku from "../Miku/src/index";
-import { stateManager, UserIdentityState, UserProfileState, GameState, SocialState, AchievementsState, NotificationsState, MessagesState } from "../store/StateManager.ts";
+import {
+	type AchievementsState,
+	type GameState,
+	type MessagesState,
+	type NotificationsState,
+	type SocialState,
+	stateManager,
+	type UserIdentityState,
+	type UserProfileState,
+} from "../store/StateManager.ts";
 
 export function useUserIdentity() {
-  const [identity, setIdentity] = Miku.useState<UserIdentityState | null>(
-    stateManager.getState('userIdentity')
-  );
+	const [identity, setIdentity] = Miku.useState<UserIdentityState | null>(
+		stateManager.getState("userIdentity"),
+	);
 
-  Miku.useEffect(() => {
-    return stateManager.subscribe('userIdentity', setIdentity);
-  }, []);
+	Miku.useEffect(() => {
+		return stateManager.subscribe("userIdentity", setIdentity);
+	}, []);
 
-  return identity;
+	return identity;
 }
 
 export function useUserProfile() {
-  const [profile, setProfile] = Miku.useState<UserProfileState | null>(
-    stateManager.getState('userProfile')
-  );
-  Miku.useEffect(() => {
-    return stateManager.subscribe('userProfile', setProfile);
-  }, []);
+	const [profile, setProfile] = Miku.useState<UserProfileState | null>(
+		stateManager.getState("userProfile"),
+	);
+	Miku.useEffect(() => {
+		return stateManager.subscribe("userProfile", setProfile);
+	}, []);
 
-  return profile;
+	return profile;
 }
 
 export function useGameState() {
-  const [gameState, setGameState] = Miku.useState<GameState | null>(
-    stateManager.getState('gameState')
-  );
+	const [gameState, setGameState] = Miku.useState<GameState | null>(
+		stateManager.getState("gameState"),
+	);
 
-  Miku.useEffect(() => {
-    return stateManager.subscribe('gameState', setGameState);
-  }, []);
+	Miku.useEffect(() => {
+		return stateManager.subscribe("gameState", setGameState);
+	}, []);
 
-  return gameState;
+	return gameState;
 }
 
 export function useSocialState() {
-  const [social, setSocial] = Miku.useState<SocialState | null>(
-    stateManager.getState('social')
-  );
+	const [social, setSocial] = Miku.useState<SocialState | null>(
+		stateManager.getState("social"),
+	);
 
-  Miku.useEffect(() => {
-    return stateManager.subscribe('social', setSocial);
-  }, []);
+	Miku.useEffect(() => {
+		return stateManager.subscribe("social", setSocial);
+	}, []);
 
-  return social;
+	return social;
 }
 
 export function useAchievements() {
-  const [achievements, setAchievements] = Miku.useState<AchievementsState | null>(
-    stateManager.getState('achievements')
-  );
+	const [achievements, setAchievements] =
+		Miku.useState<AchievementsState | null>(
+			stateManager.getState("achievements"),
+		);
 
-  Miku.useEffect(() => {
-    return stateManager.subscribe('achievements', setAchievements);
-  }, []);
+	Miku.useEffect(() => {
+		return stateManager.subscribe("achievements", setAchievements);
+	}, []);
 
-  return achievements;
+	return achievements;
 }
 
 export function useNotifications() {
-  const [notifications, setNotifications] = Miku.useState<NotificationsState | null>(
-    stateManager.getState('notifications')
-  );
+	const [notifications, setNotifications] =
+		Miku.useState<NotificationsState | null>(
+			stateManager.getState("notifications"),
+		);
 
-  Miku.useEffect(() => {
-    return stateManager.subscribe('notifications', setNotifications);
-  }, []);
+	Miku.useEffect(() => {
+		return stateManager.subscribe("notifications", setNotifications);
+	}, []);
 
-  return notifications;
+	return notifications;
 }
 
 export function useMessages() {
-  const [messages, setMessages] = Miku.useState<MessagesState | null>(
-    stateManager.getState('messages')
-  );
+	const [messages, setMessages] = Miku.useState<MessagesState | null>(
+		stateManager.getState("messages"),
+	);
 
-  Miku.useEffect(() => {
-    return stateManager.subscribe('messages', setMessages);
-  }, []);
+	Miku.useEffect(() => {
+		return stateManager.subscribe("messages", setMessages);
+	}, []);
 
-  return messages;
+	return messages;
 }
 
 // Combined hook for components that need multiple states
 export function useDashboardData() {
-  const identity = useUserIdentity();
-  const profile = useUserProfile();
-  const gameState = useGameState();
-  const social = useSocialState();
-  const achievements = useAchievements();
-  const notifications = useNotifications();
-  const messages = useMessages();
+	const identity = useUserIdentity();
+	const profile = useUserProfile();
+	const gameState = useGameState();
+	const social = useSocialState();
+	const achievements = useAchievements();
+	const notifications = useNotifications();
+	const messages = useMessages();
 
-  return { 
-    identity, 
-    profile, 
-    gameState, 
-    social, 
-    achievements, 
-    notifications, 
-    messages 
-  };
+	return {
+		identity,
+		profile,
+		gameState,
+		social,
+		achievements,
+		notifications,
+		messages,
+	};
 }
