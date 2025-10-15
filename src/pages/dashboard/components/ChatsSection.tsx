@@ -3,7 +3,6 @@ import Miku, { useEffect, useRef, useState } from "../../../Miku/src/index";
 import {
 	API_URL,
 	formatTime,
-	getOrCreateConversation,
 	sendChallenge,
 	sendMessage,
 } from "../../../services/api.ts";

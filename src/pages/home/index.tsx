@@ -174,7 +174,6 @@ export default function UserHomePage() {
 							PingPong Pro
 						</span>
 					</div>
-
 					<nav className="hidden md:flex items-center space-x-6">
 						<Link
 							to="/dashboard"
@@ -183,19 +182,12 @@ export default function UserHomePage() {
 							Dashboard
 						</Link>
 						<Link
-							to="/tournaments"
-							className="text-gray-300 hover:text-white transition-colors"
-						>
-							Tournaments
-						</Link>
-						<Link
 							to="/leaderboard"
 							className="text-gray-300 hover:text-white transition-colors"
 						>
 							Leaderboard
 						</Link>
-					</nav>
-
+					</nav>{" "}
 					<div className="flex items-center space-x-4">
 						<div className="flex items-center space-x-2 text-gray-300">
 							<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

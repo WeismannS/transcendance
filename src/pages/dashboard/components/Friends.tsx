@@ -120,6 +120,7 @@ export default function Friends({
 			<div className="flex items-center justify-between">
 				<h2 className="text-3xl font-bold text-white">Friends</h2>
 				<button
+					type="button"
 					onClick={handleAddFriends}
 					className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
 				>

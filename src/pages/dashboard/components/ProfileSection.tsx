@@ -241,6 +241,7 @@ export default function ProfileSection({
 									new Array(10).fill(null),
 									recentGames,
 								);
+
 								return filledGames.map((game: any, index: number) => {
 									if (!game) {
 										return (

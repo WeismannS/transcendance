@@ -86,12 +86,6 @@ export default function HomePage() {
 							Play
 						</Link>
 						<Link
-							to="/tournaments"
-							className="text-gray-300 hover:text-white transition-colors"
-						>
-							Tournaments
-						</Link>
-						<Link
 							to="/leaderboard"
 							className="text-gray-300 hover:text-white transition-colors"
 						>

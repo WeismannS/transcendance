@@ -1,57 +1,700 @@
-import Miku from "../../../Miku/src/index";
-import { Link } from "../../../Miku/src/Router/Router";
-import type { Tournament } from "./types";
+import Miku, { useEffect, useState } from "../../../Miku/src/index";
+import { useUserProfile } from "../../../hooks/useStates.ts";
+import {
+	API_URL,
+	createTournament,
+	getTournamentMatches,
+	getTournaments,
+	joinTournament,
+	leaveTournament,
+	sendChallenge,
+	startTournament,
+	stopTournament,
+} from "../../../services/api.ts";
+
+interface Tournament {
+	id: string;
+	name: string;
+	status: string;
+	type: string;
+	participants: number;
+	maxParticipants: number;
+	prize: string;
+	entryFee: string;
+	startTime: string;
+	endTime: string;
+	description: string;
+	rules: string;
+	currentRound: string;
+	registered: boolean;
+	featured: boolean;
+	difficulty: string;
+	organizer: string;
+	createdBy?: string;
+	players?: any[];
+	winner?: string;
+	userPlacement?: string;
+	playersCount?: number;
+	timeLeft?: string;
+	result?: string;
+}
 
 interface TournamentsSectionProps {
-	tournaments: Tournament[];
-	loading?: boolean;
-}
-
-function getUIStatus(
-	status: Tournament["status"],
-): "live" | "upcoming" | "completed" {
-	switch (status) {
-		case "ongoing":
-			return "live";
-		case "upcoming":
-		case "pending":
-			return "upcoming";
-		case "done":
-		case "cancelled":
-			return "completed";
-		default:
-			return "upcoming";
-	}
-}
-
-function formatStartTime(startTime: string | null): string {
-	if (!startTime) return "TBD";
-	try {
-		const date = new Date(startTime);
-		return (
-			date.toLocaleDateString() +
-			" " +
-			date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-		);
-	} catch {
-		return "TBD";
-	}
+	onRefresh?: () => void;
 }
 
 export default function TournamentsSection({
-	tournaments,
-	loading = false,
+	onRefresh,
 }: TournamentsSectionProps) {
+	const userProfile = useUserProfile();
+
+	const [tournaments, setTournaments] = useState<Tournament[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
+	const [selectedTournament, setSelectedTournament] =
+		useState<Tournament | null>(null);
+	const [showCreateModal, setShowCreateModal] = useState(false);
+	const [showBracket, setShowBracket] = useState(false);
+	const [showTournamentDetails, setShowTournamentDetails] = useState(false);
+	const [tournamentMatches, setTournamentMatches] = useState<any[]>([]);
+	const [matchesLoading, setMatchesLoading] = useState(false);
+	const [activeFilter, setActiveFilter] = useState("all");
+	const [searchQuery, setSearchQuery] = useState("");
+
+	// Create tournament form
+	const [newTournament, setNewTournament] = useState({
+		name: "",
+		startTime: "",
+	});
+
+	// Load tournaments from backend
+	const loadTournaments = async () => {
+		try {
+			setLoading(true);
+			setError("");
+			const tournamentsData = await getTournaments();
+
+			// Transform backend data to match frontend interface
+			const transformedTournaments = tournamentsData.map((tournament: any) => ({
+				id: tournament.id,
+				name: tournament.name,
+				status: tournament.status,
+				type: "4-Player Tournament",
+				participants:
+					tournament.playersCount || tournament.players?.length || 0,
+				maxParticipants: 4,
+				prize: "TBD",
+				entryFee: "Free",
+				startTime: tournament.startTime
+					? new Date(tournament.startTime).toLocaleString()
+					: "TBD",
+				endTime: "TBD",
+				description: `Tournament created by user. ${
+					tournament.participants || tournament.players?.length || 0
+				}/4 players registered.`,
+				rules: "Best of 3 sets, 11 points per set",
+				currentRound:
+					tournament.status === "upcoming"
+						? "Registration Open"
+						: tournament.status === "started"
+							? "In Progress"
+							: "Completed",
+				registered:
+					tournament.players?.some((p: any) => p.userId === userProfile?.id) ||
+					false,
+				featured: false,
+				difficulty: "Intermediate",
+				organizer: "Player",
+				createdBy: tournament.createdBy,
+				players: tournament.players || [],
+				playersCount:
+					tournament.playersCount || tournament.players?.length || 0,
+			}));
+
+			setTournaments(transformedTournaments);
+		} catch (err: any) {
+			setError(err.message || "Failed to load tournaments");
+			console.error("Failed to load tournaments:", err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const loadTournamentMatches = async (tournamentId: string) => {
+		try {
+			setMatchesLoading(true);
+			const matches = await getTournamentMatches(tournamentId);
+			setTournamentMatches(matches);
+		} catch (err: any) {
+			setError(err.message || "Failed to load tournament matches");
+			console.error("Failed to load tournament matches:", err);
+		} finally {
+			setMatchesLoading(false);
+		}
+	};
+
+	const handleTournamentChallenge = async (match: any) => {
+		if (!userProfile) return;
+
+		try {
+			const opponentId =
+				match.player1Id === String(userProfile.id)
+					? match.player2Id
+					: match.player1Id;
+
+			const opponentName =
+				match.player1Id === String(userProfile.id)
+					? match.player2?.displayName
+					: match.player1?.displayName;
+
+			const result = await sendChallenge(opponentId, "tournament", match.id);
+
+			if (result && result.gameId) {
+				window.location.href = `/game/${result.gameId}`;
+			} else {
+				alert(`Tournament challenge sent to ${opponentName}!`);
+			}
+		} catch (err: any) {
+			setError(err.message || "Failed to send tournament challenge");
+			console.error("Failed to send tournament challenge:", err);
+			alert(
+				`Failed to send tournament challenge: ${err.message || "Unknown error"}`,
+			);
+		}
+	};
+
+	useEffect(() => {
+		if (userProfile) {
+			loadTournaments();
+		}
+	}, [userProfile]);
+
+	const handleCreateTournament = async () => {
+		if (!userProfile || !newTournament.name.trim()) return;
+
+		try {
+			const startTime =
+				newTournament.startTime || new Date(Date.now() + 60000).toISOString();
+
+			await createTournament({
+				name: newTournament.name,
+				status: "upcoming",
+				startTime: startTime,
+				username: userProfile.displayName,
+			});
+
+			setNewTournament({ name: "", startTime: "" });
+			setShowCreateModal(false);
+			await loadTournaments();
+			if (onRefresh) onRefresh();
+		} catch (err: any) {
+			setError(err.message || "Failed to create tournament");
+		}
+	};
+
+	const handleRegister = async (tournamentId: string) => {
+		if (!userProfile) return;
+
+		try {
+			await joinTournament(tournamentId, userProfile.displayName);
+			await loadTournaments();
+			if (onRefresh) onRefresh();
+		} catch (err: any) {
+			setError(err.message || "Failed to join tournament");
+		}
+	};
+
+	const handleUnregister = async (tournamentId: string) => {
+		try {
+			await leaveTournament(tournamentId);
+			await loadTournaments();
+			if (onRefresh) onRefresh();
+		} catch (err: any) {
+			setError(err.message || "Failed to leave tournament");
+		}
+	};
+
+	const handleStartTournament = async (tournamentId: string) => {
+		try {
+			await startTournament(tournamentId);
+			await loadTournaments();
+			if (onRefresh) onRefresh();
+		} catch (err: any) {
+			setError(err.message || "Failed to start tournament");
+		}
+	};
+
+	const handleStopTournament = async (tournamentId: string) => {
+		try {
+			await stopTournament(tournamentId);
+			await loadTournaments();
+			if (onRefresh) onRefresh();
+		} catch (err: any) {
+			setError(err.message || "Failed to stop tournament");
+		}
+	};
+
+	const filteredTournaments = tournaments.filter((tournament) => {
+		const matchesFilter =
+			activeFilter === "all" || tournament.status === activeFilter;
+		const matchesSearch = tournament.name
+			.toLowerCase()
+			.includes(searchQuery.toLowerCase());
+		return matchesFilter && matchesSearch;
+	});
+
+	const renderTournamentCard = (tournament: Tournament) => (
+		<div
+			key={tournament.id}
+			className="bg-gray-800 bg-opacity-50 backdrop-blur-lg border rounded-2xl p-6 hover:border-orange-500 hover:border-opacity-50 transition-all duration-300 cursor-pointer transform hover:scale-105 border-gray-700"
+			onClick={() => {
+				setSelectedTournament(tournament);
+				setShowTournamentDetails(true);
+				loadTournamentMatches(tournament.id);
+			}}
+		>
+			<div className="flex items-start justify-between mb-4">
+				<h3 className="text-xl font-bold text-white flex-1 pr-4">
+					{tournament.name}
+				</h3>
+				<span
+					className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+						tournament.status === "started"
+							? "bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30"
+							: tournament.status === "upcoming"
+								? "bg-cyan-500 bg-opacity-20 text-cyan-400 border border-cyan-500 border-opacity-30"
+								: "bg-green-500 bg-opacity-20 text-green-400 border border-green-500 border-opacity-30"
+					}`}
+				>
+					{tournament.status.toUpperCase()}
+				</span>
+			</div>
+
+			<p className="text-gray-300 text-sm mb-4 line-clamp-2 min-h-10">
+				{tournament.description}
+			</p>
+
+			<div className="space-y-3 mb-4 text-sm">
+				<div className="grid grid-cols-2 gap-4">
+					<div className="flex justify-between">
+						<span className="text-gray-400">Players:</span>
+						<span className="text-white font-medium">
+							{tournament.participants}/{tournament.maxParticipants}
+						</span>
+					</div>
+					<div className="flex justify-between">
+						<span className="text-gray-400">Prize:</span>
+						<span className="text-green-400 font-semibold">
+							{tournament.prize}
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<div className="flex gap-2 mt-6" onClick={(e) => e.stopPropagation()}>
+				{tournament.createdBy === String(userProfile?.id) && (
+					<>
+						{tournament.status === "upcoming" &&
+							tournament.participants >= 2 && (
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										handleStartTournament(tournament.id);
+									}}
+									className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all font-semibold"
+								>
+									Start Tournament
+								</button>
+							)}
+						{(tournament.status === "upcoming" ||
+							tournament.status === "started") && (
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									handleStopTournament(tournament.id);
+								}}
+								className="flex-1 py-3 bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30 rounded-xl hover:bg-red-500 hover:bg-opacity-30 transition-all font-semibold"
+							>
+								Cancel
+							</button>
+						)}
+					</>
+				)}
+
+				{tournament.createdBy !== String(userProfile?.id) &&
+					tournament.status === "upcoming" && (
+						<>
+							{tournament.registered ? (
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										handleUnregister(tournament.id);
+									}}
+									className="flex-1 py-3 bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30 rounded-xl hover:bg-red-500 hover:bg-opacity-30 transition-all font-semibold"
+								>
+									Leave
+								</button>
+							) : (
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										handleRegister(tournament.id);
+									}}
+									className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+									disabled={
+										tournament.participants >= tournament.maxParticipants
+									}
+								>
+									{tournament.participants >= tournament.maxParticipants
+										? "Full"
+										: "Join"}
+								</button>
+							)}
+						</>
+					)}
+
+				{tournament.status === "started" && (
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+							loadTournamentMatches(tournament.id);
+							setSelectedTournament(tournament);
+							setShowBracket(true);
+						}}
+						className="flex-1 py-3 bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30 rounded-xl hover:bg-red-500 hover:bg-opacity-30 transition-all font-semibold"
+					>
+						Watch Live
+					</button>
+				)}
+
+				{tournament.status === "completed" && (
+					<button
+						onClick={(e) => {
+							e.stopPropagation();
+							loadTournamentMatches(tournament.id);
+							setSelectedTournament(tournament);
+							setShowBracket(true);
+						}}
+						className="flex-1 py-3 bg-gray-600 bg-opacity-20 text-gray-400 border border-gray-600 border-opacity-30 rounded-xl hover:bg-gray-600 hover:bg-opacity-30 transition-all font-semibold"
+					>
+						Results
+					</button>
+				)}
+			</div>
+		</div>
+	);
+
+	const renderBracket = () => (
+		<div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+			<div className="bg-gray-800 bg-opacity-90 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-6xl w-full max-h-screen overflow-y-auto">
+				<div className="flex items-center justify-between mb-6">
+					<h2 className="text-3xl font-bold text-white">
+						{selectedTournament?.status === "started"
+							? `🔴 Live: ${selectedTournament?.name || "Tournament"}`
+							: selectedTournament?.status === "completed"
+								? `🏆 Results: ${selectedTournament?.name || "Tournament"}`
+								: `Tournament Bracket`}
+					</h2>
+					<button
+						onClick={() => setShowBracket(false)}
+						className="text-gray-400 hover:text-white transition-colors text-2xl"
+					>
+						✕
+					</button>
+				</div>
+
+				{matchesLoading ? (
+					<div className="text-center py-12">
+						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+						<p className="text-white text-lg mt-4">
+							Loading tournament data...
+						</p>
+					</div>
+				) : tournamentMatches.length === 0 ? (
+					<div className="text-center py-12">
+						<div className="text-6xl mb-4">🏓</div>
+						<h3 className="text-2xl font-bold text-gray-400 mb-2">
+							No matches found
+						</h3>
+						<p className="text-gray-500">
+							Tournament matches will appear here once the tournament starts
+						</p>
+					</div>
+				) : (
+					<div className="space-y-8">
+						{Array.from(new Set(tournamentMatches.map((match) => match.round)))
+							.sort((a, b) => a - b)
+							.map((round) => {
+								const roundMatches = tournamentMatches.filter(
+									(match) => match.round === round,
+								);
+								const getRoundName = (round: number) => {
+									const totalRounds = Math.max(
+										...tournamentMatches.map((m) => m.round),
+									);
+									if (totalRounds === 1) return "Finals";
+									if (round === totalRounds) return "Finals";
+									if (round === totalRounds - 1) return "Semi-Finals";
+									return `Round ${round}`;
+								};
+
+								return (
+									<div key={round}>
+										<h3 className="text-xl font-bold text-orange-400 mb-4">
+											{getRoundName(round)}
+										</h3>
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											{roundMatches.map((match) => {
+												const player1Name = match.player1?.displayName || "TBD";
+												const player2Name = match.player2?.displayName || "TBD";
+												const isLive =
+													match.status === "active" ||
+													match.status === "ACTIVE";
+												const isCompleted =
+													match.status === "completed" ||
+													match.status === "COMPLETED";
+
+												let scoreDisplay = "";
+												if (match.score) {
+													try {
+														const parsedScore = JSON.parse(match.score);
+														scoreDisplay = `${parsedScore.player1 || "0"} - ${parsedScore.player2 || "0"}`;
+													} catch {
+														scoreDisplay = match.score;
+													}
+												}
+
+												const hasWinner =
+													match.winnerId &&
+													(match.winnerId === match.player1Id ||
+														match.winnerId === match.player2Id);
+												const isActuallyCompleted =
+													isCompleted ||
+													hasWinner ||
+													(match.score && match.score !== "null");
+
+												return (
+													<div
+														key={match.id}
+														className="bg-gray-700 bg-opacity-50 rounded-xl p-4"
+													>
+														<div className="flex items-center justify-between mb-3">
+															<span className="text-orange-400 font-semibold text-sm">
+																Match #{match.id.slice(-4)}
+															</span>
+															{isActuallyCompleted && scoreDisplay && (
+																<span className="text-white font-bold bg-gray-800 px-3 py-1 rounded-lg">
+																	{scoreDisplay}
+																</span>
+															)}
+														</div>
+
+														<div className="space-y-2">
+															<div className="flex items-center justify-between">
+																<div className="flex items-center space-x-3">
+																	<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+																		{player1Name.charAt(0).toUpperCase()}
+																	</div>
+																	<span
+																		className={`font-medium ${isActuallyCompleted && match.winnerId === match.player1Id ? "text-green-400 font-bold" : "text-white"}`}
+																	>
+																		{player1Name}
+																		{isActuallyCompleted &&
+																			match.winnerId === match.player1Id && (
+																				<span className="ml-2">🏆</span>
+																			)}
+																	</span>
+																</div>
+															</div>
+
+															<div className="text-center text-gray-400 text-sm font-semibold">
+																VS
+															</div>
+
+															<div className="flex items-center justify-between">
+																<div className="flex items-center space-x-3">
+																	<div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+																		{player2Name.charAt(0).toUpperCase()}
+																	</div>
+																	<span
+																		className={`font-medium ${isActuallyCompleted && match.winnerId === match.player2Id ? "text-green-400 font-bold" : "text-white"}`}
+																	>
+																		{player2Name}
+																		{isActuallyCompleted &&
+																			match.winnerId === match.player2Id && (
+																				<span className="ml-2">🏆</span>
+																			)}
+																	</span>
+																</div>
+															</div>
+														</div>
+
+														{!isActuallyCompleted &&
+															match.status?.toLowerCase() === "pending" &&
+															userProfile &&
+															(match.player1Id === String(userProfile.id) ||
+																match.player2Id === String(userProfile.id)) && (
+																<div className="mt-4">
+																	<button
+																		onClick={() =>
+																			handleTournamentChallenge(match)
+																		}
+																		className="w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-all font-medium"
+																	>
+																		Challenge
+																	</button>
+																</div>
+															)}
+													</div>
+												);
+											})}
+										</div>
+									</div>
+								);
+							})}
+					</div>
+				)}
+			</div>
+		</div>
+	);
+
+	const renderTournamentDetails = () => {
+		if (!showTournamentDetails || !selectedTournament) return null;
+
+		return (
+			<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+				<div className="bg-gray-800 rounded-xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+					<div className="flex justify-between items-center mb-6">
+						<h3 className="text-2xl font-bold text-white">
+							{selectedTournament.name} - Matches
+						</h3>
+						<button
+							onClick={() => setShowTournamentDetails(false)}
+							className="text-gray-400 hover:text-white text-xl font-bold"
+						>
+							×
+						</button>
+					</div>
+
+					<div className="space-y-4">
+						{matchesLoading ? (
+							<div className="text-center py-8">
+								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+								<p className="text-gray-300 mt-4">Loading matches...</p>
+							</div>
+						) : tournamentMatches.length > 0 ? (
+							<div className="space-y-6">
+								{Array.from(
+									new Set(tournamentMatches.map((match) => match.round)),
+								)
+									.sort()
+									.map((round) => (
+										<div key={round} className="bg-gray-700 rounded-lg p-4">
+											<h4 className="text-lg font-semibold text-white mb-4">
+												{round === 1
+													? "Semi-Finals"
+													: round === 2
+														? "Finals"
+														: `Round ${round}`}
+											</h4>
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+												{tournamentMatches
+													.filter((match) => match.round === round)
+													.map((match) => (
+														<div
+															key={match.id}
+															className="bg-gray-800 rounded-lg p-4"
+														>
+															<div className="flex justify-between items-center mb-3">
+																<div className="text-center flex-1">
+																	<p className="text-white font-medium">
+																		{match.player1?.displayName || "TBD"}
+																	</p>
+																</div>
+																<div className="px-4 text-gray-400 font-bold">
+																	VS
+																</div>
+																<div className="text-center flex-1">
+																	<p className="text-white font-medium">
+																		{match.player2?.displayName || "TBD"}
+																	</p>
+																</div>
+															</div>
+
+															<div className="text-center">
+																<p
+																	className={`text-sm font-medium mb-2 ${
+																		match.status?.toLowerCase() === "completed"
+																			? "text-green-400"
+																			: match.status?.toLowerCase() ===
+																					"in_progress"
+																				? "text-yellow-400"
+																				: "text-gray-400"
+																	}`}
+																>
+																	{match.status?.toLowerCase() === "completed"
+																		? "Completed"
+																		: match.status?.toLowerCase() ===
+																				"in_progress"
+																			? "In Progress"
+																			: "Pending"}
+																</p>
+
+																{match.status?.toLowerCase() === "pending" &&
+																	userProfile &&
+																	(match.player1Id === String(userProfile.id) ||
+																		match.player2Id ===
+																			String(userProfile.id)) && (
+																		<button
+																			onClick={() =>
+																				handleTournamentChallenge(match)
+																			}
+																			className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-all font-medium"
+																		>
+																			Challenge
+																		</button>
+																	)}
+
+																{match.status?.toLowerCase() === "completed" &&
+																	match.winnerId && (
+																		<p className="text-sm text-blue-400">
+																			Winner:{" "}
+																			{match.winnerId === match.player1Id
+																				? match.player1?.displayName
+																				: match.player2?.displayName}
+																		</p>
+																	)}
+															</div>
+														</div>
+													))}
+											</div>
+										</div>
+									))}
+							</div>
+						) : (
+							<div className="text-center py-8">
+								<p className="text-gray-300">
+									No matches found for this tournament.
+								</p>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		);
+	};
+
 	if (loading) {
 		return (
 			<div className="space-y-6">
 				<div className="flex items-center justify-between">
 					<h2 className="text-3xl font-bold text-white">Tournaments</h2>
-					<Link to="/tournaments">
-						<button className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
-							View All Tournaments
-						</button>
-					</Link>
+					<button
+						onClick={() => setShowCreateModal(true)}
+						className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
+					>
+						Create Tournament
+					</button>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{[...Array(3)].map((_, i) => (
@@ -73,110 +716,191 @@ export default function TournamentsSection({
 		);
 	}
 
-	if (tournaments.length === 0) {
-		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<h2 className="text-3xl font-bold text-white">Tournaments</h2>
-					<Link to="/tournaments">
-						<button className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
-							View All Tournaments
-						</button>
-					</Link>
-				</div>
-				<div className="text-center py-12">
-					<p className="text-gray-400 text-lg">No tournaments available</p>
-					<p className="text-gray-500 mt-2">
-						Check back later for upcoming tournaments!
-					</p>
-				</div>
-			</div>
-		);
-	}
-
 	return (
 		<div className="space-y-6">
+			{renderTournamentDetails()}
+			{showBracket && renderBracket()}
+
+			{/* Header with filters and create button */}
 			<div className="flex items-center justify-between">
 				<h2 className="text-3xl font-bold text-white">Tournaments</h2>
-				<Link to="/tournaments">
-					<button className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all">
-						View All Tournaments
-					</button>
-				</Link>
+				<button
+					onClick={() => setShowCreateModal(true)}
+					className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
+				>
+					Create Tournament
+				</button>
 			</div>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{tournaments.map((tournament) => {
-					const uiStatus = getUIStatus(tournament.status);
-					return (
-						<Link key={tournament.id} to="/tournaments">
-							<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer">
-								<div className="flex items-center justify-between mb-4">
-									<h3 className="text-xl font-bold text-white">
-										{tournament.name}
-									</h3>
-									<span
-										className={`px-3 py-1 rounded-full text-xs font-semibold ${
-											uiStatus === "live"
-												? "bg-red-500/20 text-red-400 border border-red-500/30"
-												: uiStatus === "upcoming"
-													? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-													: "bg-green-500/20 text-green-400 border border-green-500/30"
-										}`}
-									>
-										{uiStatus.toUpperCase()}
-									</span>
-								</div>
-								<div className="space-y-2 text-gray-300">
-									<div className="flex justify-between">
-										<span>Players:</span>
-										<span className="text-white font-semibold">
-											{tournament.playersCount}/4
-										</span>
-									</div>
-									<div className="flex justify-between">
-										<span>Prize Pool:</span>
-										<span className="text-orange-400 font-semibold">
-											{tournament.prize || "TBD"}
-										</span>
-									</div>
-									<div className="flex justify-between">
-										<span>
-											{uiStatus === "live"
-												? "Time Left:"
-												: uiStatus === "upcoming"
-													? "Starts:"
-													: "Result:"}
-										</span>
-										<span className="text-white font-semibold">
-											{uiStatus === "live"
-												? tournament.timeLeft || "In Progress"
-												: uiStatus === "upcoming"
-													? formatStartTime(tournament.startTime)
-													: tournament.result || "Completed"}
-										</span>
-									</div>
-								</div>
+
+			{/* Search and Filters */}
+			<div className="flex flex-col md:flex-row gap-4">
+				<div className="flex-1">
+					<input
+						type="text"
+						placeholder="Search tournaments..."
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="w-full px-4 py-3 bg-gray-800 bg-opacity-50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+					/>
+				</div>
+
+				<div className="flex flex-wrap gap-2">
+					{[
+						{ id: "all", label: "All", count: tournaments.length },
+						{
+							id: "started",
+							label: "Live",
+							count: tournaments.filter((t) => t.status === "started").length,
+						},
+						{
+							id: "upcoming",
+							label: "Upcoming",
+							count: tournaments.filter((t) => t.status === "upcoming").length,
+						},
+						{
+							id: "completed",
+							label: "Completed",
+							count: tournaments.filter((t) => t.status === "completed").length,
+						},
+					].map((filter) => (
+						<button
+							key={filter.id}
+							onClick={() => setActiveFilter(filter.id)}
+							className={`px-4 py-3 rounded-xl font-semibold transition-all flex items-center space-x-2 whitespace-nowrap ${
+								activeFilter === filter.id
+									? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
+									: "bg-gray-800 bg-opacity-50 text-gray-400 hover:text-white hover:bg-gray-700 hover:bg-opacity-50"
+							}`}
+						>
+							<span>{filter.label}</span>
+							<span className="bg-gray-700 text-white text-xs px-2 py-1 rounded-full">
+								{filter.count}
+							</span>
+						</button>
+					))}
+				</div>
+			</div>
+
+			{/* Error Display */}
+			{error && (
+				<div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 border-opacity-30 rounded-xl text-red-400">
+					{error}
+					<button
+						onClick={() => setError("")}
+						className="ml-4 text-red-300 hover:text-red-100"
+					>
+						✕
+					</button>
+				</div>
+			)}
+
+			{/* Tournament Grid */}
+			{filteredTournaments.length > 0 ? (
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{filteredTournaments.map((tournament) =>
+						renderTournamentCard(tournament),
+					)}
+				</div>
+			) : (
+				<div className="text-center py-12">
+					<div className="text-6xl mb-4">🏓</div>
+					<h3 className="text-2xl font-bold text-gray-400 mb-2">
+						No tournaments found
+					</h3>
+					<p className="text-gray-500">
+						{tournaments.length === 0
+							? "Create your first tournament!"
+							: "Try adjusting your search or filters"}
+					</p>
+				</div>
+			)}
+
+			{/* Create Tournament Modal */}
+			{showCreateModal && (
+				<div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+					<div className="bg-gray-800 bg-opacity-90 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-md w-full">
+						<div className="flex items-center justify-between mb-6">
+							<h2 className="text-3xl font-bold text-white">
+								Create Tournament
+							</h2>
+							<button
+								onClick={() => setShowCreateModal(false)}
+								className="text-gray-400 hover:text-white transition-colors text-2xl"
+							>
+								✕
+							</button>
+						</div>
+
+						<div className="space-y-4">
+							<div>
+								<label className="block text-sm font-medium text-gray-300 mb-2">
+									Tournament Name
+								</label>
+								<input
+									type="text"
+									value={newTournament.name}
+									onChange={(e) =>
+										setNewTournament((prev) => ({
+											...prev,
+											name: e.target.value,
+										}))
+									}
+									placeholder="Enter tournament name..."
+									className="w-full px-4 py-3 bg-gray-700 bg-opacity-50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+								/>
+							</div>
+
+							<div>
+								<label className="block text-sm font-medium text-gray-300 mb-2">
+									Start Time (Optional)
+								</label>
+								<input
+									type="datetime-local"
+									value={newTournament.startTime}
+									onChange={(e) =>
+										setNewTournament((prev) => ({
+											...prev,
+											startTime: e.target.value,
+										}))
+									}
+									className="w-full px-4 py-3 bg-gray-700 bg-opacity-50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+								/>
+								<p className="text-gray-400 text-sm mt-1">
+									Leave empty for immediate availability
+								</p>
+							</div>
+
+							<div className="bg-gray-700 bg-opacity-30 p-4 rounded-xl">
+								<h3 className="text-white font-semibold mb-2">
+									Tournament Info
+								</h3>
+								<ul className="text-gray-300 text-sm space-y-1">
+									<li>• Maximum 4 players</li>
+									<li>• Tournament creator can start when 2+ players join</li>
+									<li>• Semifinals → Finals format</li>
+									<li>• You'll be automatically registered as a player</li>
+								</ul>
+							</div>
+
+							<div className="flex gap-3">
 								<button
-									className={`w-full mt-4 py-2 rounded-xl font-semibold transition-all ${
-										uiStatus === "live"
-											? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
-											: uiStatus === "upcoming"
-												? "bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30"
-												: "bg-gray-600/20 text-gray-400 border border-gray-600/30"
-									}`}
-									disabled={uiStatus === "completed"}
+									onClick={() => setShowCreateModal(false)}
+									className="flex-1 py-3 bg-gray-600 bg-opacity-50 text-gray-300 rounded-xl hover:bg-gray-600 transition-all font-semibold"
 								>
-									{uiStatus === "live"
-										? "Watch Live"
-										: uiStatus === "upcoming"
-											? "Register"
-											: "View Results"}
+									Cancel
+								</button>
+								<button
+									onClick={handleCreateTournament}
+									disabled={!newTournament.name.trim()}
+									className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									Create Tournament
 								</button>
 							</div>
-						</Link>
-					);
-				})}
-			</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

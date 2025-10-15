@@ -43,16 +43,8 @@ export default function Overview() {
 		redirect("/game");
 	};
 
-	const handleViewTournaments = () => {
-		redirect("/tournaments");
-	};
-
 	const handleViewLeaderboard = () => {
 		redirect("/leaderboard");
-	};
-
-	const handleViewProfile = () => {
-		redirect("/app_home");
 	};
 
 	return (

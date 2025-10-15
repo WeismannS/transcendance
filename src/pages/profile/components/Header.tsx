@@ -13,7 +13,6 @@ export default function Header() {
 						PingPong Pro
 					</span>
 				</div>
-
 				<nav className="hidden md:flex items-center space-x-6">
 					<Link
 						to="/home"
@@ -27,14 +26,7 @@ export default function Header() {
 					>
 						Dashboard
 					</Link>
-					<Link
-						to="/tournaments"
-						className="text-gray-300 hover:text-white transition-colors"
-					>
-						Tournaments
-					</Link>
-				</nav>
-
+				</nav>{" "}
 				<div className="flex items-center space-x-3">
 					<div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
 						<span className="text-white font-bold text-sm">JD</span>

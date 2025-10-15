@@ -7,7 +7,6 @@ import LeaderboardPage from "./pages/leaderboard/index.tsx";
 import { NotificationContainer } from "./pages/notification.tsx";
 import UserHomePage from "./pages/profile/index.tsx";
 import SignInPage from "./pages/sign_in/index.tsx";
-import TournamentsPage from "./pages/tournaments/index.tsx";
 import {
 	API_URL,
 	getAllConversations,
@@ -28,7 +27,6 @@ const ProtectedRoutes = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
 				Component={UserHomePage}
 				isLoggedIn={isLoggedIn}
 			/>
-			<Router path="/tournaments" Component={TournamentsPage} />
 			<Router path="/leaderboard" Component={LeaderboardPage} />
 			<Router path="/game/" Component={GamePage} />
 			<Router path="/game/:gameId" Component={GamePage} />

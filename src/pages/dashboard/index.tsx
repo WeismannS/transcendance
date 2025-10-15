@@ -1,12 +1,7 @@
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
 import Miku, { useEffect, useState } from "../../Miku/src/index";
-import {
-	API_URL,
-	getTournaments,
-	logOut,
-	updateProfile,
-} from "../../services/api.ts";
+import { API_URL, logOut, updateProfile } from "../../services/api.ts";
 import { Achievement, User } from "../../types/user.ts";
 import {
 	AnimatedBackground,
@@ -72,44 +67,6 @@ export default function DashboardPage() {
 		avatarPreview: profile?.avatar ? API_URL + `/${profile.avatar}` : "",
 	});
 
-	// Tournament data from backend
-	const [tournaments, setTournaments] = useState([]);
-	const [tournamentsLoading, setTournamentsLoading] = useState(true);
-
-	// Load tournaments from backend
-	const loadDashboardTournaments = async () => {
-		try {
-			setTournamentsLoading(true);
-			const tournamentsData = await getTournaments();
-
-			// Transform backend data to match dashboard interface (simpler than full tournament page)
-			const transformedTournaments = tournamentsData
-				.slice(0, 3)
-				.map((tournament: any) => ({
-					id: tournament.id,
-					name: tournament.name,
-					status: tournament.status === "started" ? "live" : tournament.status,
-					players: tournament.playersCount || tournament.players?.length || 0,
-					prize: "TBD", // Could be added to backend later
-					timeLeft: tournament.status === "started" ? "Live" : undefined,
-					startTime:
-						tournament.status === "upcoming" && tournament.startTime
-							? new Date(tournament.startTime).toLocaleString()
-							: undefined,
-					result:
-						tournament.status === "completed" ? "View Results" : undefined,
-				}));
-
-			setTournaments(transformedTournaments);
-		} catch (err: any) {
-			console.error("Failed to load dashboard tournaments:", err);
-			// Keep empty array on error
-			setTournaments([]);
-		} finally {
-			setTournamentsLoading(false);
-		}
-	};
-
 	useEffect(() => {
 		setIsVisible(true);
 		// Initialize editable profile state when profile data is available
@@ -136,11 +93,6 @@ export default function DashboardPage() {
 							).toFixed(1)
 						: 0,
 			});
-		}
-
-		// Load tournaments when profile is available
-		if (profile) {
-			loadDashboardTournaments();
 		}
 
 		// Animated ping pong ball
@@ -227,12 +179,7 @@ export default function DashboardPage() {
 						}`}
 					>
 						{activeSection === "overview" && <Overview />}
-						{activeSection === "tournaments" && (
-							<TournamentsSection
-								tournaments={tournaments}
-								loading={tournamentsLoading}
-							/>
-						)}
+						{activeSection === "tournaments" && <TournamentsSection />}
 						{activeSection === "chats" && <ChatsSection />}
 						{activeSection === "friends" && (
 							<Friends setActiveSection={setActiveSection} />

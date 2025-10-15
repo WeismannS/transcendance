@@ -22,7 +22,7 @@ export default function Navigation({
 			<div className="max-w-7xl mx-auto">
 				<div className="flex space-x-8">
 					{sections.map((section) => (
-						<button 
+						<button
 							type="button"
 							key={section.id}
 							onClick={() => setActiveSection(section.id)}
