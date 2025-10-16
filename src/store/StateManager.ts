@@ -233,7 +233,6 @@ class StateManager {
 		switch (event.type) {
 			case "GAME_FINISHED":
 				this.updateGameStats(event.payload);
-				this.checkForAchievements(event.payload);
 				break;
 
 			case "FRIEND_REQUEST_SENT":
@@ -335,7 +334,7 @@ class StateManager {
 			return {
 				...prev,
 				stats: newStats,
-				history: [gameResult, ...prev.history.slice(0, 49)],
+				history: [...prev.history.slice(0, 49), gameResult],
 			};
 		});
 	}
@@ -348,7 +347,7 @@ class StateManager {
 		this.updateState<SocialState>("social", (prev) => {
 			const updatedFriends = prev.friends.map((friend) =>
 				friend.id === user.id
-					? (console.log("Found"),
+					? (
 						{
 							...friend,
 							status: user.isOnline

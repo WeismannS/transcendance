@@ -16,7 +16,10 @@
 	"linter": {
 		"enabled": false,
 		"rules": {
-			"recommended": true
+			"recommended": false,
+			"suspicious" : {
+				"noConsole" : "error"
+			}
 		}
 	},
 	"javascript": {

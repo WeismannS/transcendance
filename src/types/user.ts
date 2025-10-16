@@ -71,6 +71,7 @@ export type FriendEvent =
 export type GameEvent =
 	| "GAME_INVITE"
 	| "GAME_ACCEPTED"
+	| "GAME_FINISHED"
 	| "GAME_REJECTED"
 	| "TOURNAMENT_MATCH"
 	| "TOURNAMENT_UPDATE";
@@ -97,6 +98,7 @@ export type Notification<T extends EventType> = {
 		: never;
 	opponent: T extends "TOURNAMENT_MATCH" ? ProfileOverview : never;
 	round: T extends "TOURNAMENT_MATCH" ? number : never;
+	gameResult: T extends "GAME_FINISHED" ? GameHistory : never;
 };
 
 export function isNotificationType<T extends EventType>(

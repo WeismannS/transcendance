@@ -508,7 +508,9 @@ export function initializeNotificationWs() {
 				});
 			} else if (isNotificationType(data, "ACHIEVEMENT_UNLOCKED")) {
 				stateManager.emit("ACHIEVEMENT_UNLOCKED", data);
-			} else {
+			} else if (isNotificationType(data, "GAME_FINISHED"))
+				stateManager.emit("GAME_FINISHED", data.gameResult);
+			else {
 				console.log("Unknown websocket message type:", data.type);
 			}
 		} catch (error) {

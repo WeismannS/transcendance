@@ -130,7 +130,7 @@ export default function Friends({
 
 			{/* Confirm Remove Friend Modal */}
 			{showConfirmRemove && (
-				<div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+				<div className="fixed inset-0  flex items-center justify-center z-50">
 					<div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md mx-4">
 						<h3 className="text-xl font-bold text-white mb-4">Remove Friend</h3>
 						<p className="text-gray-300 mb-6">
@@ -158,7 +158,7 @@ export default function Friends({
 
 			{/* Add Friends Modal */}
 			{showAddFriendsModal && (
-				<div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+				<div className="fixed inset-0 flex items-center justify-center z-50">
 					<div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
 						<div className="flex items-center justify-between mb-6">
 							<h3 className="text-2xl font-bold text-white">Add Friends</h3>

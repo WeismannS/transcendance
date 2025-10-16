@@ -4,7 +4,10 @@ WORKDIR /app
 
 COPY . /app
 
-RUN bun install && bun run build \
+RUN sed -i '17s/\bfalse\b/true/g' biome.json
+
+RUN bun install && bunx biome lint --unsafe --write \
+ && bun run build \
  && rm -rf node_modules src \
  && bun pm cache rm
 
