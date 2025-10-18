@@ -1,4 +1,4 @@
-import Miku from "../../../Miku/src/index";
+import Miku from "Miku";
 import { API_URL } from "../../../services/api.ts";
 import type { ProfileUser } from "./types.ts";
 
@@ -12,6 +12,7 @@ interface ProfileHeaderProps {
 	onChallenge: () => void;
 	onMessage: () => void;
 	onEditProfile: () => void;
+	onBlock: () => void;
 }
 
 export default function ProfileHeader({
@@ -24,6 +25,7 @@ export default function ProfileHeader({
 	onChallenge,
 	onMessage,
 	onEditProfile,
+	onBlock
 }: ProfileHeaderProps) {
 	return (
 		<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 mb-8">
@@ -101,6 +103,17 @@ export default function ProfileHeader({
 								}`}
 							>
 								Challenge
+							</button>
+							<button
+								onClick={onBlock}
+								disabled={hasPendingRequest}
+								className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+									hasPendingRequest
+										? "bg-yellow-600/50 text-yellow-200 cursor-not-allowed"
+										: "bg-red-600 text-white hover:bg-red-700"
+								}`}
+							>
+								Block
 							</button>
 							<button
 								onClick={onMessage}

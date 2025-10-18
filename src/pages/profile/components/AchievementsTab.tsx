@@ -1,4 +1,4 @@
-import Miku from "../../../Miku/src/index";
+import Miku from "Miku";
 import type { Achievement } from "./types.ts";
 
 interface AchievementsTabProps {

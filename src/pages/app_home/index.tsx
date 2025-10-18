@@ -1,5 +1,5 @@
-import Miku, { useEffect, useState } from "../../Miku/src/index";
-import { Link } from "../../Miku/src/Router/Router";
+import Miku, { useEffect, useState } from "Miku";
+import { Link } from "Miku/Router";
 
 export default function HomePage() {
 	const [isVisible, setIsVisible] = useState(false);

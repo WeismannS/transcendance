@@ -1,6 +1,6 @@
 import UniversalHeader from "../../components/UniversalHeader.tsx";
-import Miku, { useEffect, useState } from "../../Miku/src/index";
-import { Link, redirect } from "../../Miku/src/Router/Router";
+import Miku, { useEffect, useState } from "Miku";
+import { Link, redirect } from "Miku/Router";
 import {
 	getOrCreateConversation,
 	getProfileByUsername,
@@ -457,6 +457,12 @@ export default function UserProfilePage({
 		}
 	};
 
+	const handleBlock = () => {
+		if (!isOwnProfile && profileUser) {
+			
+		}
+	};
+
 	const renderTabContent = () => {
 		if (!profileUser) return null;
 
@@ -712,6 +718,7 @@ export default function UserProfilePage({
 							onChallenge={handleChallenge}
 							onMessage={handleMessage}
 							onEditProfile={handleEditProfile}
+							onBlock={handleBlock}
 						/>
 
 						<TabNavigation

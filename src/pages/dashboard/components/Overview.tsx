@@ -1,7 +1,7 @@
 "use client";
 
-import Miku from "../../../Miku/src/index";
-import { redirect } from "../../../Miku/src/Router/Router";
+import Miku from "Miku";
+import { redirect } from "Miku/Router";
 import { formatTime } from "../../../services/api.ts";
 import type {
 	AchievementsState,

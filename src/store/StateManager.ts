@@ -1,4 +1,4 @@
-import { redirect } from "../Miku/src/Router/Router";
+import { redirect } from "Miku/Router";
 import type { Notification } from "../pages/use-notification.ts";
 import {
 	initializeChatWebSocket,

@@ -1,4 +1,4 @@
-import Miku, { useEffect, useState } from "../../../Miku/src/index";
+import Miku, { useEffect, useState } from "Miku";
 import {
 	API_URL,
 	acceptFriendRequest,

@@ -1,6 +1,6 @@
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
-import Miku, { useEffect, useState } from "../../Miku/src/index";
+import Miku, { useEffect, useState } from "Miku";
 import { API_URL, logOut, updateProfile } from "../../services/api.ts";
 import { Achievement, User } from "../../types/user.ts";
 import {
@@ -13,6 +13,7 @@ import {
 	ProfileSection,
 	TournamentsSection,
 } from "./components/index.ts";
+import { useNotifications } from "../use-notification";
 
 export default function DashboardPage() {
 	const {
@@ -24,7 +25,7 @@ export default function DashboardPage() {
 		notifications,
 		messages,
 	} = useDashboardData();
-
+	const {addNotification} = useNotifications();
 	// Check if we should start with a specific section (e.g., from profile message button)
 	const initialSection =
 		sessionStorage.getItem("dashboardActiveSection") || "overview";
@@ -108,15 +109,24 @@ export default function DashboardPage() {
 
 	// Profile Edit Handlers
 	const handleSave = async () => {
-		const success = await updateProfile({
+		const result = await updateProfile({
 			displayName: editableProfile.displayName,
 			bio: editableProfile.bio,
 			avatar: editableProfile.avatarFile ?? null,
 		});
-		console.log("Profile updated:", success);
-		if (success) {
+		console.log("Profile updated:", result);
+		if (result.success) {
 			setIsEditMode(false);
 		}
+		else {
+			addNotification({
+				type: "error",
+				message: `Failed to update profile. ${result.error}`,
+				duration: 5000,
+				title: "Profile Update Error",
+			});
+		}
+		
 	};
 
 	const handleCancel = () => {

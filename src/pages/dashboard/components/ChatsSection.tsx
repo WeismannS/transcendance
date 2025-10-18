@@ -1,5 +1,5 @@
 import { useMessages, useUserProfile } from "../../../hooks/useStates.ts";
-import Miku, { useEffect, useRef, useState } from "../../../Miku/src/index";
+import Miku, { useEffect, useRef, useState } from "Miku";
 import {
 	API_URL,
 	formatTime,

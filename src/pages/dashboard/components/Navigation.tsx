@@ -1,4 +1,4 @@
-import Miku from "../../../Miku/src/index";
+import Miku from "Miku";
 
 interface NavigationProps {
 	activeSection: string;

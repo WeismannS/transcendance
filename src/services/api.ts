@@ -1,4 +1,4 @@
-import { redirect } from "../Miku/src/Router/Router";
+import { redirect } from "Miku/Router";
 import { useNotifications } from "../pages/use-notification.tsx";
 import {
 	EventType,
@@ -271,7 +271,7 @@ export async function updateProfile(profileData: any) {
 			credentials: "include",
 		});
 		if (!response.ok) {
-			throw new Error("Failed to update profile");
+			throw new Error(`${response.statusText}`);
 		} else {
 			const profile = await response.json();
 			stateManager.emit("PROFILE_UPDATED", {
@@ -279,11 +279,11 @@ export async function updateProfile(profileData: any) {
 				avatar: profile.avatarUrl,
 			});
 		}
-		return true;
+		return { success: true };
 	} catch (error) {
 		console.error("Failed to update profile:", error);
 
-		return false;
+		return {error, success: false};
 	}
 }
 

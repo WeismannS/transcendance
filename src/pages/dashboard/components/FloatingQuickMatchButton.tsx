@@ -1,5 +1,5 @@
-import Miku from "../../../Miku/src/index";
-import { Link } from "../../../Miku/src/Router/Router";
+import Miku from "Miku";
+import { Link } from "Miku/Router";
 
 export default function FloatingQuickMatchButton() {
 	return (
