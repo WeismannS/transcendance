@@ -8,6 +8,7 @@ interface ProfileHeaderProps {
 	isFriend: boolean;
 	isOwnProfile?: boolean;
 	hasPendingRequest?: boolean;
+	isBlocked?: boolean;
 	onFriendToggle: () => void;
 	onChallenge: () => void;
 	onMessage: () => void;
@@ -19,6 +20,7 @@ export default function ProfileHeader({
 	profileUser,
 	isOnline,
 	isFriend,
+	isBlocked,
 	isOwnProfile = false,
 	hasPendingRequest = false,
 	onFriendToggle,
@@ -107,13 +109,16 @@ export default function ProfileHeader({
 							<button
 								onClick={onBlock}
 								disabled={hasPendingRequest}
+								aria-pressed={isBlocked}
 								className={`px-6 py-3 rounded-xl font-semibold transition-all ${
 									hasPendingRequest
 										? "bg-yellow-600/50 text-yellow-200 cursor-not-allowed"
-										: "bg-red-600 text-white hover:bg-red-700"
+										: isBlocked
+											? "bg-green-600 text-white hover:bg-green-700"
+											: "bg-red-600 text-white hover:bg-red-700"
 								}`}
 							>
-								Block
+								{isBlocked ? "Unblock" : "Block"}
 							</button>
 							<button
 								onClick={onMessage}

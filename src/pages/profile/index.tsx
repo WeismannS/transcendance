@@ -9,6 +9,7 @@ import {
 	removeFriend,
 	sendChallenge,
 	sendFriendRequest,
+	unblockUser,
 } from "../../services/api.ts";
 import type {
 	AchievementsState,
@@ -226,6 +227,7 @@ export default function UserProfilePage({
 						},
 						achievements: achievementsState?.userAchievementIds || [],
 						gamesH2h: [],
+						isBlocked : false,
 					};
 
 					setProfileData(mockProfile);
@@ -314,6 +316,7 @@ export default function UserProfilePage({
 				},
 				achievements: achievementsState.userAchievementIds || [],
 				gamesH2h: [],
+				isBlocked : false,
 			};
 			console.log("this in useeffect", gameState);
 			setProfileData(updatedProfile);
@@ -458,15 +461,24 @@ export default function UserProfilePage({
 		}
 	};
 
-	const handleBlock = () => {
-		if (!isOwnProfile && profileUser) {
-			if (profileData?.profile)
-			{
-				blockUser(profileData.profile.id).then(e=>{
-					if (e.success)
-						stateManager.emit("FRIEND_REMOVED", {user : {id : profileData.profile.id}})
-				})
+	const handleBlock = async () => {
+		if (isOwnProfile || !profileUser || !profileData?.profile) return;
+
+		const targetId = profileData.profile.id;
+		try {
+			if (profileData.isBlocked) {
+				const res = await unblockUser(targetId);
+				if (res.success)
+					setProfileData((prev) => prev ? { ...prev, isBlocked: false } : prev);
+			} else {
+				const res = await blockUser(targetId);
+				if (res.success) {
+					setProfileData((prev) => prev ? { ...prev, isBlocked: true } : prev);
+					stateManager.emit("FRIEND_REMOVED", { user: { id: targetId } });
+				}
 			}
+		} catch (err) {
+			console.error("Error toggling block status:", err);
 		}
 	};
 
@@ -719,6 +731,7 @@ export default function UserProfilePage({
 							profileUser={profileUser}
 							isOnline={isOnline}
 							isFriend={isFriend}
+							isBlocked={profileData.isBlocked}
 							isOwnProfile={isOwnProfile}
 							hasPendingRequest={hasPendingRequest}
 							onFriendToggle={handleFriendToggle}

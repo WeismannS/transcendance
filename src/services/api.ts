@@ -208,6 +208,28 @@ export async function blockUser(id : string)
 			body : JSON.stringify({
 				"blockedUserId" : id
 			}),
+			headers : {
+				"content-type" : "application/json"
+			},
+			credentials : "include"
+		})
+		if (!response.ok)
+		{
+			const reason = await response.json()
+			return {error : reason.message, success : false}
+		}
+		return {success : true} as const
+	}
+	catch(error) {
+		return {error : error, success: false} 
+		} 
+	}
+
+export async function unblockUser(id : string)
+{
+	try {
+		const response = await fetch(API_URL +"/api/user-management/blocks/"+id, {
+			method : "DELETE",
 			credentials : "include"
 		})
 		if (!response.ok)

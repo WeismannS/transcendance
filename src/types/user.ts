@@ -18,6 +18,7 @@ export interface Profile extends Omit<User, "friends" | "friendRequests"> {
 		wins: number;
 		losses: number;
 	};
+	isBlocked : boolean;
 }
 export type GameHistory = {
 	id: number;
