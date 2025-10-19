@@ -2,10 +2,12 @@ import UniversalHeader from "../../components/UniversalHeader.tsx";
 import Miku, { useEffect, useState } from "Miku";
 import { Link, redirect } from "Miku/Router";
 import {
+	blockUser,
 	getOrCreateConversation,
 	getProfileByUsername,
 	logOut,
 	removeFriend,
+	sendChallenge,
 	sendFriendRequest,
 } from "../../services/api.ts";
 import type {
@@ -405,10 +407,9 @@ export default function UserProfilePage({
 	};
 
 	const handleChallenge = () => {
-		if (profileUser) {
-			console.log("Challenge sent to", profileUser.name);
-			// Here you would implement the challenge functionality
-		}
+		if (profileUser) 
+			if (profileData?.profile)
+				sendChallenge(profileData.profile.id)
 	};
 
 	const handleMessage = async () => {
@@ -459,7 +460,13 @@ export default function UserProfilePage({
 
 	const handleBlock = () => {
 		if (!isOwnProfile && profileUser) {
-			
+			if (profileData?.profile)
+			{
+				blockUser(profileData.profile.id).then(e=>{
+					if (e.success)
+						stateManager.emit("FRIEND_REMOVED", {user : {id : profileData.profile.id}})
+				})
+			}
 		}
 	};
 

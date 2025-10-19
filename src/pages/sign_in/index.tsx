@@ -594,27 +594,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 							<div key="auth-form" className="space-y-6">
 								{formFields}
 
-								<div
-									key="form-options"
-									className="flex items-center justify-between"
-								>
-									<label key="checkbox-label" className="flex items-center">
-										<input
-											key="checkbox"
-											type="checkbox"
-											className="w-4 h-4 text-cyan-500 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
-										/>
-									</label>
-									<button
-										key="forgot-password"
-										type="button"
-										className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
-										style={{ display: !isSignUp ? "block" : "none" }}
-									>
-										Forgot password?
-									</button>
-								</div>
-
 								<button
 									key="submit-btn"
 									type="button"
@@ -660,26 +639,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 							</div>
 						</div>
 
-						{/* Additional Info */}
-						<div key="additional-info" className="text-center mt-8">
-							<p key="terms-text" className="text-gray-400 text-sm">
-								By {isSignUp ? "creating an account" : "signing in"}, you agree
-								to our{" "}
-								<button
-									key="terms-link"
-									className="text-cyan-400 hover:text-cyan-300 transition-colors"
-								>
-									Terms of Service
-								</button>
-								{" and "}
-								<button
-									key="privacy-link"
-									className="text-cyan-400 hover:text-cyan-300 transition-colors"
-								>
-									Privacy Policy
-								</button>
-							</p>
-						</div>
+					
 					</div>
 				</div>
 			</main>

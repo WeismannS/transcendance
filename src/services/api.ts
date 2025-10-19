@@ -200,6 +200,28 @@ export async function isOnline(userId: number): Promise<boolean> {
 	}
 }
 
+export async function blockUser(id : string)
+{
+	try {
+		const response = await fetch(API_URL +"/api/user-management/blocks/", {
+			method : "POST",
+			body : JSON.stringify({
+				"blockedUserId" : id
+			}),
+			credentials : "include"
+		})
+		if (!response.ok)
+		{
+			const reason = await response.json()
+			return {error : reason.message, success : false}
+		}
+		return {success : true} as const
+	}
+	catch(error) {
+		return {error : error, success: false} 
+		} 
+	}
+
 export async function declineFriendRequest(requestId: string, friend: any) {
 	try {
 		const response = await fetch(
