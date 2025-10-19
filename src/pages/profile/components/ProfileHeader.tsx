@@ -97,9 +97,9 @@ export default function ProfileHeader({
 							</button>
 							<button
 								onClick={onChallenge}
-								disabled={!isOnline}
+								disabled={!(isFriend && isOnline)}
 								className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-									!isOnline
+									!(isFriend && isOnline)
 										? "bg-gray-600 text-gray-400 cursor-not-allowed"
 										: "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
 								}`}
