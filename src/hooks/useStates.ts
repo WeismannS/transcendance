@@ -9,6 +9,7 @@ import {
 	type UserIdentityState,
 	type UserProfileState,
 } from "../store/StateManager.ts";
+import { Tournament } from "../types/user";
 
 export function useUserIdentity() {
 	const [identity, setIdentity] = Miku.useState<UserIdentityState | null>(
@@ -68,6 +69,17 @@ export function useAchievements() {
 	}, []);
 
 	return achievements;
+}
+
+export function useTournaments() {
+	const [tournaments, setTournaments] = Miku.useState<Tournament[] | null>(
+		stateManager.getState("tournaments"),
+	);
+	
+	Miku.useEffect(() => {
+		return stateManager.subscribe("tournaments", setTournaments);
+	}, []);
+	return tournaments;
 }
 
 export function useNotifications() {

@@ -2,7 +2,7 @@
 
 import Miku from "Miku";
 import { redirect } from "Miku/Router";
-import { formatTime } from "../../../services/api.ts";
+import { formatTime } from "../../../services/api";
 import type {
 	AchievementsState,
 	GameState,

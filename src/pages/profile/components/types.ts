@@ -36,14 +36,9 @@ export interface Achievement {
 	unlocked: boolean;
 }
 
-export interface Tournament {
-	id: number;
-	name: string;
-	placement: string;
-	prize: string;
-	date: string;
-	participants: number;
-}
+import type { Tournament } from "../../../types/user";
+
+export type { Tournament };
 
 export interface MutualMatch {
 	id: number;

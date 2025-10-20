@@ -10,7 +10,7 @@ import {
 	sendChallenge,
 	sendFriendRequest,
 	unblockUser,
-} from "../../services/api.ts";
+} from "../../services/api";
 import type {
 	AchievementsState,
 	GameState,

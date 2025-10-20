@@ -115,7 +115,7 @@ export type Message = {
 	content: string;
 	receiverId: string;
 	createdAt: Date;
-	convoId: string; // Optional for direct messages
+	convoId: string;
 };
 
 export type Conversation = {
@@ -125,3 +125,16 @@ export type Conversation = {
 	unreadCount: number;
 	lastMessage: Message | null;
 };
+
+
+export interface Tournament {
+	id: string;
+	name: string;
+	status : "upcoming" | "started" | "cancelled" | "completed";
+	startDate: string;
+	endDate: string;
+	players: ProfileOverview[];		
+	playerCount : number;
+	winnerId : string | null;
+	createdBy : string 
+}

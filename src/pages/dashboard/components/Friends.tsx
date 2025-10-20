@@ -10,7 +10,7 @@ import {
 	searchProfiles,
 	sendChallenge,
 	sendFriendRequest,
-} from "../../../services/api.ts";
+} from "../../../services/api";
 import { type SocialState, stateManager } from "../../../store/StateManager.ts";
 import type { ProfileOverview } from "../../../types/user.ts";
 import { useNotifications } from "../../use-notification.tsx";

@@ -4,7 +4,7 @@ import {
 	API_URL,
 	searchProfiles,
 	sendFriendRequest,
-} from "../../../services/api.ts";
+} from "../../../services/api";
 import {
 	type SocialState,
 	stateManager,

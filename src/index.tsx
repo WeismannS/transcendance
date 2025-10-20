@@ -12,7 +12,7 @@ import {
 	getAllConversations,
 	initializeChatWebSocket,
 	initializeNotificationWs,
-} from "./services/api.ts";
+} from "./services/api";
 import { stateManager } from "./store/StateManager.ts";
 
 const aa = document.body.querySelector("#app");
@@ -94,7 +94,6 @@ const Routing = () => {
 						console.log("User data:", userData);
 						console.log("Achievements data:", achievementsData);
 
-						// Initialize state manager
 						await stateManager.initializeFromUser(
 							userData,
 							achievementsData.achievements || [],

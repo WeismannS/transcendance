@@ -1,23 +1,6 @@
-export interface Tournament {
-	id: string;
-	name: string;
-	status: "upcoming" | "ongoing" | "done" | "cancelled" | "pending";
-	players?: {
-		id: string;
-		userId: string;
-		username: string;
-		tournamentId: string;
-	}[];
-	playersCount: number;
-	startTime: string | null;
-	createdBy?: string;
-	createdAt: string;
-	winnerId?: string | null;
-	// Computed fields for UI
-	prize?: string;
-	timeLeft?: string;
-	result?: string;
-}
+import type { Tournament } from "../../../types/user";
+
+export type { Tournament };
 
 export interface Chat {
 	id: number;

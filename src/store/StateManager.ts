@@ -4,7 +4,7 @@ import {
 	initializeChatWebSocket,
 	initializeNotificationWs,
 	isOnline,
-} from "../services/api.ts";
+} from "../services/api";
 import type {
 	Achievement,
 	Conversation,
@@ -16,7 +16,7 @@ import type {
 	ProfileOverview,
 	User,
 } from "../types/user.ts";
-// State Fragments based on your User schema
+
 export interface UserIdentityState {
 	id: string;
 	isOnline: boolean;
@@ -67,29 +67,19 @@ export interface MessagesState {
 	activeChat?: string;
 }
 
-// Event Types
-export type EventType =
-	| "USER_DATA_LOADED"
-	| "GAME_FINISHED"
-	| "FRIEND_REQUEST_SENT"
-	| "FRIEND_REQUEST_RECEIVED"
-	| "FRIEND_REQUEST_ACCEPTED"
-	| "FRIEND_REQUEST_DECLINED"
-	| "ACHIEVEMENT_UNLOCKED"
-	| "MESSAGE_RECEIVED"
-	| "MESSAGE_SENT"
-	| "CONVERSATION_READ"
-	| "PROFILE_UPDATED"
-	| "NOTIFICATION_ADDED"
-	| "CONVERSATION_ADDED"
-	| "STATUS_UPDATE"
-	| "CONVERSATIONS_LOADED"
-	| "FRIEND_REMOVED"
-	| "GAME_INVITE"
-	| "GAME_REJECTED"
-	| "GAME_ACCEPTED"
-	| "TOURNAMENT_MATCH"
-	| "TOURNAMENT_UPDATE";
+
+export type EventType = FriendEvent | MessageEvent | TournamentEvent | GameEvent | UserEvent;
+
+export type FriendEvent = "FRIEND_REMOVED" | "FRIEND_REQUEST_RECEIVED" |
+						 "FRIEND_REQUEST_ACCEPTED" | "FRIEND_REQUEST_DECLINED" |
+						 "FRIEND_REQUEST_SENT"
+
+export type MessageEvent = "MESSAGE_RECEIVED" | "MESSAGE_SENT" | "CONVERSATION_READ" | "CONVERSATIONS_LOADED" | "CONVERSATION_ADDED"
+export type TournamentEvent = "TOURNAMENT_CREATED" | "TOURNAMENT_UPDATED" 
+							| "TOURNAMENT_CANCELLED" | "TOURNAMENT_MATCH"
+export type GameEvent = "GAME_INVITE" | "GAME_ACCEPTED" | "GAME_FINISHED" | "GAME_REJECTED"
+export type UserEvent = "PROFILE_UPDATED" | "STATUS_UPDATE" | "ACHIEVEMENT_UNLOCKED" 
+					| "USER_DATA_LOADED" | "NOTIFICATION_ADDED" 
 
 interface StateEvent {
 	type: EventType;
@@ -106,7 +96,8 @@ type StateKey =
 	| "achievements"
 	| "notifications"
 	| "messages"
-	| "webSocket";
+	| "webSocket"
+	| "tournaments"
 
 class StateManager {
 	private states: Map<StateKey, any> = new Map();

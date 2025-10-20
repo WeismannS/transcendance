@@ -1,7 +1,7 @@
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
 import Miku, { useEffect, useState } from "Miku";
-import { API_URL, logOut, updateProfile } from "../../services/api.ts";
+import { API_URL, logOut, updateProfile } from "../../services/api";
 import { Achievement, User } from "../../types/user.ts";
 import {
 	AnimatedBackground,

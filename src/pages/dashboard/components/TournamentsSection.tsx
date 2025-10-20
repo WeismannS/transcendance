@@ -1,5 +1,6 @@
 import Miku, { useEffect, useState } from "Miku";
 import { useUserProfile } from "../../../hooks/useStates.ts";
+import type { Tournament } from "../../../types/user";
 import {
 	API_URL,
 	createTournament,
@@ -10,34 +11,9 @@ import {
 	sendChallenge,
 	startTournament,
 	stopTournament,
-} from "../../../services/api.ts";
+} from "../../../services/api";
 
-interface Tournament {
-	id: string;
-	name: string;
-	status: string;
-	type: string;
-	participants: number;
-	maxParticipants: number;
-	prize: string;
-	entryFee: string;
-	startTime: string;
-	endTime: string;
-	description: string;
-	rules: string;
-	currentRound: string;
-	registered: boolean;
-	featured: boolean;
-	difficulty: string;
-	organizer: string;
-	createdBy?: string;
-	players?: any[];
-	winner?: string;
-	userPlacement?: string;
-	playersCount?: number;
-	timeLeft?: string;
-	result?: string;
-}
+// Use canonical Tournament type from src/types/user.ts
 
 interface TournamentsSectionProps {
 	onRefresh?: () => void;
@@ -76,39 +52,15 @@ export default function TournamentsSection({
 
 			// Transform backend data to match frontend interface
 			const transformedTournaments = tournamentsData.map((tournament: any) => ({
-				id: tournament.id,
+				id: String(tournament.id),
 				name: tournament.name,
-				status: tournament.status,
-				type: "4-Player Tournament",
-				participants:
-					tournament.playersCount || tournament.players?.length || 0,
-				maxParticipants: 4,
-				prize: "TBD",
-				entryFee: "Free",
-				startTime: tournament.startTime
-					? new Date(tournament.startTime).toLocaleString()
-					: "TBD",
-				endTime: "TBD",
-				description: `Tournament created by user. ${
-					tournament.participants || tournament.players?.length || 0
-				}/4 players registered.`,
-				rules: "Best of 3 sets, 11 points per set",
-				currentRound:
-					tournament.status === "upcoming"
-						? "Registration Open"
-						: tournament.status === "started"
-							? "In Progress"
-							: "Completed",
-				registered:
-					tournament.players?.some((p: any) => p.userId === userProfile?.id) ||
-					false,
-				featured: false,
-				difficulty: "Intermediate",
-				organizer: "Player",
-				createdBy: tournament.createdBy,
+				status: (tournament.status as "upcoming" | "started" | "cancelled" | "completed") || "upcoming",
+				startDate: tournament.startTime || null,
+				endDate: tournament.endTime || null,
 				players: tournament.players || [],
-				playersCount:
-					tournament.playersCount || tournament.players?.length || 0,
+				playerCount: tournament.playersCount || tournament.players?.length || 0,
+				winnerId: tournament.winnerId ?? null,
+				createdBy: tournament.createdBy ?? "",
 			}));
 
 			setTournaments(transformedTournaments);
@@ -258,34 +210,30 @@ export default function TournamentsSection({
 					{tournament.name}
 				</h3>
 				<span
-					className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-						tournament.status === "started"
-							? "bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30"
-							: tournament.status === "upcoming"
-								? "bg-cyan-500 bg-opacity-20 text-cyan-400 border border-cyan-500 border-opacity-30"
-								: "bg-green-500 bg-opacity-20 text-green-400 border border-green-500 border-opacity-30"
+					className={`px-3 py-1 rounded-full text-black text-xs font-semibold whitespace-nowrap ${
+								tournament.status === "started"
+									? "bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30"
+									: tournament.status === "upcoming"
+										? "bg-cyan-500 bg-opacity-20 border border-cyan-500 border-opacity-30"
+										: "bg-green-500 bg-opacity-20 border border-green-500 border-opacity-30"
 					}`}
 				>
 					{tournament.status.toUpperCase()}
 				</span>
 			</div>
 
-			<p className="text-gray-300 text-sm mb-4 line-clamp-2 min-h-10">
-				{tournament.description}
-			</p>
-
 			<div className="space-y-3 mb-4 text-sm">
 				<div className="grid grid-cols-2 gap-4">
 					<div className="flex justify-between">
 						<span className="text-gray-400">Players:</span>
 						<span className="text-white font-medium">
-							{tournament.participants}/{tournament.maxParticipants}
+							{tournament.players?.length ?? tournament.playerCount ?? 0}
 						</span>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-gray-400">Prize:</span>
+						<span className="text-gray-400">Dates:</span>
 						<span className="text-green-400 font-semibold">
-							{tournament.prize}
+							{tournament.startDate ? new Date(tournament.startDate).toLocaleDateString() : "TBD"}
 						</span>
 					</div>
 				</div>
@@ -295,7 +243,7 @@ export default function TournamentsSection({
 				{tournament.createdBy === String(userProfile?.id) && (
 					<>
 						{tournament.status === "upcoming" &&
-							tournament.participants >= 2 && (
+							(tournament.players?.length ?? tournament.playerCount ?? 0) >= 2 && (
 								<button
 									onClick={(e) => {
 										e.stopPropagation();
@@ -324,7 +272,7 @@ export default function TournamentsSection({
 				{tournament.createdBy !== String(userProfile?.id) &&
 					tournament.status === "upcoming" && (
 						<>
-							{tournament.registered ? (
+							{(tournament.players?.some((p: any) => ((p.id ?? p.userId ?? p.user?.id) === String(userProfile?.id)))) ? (
 								<button
 									onClick={(e) => {
 										e.stopPropagation();
@@ -341,13 +289,9 @@ export default function TournamentsSection({
 										handleRegister(tournament.id);
 									}}
 									className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-									disabled={
-										tournament.participants >= tournament.maxParticipants
-									}
+									disabled={(tournament.players?.length ?? tournament.playerCount ?? 0) >= 9999}
 								>
-									{tournament.participants >= tournament.maxParticipants
-										? "Full"
-										: "Join"}
+									Join
 								</button>
 							)}
 						</>
@@ -744,7 +688,7 @@ export default function TournamentsSection({
 					/>
 				</div>
 
-				<div className="flex flex-wrap gap-2">
+				<div className="flex flex-wrap gap-2 color-black">
 					{[
 						{ id: "all", label: "All", count: tournaments.length },
 						{
@@ -783,7 +727,7 @@ export default function TournamentsSection({
 
 			{/* Error Display */}
 			{error && (
-				<div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 border-opacity-30 rounded-xl text-red-400">
+				<div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 border-opacity-30 rounded-xl text-black">
 					{error}
 					<button
 						onClick={() => setError("")}

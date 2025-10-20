@@ -2,7 +2,7 @@
 
 import Miku, { useEffect, useRef, useState } from "Miku";
 import { Link } from "Miku/Router";
-import { API_URL, gameConnect, getPlayerProfile } from "../../services/api.ts";
+import { API_URL, gameConnect, getPlayerProfile } from "../../services/api";
 import type { UserProfileState } from "../../store/StateManager.ts";
 import { stateManager } from "../../store/StateManager.ts";
 

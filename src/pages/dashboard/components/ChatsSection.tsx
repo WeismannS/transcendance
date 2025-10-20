@@ -5,7 +5,7 @@ import {
 	formatTime,
 	sendChallenge,
 	sendMessage,
-} from "../../../services/api.ts";
+} from "../../../services/api";
 import { stateManager } from "../../../store/StateManager.ts";
 import type {
 	Conversation,

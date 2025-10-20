@@ -1,6 +1,6 @@
 import Miku, { useEffect, useState } from "../Miku/src/index";
 import { Link } from "Miku/Router";
-import { API_URL, searchProfiles, sendFriendRequest } from "../services/api.ts";
+import { API_URL, searchProfiles, sendFriendRequest } from "../services/api";
 import {
 	type SocialState,
 	stateManager,
