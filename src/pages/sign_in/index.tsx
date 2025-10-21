@@ -638,8 +638,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 								</p>
 							</div>
 						</div>
-
-					
 					</div>
 				</div>
 			</main>

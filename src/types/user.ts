@@ -1,4 +1,4 @@
-import type { EventType } from "../store/StateManager.ts";
+import type { EventType, TournamentEvent } from "../store/StateManager.ts";
 
 export type User = {
 	profile: ProfileOverview;
@@ -18,7 +18,7 @@ export interface Profile extends Omit<User, "friends" | "friendRequests"> {
 		wins: number;
 		losses: number;
 	};
-	isBlocked : boolean;
+	isBlocked: boolean;
 }
 export type GameHistory = {
 	id: number;
@@ -100,6 +100,7 @@ export type Notification<T extends EventType> = {
 	opponent: T extends "TOURNAMENT_MATCH" ? ProfileOverview : never;
 	round: T extends "TOURNAMENT_MATCH" ? number : never;
 	gameResult: T extends "GAME_FINISHED" ? GameHistory : never;
+	tournamentData: T extends TournamentEvent ? Tournament : never;
 };
 
 export function isNotificationType<T extends EventType>(
@@ -126,15 +127,14 @@ export type Conversation = {
 	lastMessage: Message | null;
 };
 
-
 export interface Tournament {
 	id: string;
 	name: string;
-	status : "upcoming" | "started" | "cancelled" | "completed";
+	status: "upcoming" | "started" | "cancelled" | "completed";
 	startDate: string;
 	endDate: string;
-	players: ProfileOverview[];		
-	playerCount : number;
-	winnerId : string | null;
-	createdBy : string 
+	players: ProfileOverview[];
+	playerCount: number;
+	winnerId: string | null;
+	createdBy: string;
 }

@@ -17,8 +17,8 @@
 		"enabled": false,
 		"rules": {
 			"recommended": false,
-			"suspicious" : {
-				"noConsole" : "error"
+			"suspicious": {
+				"noConsole": "error"
 			}
 		}
 	},

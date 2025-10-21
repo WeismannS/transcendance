@@ -2,6 +2,8 @@ import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
 import Miku, { useEffect, useState } from "Miku";
 import { API_URL, logOut, updateProfile } from "../../services/api";
+import { getTournaments } from "../../services/api";
+import { stateManager } from "../../store/StateManager";
 import { Achievement, User } from "../../types/user.ts";
 import {
 	AnimatedBackground,
@@ -25,7 +27,7 @@ export default function DashboardPage() {
 		notifications,
 		messages,
 	} = useDashboardData();
-	const {addNotification} = useNotifications();
+	const { addNotification } = useNotifications();
 	// Check if we should start with a specific section (e.g., from profile message button)
 	const initialSection =
 		sessionStorage.getItem("dashboardActiveSection") || "overview";
@@ -47,6 +49,8 @@ export default function DashboardPage() {
 	}, []);
 
 	const [isVisible, setIsVisible] = useState(false);
+	const [tournamentsLoading, setTournamentsLoading] = useState(false);
+	const [tournamentsError, setTournamentsError] = useState<string | null>(null);
 	const [ballPosition, setBallPosition] = useState({ x: 90, y: 10 });
 	const [notificationCount, setNotificationCount] = useState(3);
 	const [onlineUsers, setOnlineUsers] = useState(0);
@@ -69,6 +73,19 @@ export default function DashboardPage() {
 	});
 
 	useEffect(() => {
+		// Load tournaments into global state on dashboard mount
+		const loadTournaments = async () => {
+			try {
+				setTournamentsLoading(true);
+				const tournamentsData = await getTournaments();
+				stateManager.setState("tournaments", tournamentsData);
+			} catch (err: any) {
+				setTournamentsError(err.message || "Failed to load tournaments");
+			} finally {
+				setTournamentsLoading(false);
+			}
+		};
+		loadTournaments();
 		setIsVisible(true);
 		// Initialize editable profile state when profile data is available
 		if (profile) {
@@ -117,8 +134,7 @@ export default function DashboardPage() {
 		console.log("Profile updated:", result);
 		if (result.success) {
 			setIsEditMode(false);
-		}
-		else {
+		} else {
 			addNotification({
 				type: "error",
 				message: `Failed to update profile. ${result.error}`,
@@ -126,7 +142,6 @@ export default function DashboardPage() {
 				title: "Profile Update Error",
 			});
 		}
-		
 	};
 
 	const handleCancel = () => {

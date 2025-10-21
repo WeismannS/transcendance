@@ -27,7 +27,7 @@ export default function ProfileHeader({
 	onChallenge,
 	onMessage,
 	onEditProfile,
-	onBlock
+	onBlock,
 }: ProfileHeaderProps) {
 	return (
 		<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 mb-8">

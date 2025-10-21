@@ -75,11 +75,11 @@ export function useTournaments() {
 	const [tournaments, setTournaments] = Miku.useState<Tournament[] | null>(
 		stateManager.getState("tournaments"),
 	);
-	
+
 	Miku.useEffect(() => {
 		return stateManager.subscribe("tournaments", setTournaments);
 	}, []);
-	return tournaments;
+	return [...(tournaments || [])];
 }
 
 export function useNotifications() {

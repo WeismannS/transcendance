@@ -227,7 +227,7 @@ export default function UserProfilePage({
 						},
 						achievements: achievementsState?.userAchievementIds || [],
 						gamesH2h: [],
-						isBlocked : false,
+						isBlocked: false,
 					};
 
 					setProfileData(mockProfile);
@@ -316,7 +316,7 @@ export default function UserProfilePage({
 				},
 				achievements: achievementsState.userAchievementIds || [],
 				gamesH2h: [],
-				isBlocked : false,
+				isBlocked: false,
 			};
 			console.log("this in useeffect", gameState);
 			setProfileData(updatedProfile);
@@ -410,9 +410,8 @@ export default function UserProfilePage({
 	};
 
 	const handleChallenge = () => {
-		if (profileUser) 
-			if (profileData?.profile)
-				sendChallenge(profileData.profile.id)
+		if (profileUser)
+			if (profileData?.profile) sendChallenge(profileData.profile.id);
 	};
 
 	const handleMessage = async () => {
@@ -469,11 +468,15 @@ export default function UserProfilePage({
 			if (profileData.isBlocked) {
 				const res = await unblockUser(targetId);
 				if (res.success)
-					setProfileData((prev) => prev ? { ...prev, isBlocked: false } : prev);
+					setProfileData((prev) =>
+						prev ? { ...prev, isBlocked: false } : prev,
+					);
 			} else {
 				const res = await blockUser(targetId);
 				if (res.success) {
-					setProfileData((prev) => prev ? { ...prev, isBlocked: true } : prev);
+					setProfileData((prev) =>
+						prev ? { ...prev, isBlocked: true } : prev,
+					);
 					stateManager.emit("FRIEND_REMOVED", { user: { id: targetId } });
 				}
 			}

@@ -12,7 +12,8 @@ export default function TournamentsTab({
 }: TournamentsTabProps) {
 	const userProfile = useUserProfile();
 	// local copy so we can optimistically update UI after leaving
-	const [localHistory, setLocalHistory] = useState<Tournament[]>(tournamentHistory);
+	const [localHistory, setLocalHistory] =
+		useState<Tournament[]>(tournamentHistory);
 
 	const handleLeave = async (tournamentId: string) => {
 		try {
@@ -22,10 +23,12 @@ export default function TournamentsTab({
 				prev.map((t) =>
 					t.id === tournamentId
 						? {
-							  ...t,
-							  players: t.players?.filter((p) => p.id !== String(userProfile?.id)) || [],
-							  playerCount: Math.max((t.playerCount || 1) - 1, 0),
-						  }
+								...t,
+								players:
+									t.players?.filter((p) => p.id !== String(userProfile?.id)) ||
+									[],
+								playerCount: Math.max((t.playerCount || 1) - 1, 0),
+							}
 						: t,
 				),
 			);
@@ -34,13 +37,15 @@ export default function TournamentsTab({
 			alert(err.message || "Failed to leave tournament");
 		}
 	};
-	
+
 	return (
 		<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 			<h3 className="text-xl font-bold text-white mb-6">Tournament History</h3>
 			<div className="space-y-4">
 				{localHistory.map((tournament) => {
-					const isPlayer = !!tournament.players?.some((p) => p.id === String(userProfile?.id));
+					const isPlayer = !!tournament.players?.some(
+						(p) => p.id === String(userProfile?.id),
+					);
 					return (
 						<div
 							key={tournament.id}
@@ -53,8 +58,12 @@ export default function TournamentsTab({
 								</div>
 							</div>
 							<div className="text-right flex flex-col items-end gap-2">
-								<div className="font-semibold text-gray-400">{tournament.status}</div>
-								<div className="text-green-400 text-sm">{tournament.winnerId}</div>
+								<div className="font-semibold text-gray-400">
+									{tournament.status}
+								</div>
+								<div className="text-green-400 text-sm">
+									{tournament.winnerId}
+								</div>
 								{tournament.status === "upcoming" && isPlayer && (
 									<button
 										onClick={() => handleLeave(tournament.id)}

@@ -3,99 +3,100 @@ import { API_URL } from "./config";
 import type { GameUpdate } from "./types";
 
 export async function finishGame(gameResult: any) {
-  try {
-    const response = await fetch(API_URL + "/api/game/finish", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(gameResult),
-    });
+	try {
+		const response = await fetch(API_URL + "/api/game/finish", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(gameResult),
+		});
 
-    if (response.ok) {
-      stateManager.emit("GAME_FINISHED", gameResult);
-      return true;
-    } else {
-      throw new Error("Failed to finish game");
-    }
-  } catch (error) {
-    console.error("Failed to finish game:", error);
-    return false;
-  }
+		if (response.ok) {
+			stateManager.emit("GAME_FINISHED", gameResult);
+			return true;
+		} else {
+			throw new Error("Failed to finish game");
+		}
+	} catch (error) {
+		console.error("Failed to finish game:", error);
+		return false;
+	}
 }
 
 export async function rejectChallenge(challengeId: string) {
-  try {
-    const response = await fetch(API_URL + "/api/game/reject/" + challengeId, {
-      method: "POST",
-      credentials: "include",
-    });
+	try {
+		const response = await fetch(API_URL + "/api/game/reject/" + challengeId, {
+			method: "POST",
+			credentials: "include",
+		});
 
-    if (!response.ok) {
-      throw new Error("Failed to reject challenge");
-    }
-  } catch (error) {
-    console.error("Failed to reject challenge:", error);
-    throw error;
-  }
+		if (!response.ok) {
+			throw new Error("Failed to reject challenge");
+		}
+	} catch (error) {
+		console.error("Failed to reject challenge:", error);
+		throw error;
+	}
 }
 
 export async function acceptChallenge(gameId: string) {
-  try {
-    const response = await fetch(API_URL + "/api/game/accepted/" + gameId, {
-      method: "POST",
-      credentials: "include",
-    });
+	try {
+		const response = await fetch(API_URL + "/api/game/accepted/" + gameId, {
+			method: "POST",
+			credentials: "include",
+		});
 
-    if (!response.ok) {
-      throw new Error("Failed to accept challenge");
-    }
-    stateManager.emit("GAME_ACCEPTED", { requestId: gameId });
-  } catch (error) {
-    console.error("Failed to accept challenge:", error);
-    throw error;
-  }
+		if (!response.ok) {
+			throw new Error("Failed to accept challenge");
+		}
+		stateManager.emit("GAME_ACCEPTED", { requestId: gameId });
+	} catch (error) {
+		console.error("Failed to accept challenge:", error);
+		throw error;
+	}
 }
 
 export async function gameConnect(
-  playerId: string,
-  gameId: string,
-  {
-    onMessage,
-    onClose,
-    onOpen,
-    onError,
-  }: {
-    onMessage: (data: GameUpdate) => void;
-    onClose: () => void;
-    onOpen: () => void;
-    onError?: (error: Event) => void;
-  },
+	playerId: string,
+	gameId: string,
+	{
+		onMessage,
+		onClose,
+		onOpen,
+		onError,
+	}: {
+		onMessage: (data: GameUpdate) => void;
+		onClose: () => void;
+		onOpen: () => void;
+		onError?: (error: Event) => void;
+	},
 ) {
-  try {
-    const socket = new WebSocket("ws://localhost:3006/ws?playerId=" + playerId + "&gameId=" + gameId);
+	try {
+		const socket = new WebSocket(
+			"ws://localhost:3006/ws?playerId=" + playerId + "&gameId=" + gameId,
+		);
 
-    socket.onopen = onOpen;
+		socket.onopen = onOpen;
 
-    socket.onerror = (error) => {
-      console.error("🔴 WebSocket ERROR:", error);
-      if (onError) onError(error);
-    };
+		socket.onerror = (error) => {
+			console.error("🔴 WebSocket ERROR:", error);
+			if (onError) onError(error);
+		};
 
-    socket.onmessage = (event) => {
-      try {
-        const data: GameUpdate = JSON.parse(event.data);
-        onMessage(data);
-      } catch (error) {
-        console.error("Failed to parse game update:", error);
-      }
-    };
-    socket.onclose = onClose;
-    return socket;
-  } catch (error) {
-    console.error("Failed to connect to game:", error);
-    return error;
-  }
+		socket.onmessage = (event) => {
+			try {
+				const data: GameUpdate = JSON.parse(event.data);
+				onMessage(data);
+			} catch (error) {
+				console.error("Failed to parse game update:", error);
+			}
+		};
+		socket.onclose = onClose;
+		return socket;
+	} catch (error) {
+		console.error("Failed to connect to game:", error);
+		return error;
+	}
 }
-
 
 export async function sendChallenge(
 	opponentId: string,

@@ -15,6 +15,7 @@ import type {
 	Message,
 	ProfileOverview,
 	User,
+	Tournament,
 } from "../types/user.ts";
 
 export interface UserIdentityState {
@@ -67,19 +68,44 @@ export interface MessagesState {
 	activeChat?: string;
 }
 
+export type EventType =
+	| FriendEvent
+	| MessageEvent
+	| TournamentEvent
+	| GameEvent
+	| UserEvent;
 
-export type EventType = FriendEvent | MessageEvent | TournamentEvent | GameEvent | UserEvent;
+export type FriendEvent =
+	| "FRIEND_REMOVED"
+	| "FRIEND_REQUEST_RECEIVED"
+	| "FRIEND_REQUEST_ACCEPTED"
+	| "FRIEND_REQUEST_DECLINED"
+	| "FRIEND_REQUEST_SENT";
 
-export type FriendEvent = "FRIEND_REMOVED" | "FRIEND_REQUEST_RECEIVED" |
-						 "FRIEND_REQUEST_ACCEPTED" | "FRIEND_REQUEST_DECLINED" |
-						 "FRIEND_REQUEST_SENT"
-
-export type MessageEvent = "MESSAGE_RECEIVED" | "MESSAGE_SENT" | "CONVERSATION_READ" | "CONVERSATIONS_LOADED" | "CONVERSATION_ADDED"
-export type TournamentEvent = "TOURNAMENT_CREATED" | "TOURNAMENT_UPDATED" 
-							| "TOURNAMENT_CANCELLED" | "TOURNAMENT_MATCH"
-export type GameEvent = "GAME_INVITE" | "GAME_ACCEPTED" | "GAME_FINISHED" | "GAME_REJECTED"
-export type UserEvent = "PROFILE_UPDATED" | "STATUS_UPDATE" | "ACHIEVEMENT_UNLOCKED" 
-					| "USER_DATA_LOADED" | "NOTIFICATION_ADDED" 
+export type MessageEvent =
+	| "MESSAGE_RECEIVED"
+	| "MESSAGE_SENT"
+	| "CONVERSATION_READ"
+	| "CONVERSATIONS_LOADED"
+	| "CONVERSATION_ADDED";
+export type TournamentEvent =
+	| "TOURNAMENT_CREATED"
+	| "TOURNAMENT_UPDATED"
+	| "TOURNAMENT_CANCELLED"
+	| "TOURNAMENT_MATCH"
+	| "TOURNAMENT_LEFT"
+	| "TOURNAMENT_JOINED";
+export type GameEvent =
+	| "GAME_INVITE"
+	| "GAME_ACCEPTED"
+	| "GAME_FINISHED"
+	| "GAME_REJECTED";
+export type UserEvent =
+	| "PROFILE_UPDATED"
+	| "STATUS_UPDATE"
+	| "ACHIEVEMENT_UNLOCKED"
+	| "USER_DATA_LOADED"
+	| "NOTIFICATION_ADDED";
 
 interface StateEvent {
 	type: EventType;
@@ -97,7 +123,7 @@ type StateKey =
 	| "notifications"
 	| "messages"
 	| "webSocket"
-	| "tournaments"
+	| "tournaments";
 
 class StateManager {
 	private states: Map<StateKey, any> = new Map();
@@ -112,7 +138,7 @@ class StateManager {
 	}
 
 	getState<T>(key: StateKey): T | null {
-		return this.states.get(key) || null;
+		return this.states.get(key) ?? null;
 	}
 
 	updateState<T>(key: StateKey, updater: (prev: T) => T) {
@@ -222,6 +248,53 @@ class StateManager {
 
 	private handleCrossStateEvents(event: StateEvent) {
 		switch (event.type) {
+			case "TOURNAMENT_CREATED":
+				this.updateState<Tournament[]>("tournaments", (prev) => {
+					console.log("should rerender tournaments now");
+					if (!prev) return [event.payload];
+					if (prev.some((t) => t.id === event.payload.id)) return prev;
+					return [event.payload, ...prev];
+				});
+				break;
+			case "TOURNAMENT_LEFT":
+				// Remove player from tournament
+				this.updateState<Tournament[]>("tournaments", (prev) => {
+					if (!prev) return prev;
+					return prev.map((t) =>
+						t.id === event.payload.id
+							? {
+									...t,
+									players: event.payload.players,
+									playerCount: event.payload.playerCount,
+								}
+							: t,
+					);
+				});
+				break;
+			case "TOURNAMENT_CANCELLED":
+				// Mark tournament as cancelled
+				this.updateState<Tournament[]>("tournaments", (prev) => {
+					if (!prev) return prev;
+					return prev.map((t) =>
+						t.id === event.payload.id ? { ...t, status: "cancelled" } : t,
+					);
+				});
+				break;
+			case "TOURNAMENT_JOINED":
+				// Add player to tournament
+				this.updateState<Tournament[]>("tournaments", (prev) => {
+					if (!prev) return prev;
+					return prev.map((t) =>
+						t.id === event.payload.id
+							? {
+									...t,
+									players: event.payload.players,
+									playerCount: event.payload.playerCount,
+								}
+							: t,
+					);
+				});
+				break;
 			case "GAME_FINISHED":
 				this.updateGameStats(event.payload);
 				break;
@@ -338,13 +411,12 @@ class StateManager {
 		this.updateState<SocialState>("social", (prev) => {
 			const updatedFriends = prev.friends.map((friend) =>
 				friend.id === user.id
-					? (
-						{
+					? {
 							...friend,
 							status: user.isOnline
 								? "online"
 								: ("offline" as Friend["status"]),
-						})
+						}
 					: friend,
 			);
 

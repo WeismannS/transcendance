@@ -1,31 +1,26 @@
-import Miku, { useEffect, useState } from "Miku";
-import { useUserProfile } from "../../../hooks/useStates.ts";
+import Miku, { useEffect, useState, useRender } from "Miku";
+import { useUserProfile, useTournaments } from "../../../hooks/useStates.ts";
 import type { Tournament } from "../../../types/user";
 import {
 	API_URL,
 	createTournament,
 	getTournamentMatches,
-	getTournaments,
 	joinTournament,
 	leaveTournament,
 	sendChallenge,
 	startTournament,
 	stopTournament,
 } from "../../../services/api";
+import { stateManager } from "../../../store/StateManager";
 
 // Use canonical Tournament type from src/types/user.ts
 
-interface TournamentsSectionProps {
-	onRefresh?: () => void;
-}
-
-export default function TournamentsSection({
-	onRefresh,
-}: TournamentsSectionProps) {
+export default function TournamentsSection({}) {
 	const userProfile = useUserProfile();
-
-	const [tournaments, setTournaments] = useState<Tournament[]>([]);
-	const [loading, setLoading] = useState(true);
+	const render = useRender();
+	const tournaments = useTournaments();
+	console.error(tournaments);
+	const loading = tournaments === null;
 	const [error, setError] = useState("");
 	const [selectedTournament, setSelectedTournament] =
 		useState<Tournament | null>(null);
@@ -36,6 +31,12 @@ export default function TournamentsSection({
 	const [matchesLoading, setMatchesLoading] = useState(false);
 	const [activeFilter, setActiveFilter] = useState("all");
 	const [searchQuery, setSearchQuery] = useState("");
+	const [joiningTournamentId, setJoiningTournamentId] = useState<string | null>(
+		null,
+	);
+	const [leavingTournamentId, setLeavingTournamentId] = useState<string | null>(
+		null,
+	);
 
 	// Create tournament form
 	const [newTournament, setNewTournament] = useState({
@@ -43,34 +44,7 @@ export default function TournamentsSection({
 		startTime: "",
 	});
 
-	// Load tournaments from backend
-	const loadTournaments = async () => {
-		try {
-			setLoading(true);
-			setError("");
-			const tournamentsData = await getTournaments();
-
-			// Transform backend data to match frontend interface
-			const transformedTournaments = tournamentsData.map((tournament: any) => ({
-				id: String(tournament.id),
-				name: tournament.name,
-				status: (tournament.status as "upcoming" | "started" | "cancelled" | "completed") || "upcoming",
-				startDate: tournament.startTime || null,
-				endDate: tournament.endTime || null,
-				players: tournament.players || [],
-				playerCount: tournament.playersCount || tournament.players?.length || 0,
-				winnerId: tournament.winnerId ?? null,
-				createdBy: tournament.createdBy ?? "",
-			}));
-
-			setTournaments(transformedTournaments);
-		} catch (err: any) {
-			setError(err.message || "Failed to load tournaments");
-			console.error("Failed to load tournaments:", err);
-		} finally {
-			setLoading(false);
-		}
-	};
+	// Loading of tournaments moved to dashboard page; this component reads global state via useTournaments
 
 	const loadTournamentMatches = async (tournamentId: string) => {
 		try {
@@ -115,11 +89,7 @@ export default function TournamentsSection({
 		}
 	};
 
-	useEffect(() => {
-		if (userProfile) {
-			loadTournaments();
-		}
-	}, [userProfile]);
+	// No local load effect; dashboard handles loading tournaments on mount
 
 	const handleCreateTournament = async () => {
 		if (!userProfile || !newTournament.name.trim()) return;
@@ -137,8 +107,6 @@ export default function TournamentsSection({
 
 			setNewTournament({ name: "", startTime: "" });
 			setShowCreateModal(false);
-			await loadTournaments();
-			if (onRefresh) onRefresh();
 		} catch (err: any) {
 			setError(err.message || "Failed to create tournament");
 		}
@@ -147,30 +115,195 @@ export default function TournamentsSection({
 	const handleRegister = async (tournamentId: string) => {
 		if (!userProfile) return;
 
+		// Optimistic UI update: add the current user to the tournament players locally
+		setJoiningTournamentId(tournamentId);
+
+		const newPlayer = {
+			id: String(userProfile.id),
+			userId: String(userProfile.id),
+			displayName: userProfile.displayName,
+			user: {
+				id: String(userProfile.id),
+				displayName: userProfile.displayName,
+			},
+		};
+
 		try {
-			await joinTournament(tournamentId, userProfile.displayName);
-			await loadTournaments();
-			if (onRefresh) onRefresh();
+			stateManager.updateState<any[]>("tournaments", (prev) => {
+				if (!prev) return prev;
+				return prev.map((t) =>
+					t.id === tournamentId
+						? {
+								...t,
+								players: t.players ? [...t.players, newPlayer] : [newPlayer],
+								playerCount: (t.playerCount ?? t.players?.length ?? 0) + 1,
+							}
+						: t,
+				);
+			});
+
+			const res = await joinTournament(tournamentId, userProfile.displayName);
+			if (!res || !res.success) {
+				// revert optimistic change
+				stateManager.updateState<any[]>("tournaments", (prev) => {
+					if (!prev) return prev;
+					return prev.map((t) =>
+						t.id === tournamentId
+							? {
+									...t,
+									players: (t.players || []).filter(
+										(p: any) =>
+											(p.id ?? p.userId ?? p.user?.id) !==
+											String(userProfile.id),
+									),
+									playerCount: Math.max(
+										(t.playerCount ?? t.players?.length ?? 1) - 1,
+										0,
+									),
+								}
+							: t,
+					);
+				});
+				setError(res?.error || "Failed to join tournament");
+			}
 		} catch (err: any) {
+			// revert optimistic change on error
+			stateManager.updateState<any[]>("tournaments", (prev) => {
+				if (!prev) return prev;
+				return prev.map((t) =>
+					t.id === tournamentId
+						? {
+								...t,
+								players: (t.players || []).filter(
+									(p: any) =>
+										(p.id ?? p.userId ?? p.user?.id) !== String(userProfile.id),
+								),
+								playerCount: Math.max(
+									(t.playerCount ?? t.players?.length ?? 1) - 1,
+									0,
+								),
+							}
+						: t,
+				);
+			});
 			setError(err.message || "Failed to join tournament");
+		} finally {
+			setJoiningTournamentId(null);
 		}
 	};
 
 	const handleUnregister = async (tournamentId: string) => {
+		if (!userProfile) return;
+
+		setLeavingTournamentId(tournamentId);
+
 		try {
-			await leaveTournament(tournamentId);
-			await loadTournaments();
-			if (onRefresh) onRefresh();
+			// Optimistic remove
+			stateManager.updateState<any[]>("tournaments", (prev) => {
+				if (!prev) return prev;
+				return prev.map((t) =>
+					t.id === tournamentId
+						? {
+								...t,
+								players: (t.players || []).filter(
+									(p: any) =>
+										(p.id ?? p.userId ?? p.user?.id) !== String(userProfile.id),
+								),
+								playerCount: Math.max(
+									(t.playerCount ?? t.players?.length ?? 1) - 1,
+									0,
+								),
+							}
+						: t,
+				);
+			});
+
+			const res = await leaveTournament(tournamentId);
+			if (!res || !res.success) {
+				// revert on failure
+				stateManager.updateState<any[]>("tournaments", (prev) => {
+					if (!prev) return prev;
+					return prev.map((t) =>
+						t.id === tournamentId
+							? {
+									...t,
+									players: t.players
+										? [
+												...t.players,
+												{
+													id: String(userProfile.id),
+													userId: String(userProfile.id),
+													displayName: userProfile.displayName,
+													user: {
+														id: String(userProfile.id),
+														displayName: userProfile.displayName,
+													},
+												},
+											]
+										: [
+												{
+													id: String(userProfile.id),
+													userId: String(userProfile.id),
+													displayName: userProfile.displayName,
+													user: {
+														id: String(userProfile.id),
+														displayName: userProfile.displayName,
+													},
+												},
+											],
+									playerCount: (t.playerCount ?? t.players?.length ?? 0) + 1,
+								}
+							: t,
+					);
+				});
+				setError(res?.error || "Failed to leave tournament");
+			}
 		} catch (err: any) {
+			// revert on error
+			stateManager.updateState<any[]>("tournaments", (prev) => {
+				if (!prev) return prev;
+				return prev.map((t) =>
+					t.id === tournamentId
+						? {
+								...t,
+								players: t.players
+									? [
+											...t.players,
+											{
+												id: String(userProfile.id),
+												userId: String(userProfile.id),
+												displayName: userProfile.displayName,
+												user: {
+													id: String(userProfile.id),
+													displayName: userProfile.displayName,
+												},
+											},
+										]
+									: [
+											{
+												id: String(userProfile.id),
+												userId: String(userProfile.id),
+												displayName: userProfile.displayName,
+												user: {
+													id: String(userProfile.id),
+													displayName: userProfile.displayName,
+												},
+											},
+										],
+								playerCount: (t.playerCount ?? t.players?.length ?? 0) + 1,
+							}
+						: t,
+				);
+			});
 			setError(err.message || "Failed to leave tournament");
+		} finally {
+			setLeavingTournamentId(null);
 		}
 	};
 
 	const handleStartTournament = async (tournamentId: string) => {
 		try {
 			await startTournament(tournamentId);
-			await loadTournaments();
-			if (onRefresh) onRefresh();
 		} catch (err: any) {
 			setError(err.message || "Failed to start tournament");
 		}
@@ -179,14 +312,12 @@ export default function TournamentsSection({
 	const handleStopTournament = async (tournamentId: string) => {
 		try {
 			await stopTournament(tournamentId);
-			await loadTournaments();
-			if (onRefresh) onRefresh();
 		} catch (err: any) {
 			setError(err.message || "Failed to stop tournament");
 		}
 	};
 
-	const filteredTournaments = tournaments.filter((tournament) => {
+	const filteredTournaments = tournaments.filter((tournament: Tournament) => {
 		const matchesFilter =
 			activeFilter === "all" || tournament.status === activeFilter;
 		const matchesSearch = tournament.name
@@ -197,7 +328,6 @@ export default function TournamentsSection({
 
 	const renderTournamentCard = (tournament: Tournament) => (
 		<div
-			key={tournament.id}
 			className="bg-gray-800 bg-opacity-50 backdrop-blur-lg border rounded-2xl p-6 hover:border-orange-500 hover:border-opacity-50 transition-all duration-300 cursor-pointer transform hover:scale-105 border-gray-700"
 			onClick={() => {
 				setSelectedTournament(tournament);
@@ -211,11 +341,11 @@ export default function TournamentsSection({
 				</h3>
 				<span
 					className={`px-3 py-1 rounded-full text-black text-xs font-semibold whitespace-nowrap ${
-								tournament.status === "started"
-									? "bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30"
-									: tournament.status === "upcoming"
-										? "bg-cyan-500 bg-opacity-20 border border-cyan-500 border-opacity-30"
-										: "bg-green-500 bg-opacity-20 border border-green-500 border-opacity-30"
+						tournament.status === "started"
+							? "bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30"
+							: tournament.status === "upcoming"
+								? "bg-cyan-500 bg-opacity-20 border border-cyan-500 border-opacity-30"
+								: "bg-green-500 bg-opacity-20 border border-green-500 border-opacity-30"
 					}`}
 				>
 					{tournament.status.toUpperCase()}
@@ -233,7 +363,9 @@ export default function TournamentsSection({
 					<div className="flex justify-between">
 						<span className="text-gray-400">Dates:</span>
 						<span className="text-green-400 font-semibold">
-							{tournament.startDate ? new Date(tournament.startDate).toLocaleDateString() : "TBD"}
+							{tournament.startDate
+								? new Date(tournament.startDate).toLocaleDateString()
+								: "TBD"}
 						</span>
 					</div>
 				</div>
@@ -243,7 +375,8 @@ export default function TournamentsSection({
 				{tournament.createdBy === String(userProfile?.id) && (
 					<>
 						{tournament.status === "upcoming" &&
-							(tournament.players?.length ?? tournament.playerCount ?? 0) >= 2 && (
+							(tournament.players?.length ?? tournament.playerCount ?? 0) >=
+								2 && (
 								<button
 									onClick={(e) => {
 										e.stopPropagation();
@@ -272,15 +405,21 @@ export default function TournamentsSection({
 				{tournament.createdBy !== String(userProfile?.id) &&
 					tournament.status === "upcoming" && (
 						<>
-							{(tournament.players?.some((p: any) => ((p.id ?? p.userId ?? p.user?.id) === String(userProfile?.id)))) ? (
+							{tournament.players?.some(
+								(p: any) =>
+									(p.id ?? p.userId ?? p.user?.id) === String(userProfile?.id),
+							) ? (
 								<button
 									onClick={(e) => {
 										e.stopPropagation();
 										handleUnregister(tournament.id);
 									}}
 									className="flex-1 py-3 bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-30 rounded-xl hover:bg-red-500 hover:bg-opacity-30 transition-all font-semibold"
+									disabled={leavingTournamentId === tournament.id}
 								>
-									Leave
+									{leavingTournamentId === tournament.id
+										? "Leaving..."
+										: "Leave"}
 								</button>
 							) : (
 								<button
@@ -289,9 +428,16 @@ export default function TournamentsSection({
 										handleRegister(tournament.id);
 									}}
 									className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-									disabled={(tournament.players?.length ?? tournament.playerCount ?? 0) >= 9999}
+									disabled={
+										joiningTournamentId === tournament.id ||
+										(tournament.players?.length ??
+											tournament.playerCount ??
+											0) >= 9999
+									}
 								>
-									Join
+									{joiningTournamentId === tournament.id
+										? "Joining..."
+										: "Join"}
 								</button>
 							)}
 						</>
@@ -694,17 +840,23 @@ export default function TournamentsSection({
 						{
 							id: "started",
 							label: "Live",
-							count: tournaments.filter((t) => t.status === "started").length,
+							count: tournaments.filter(
+								(t: Tournament) => t.status === "started",
+							).length,
 						},
 						{
 							id: "upcoming",
 							label: "Upcoming",
-							count: tournaments.filter((t) => t.status === "upcoming").length,
+							count: tournaments.filter(
+								(t: Tournament) => t.status === "upcoming",
+							).length,
 						},
 						{
 							id: "completed",
 							label: "Completed",
-							count: tournaments.filter((t) => t.status === "completed").length,
+							count: tournaments.filter(
+								(t: Tournament) => t.status === "completed",
+							).length,
 						},
 					].map((filter) => (
 						<button
@@ -741,7 +893,7 @@ export default function TournamentsSection({
 			{/* Tournament Grid */}
 			{filteredTournaments.length > 0 ? (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{filteredTournaments.map((tournament) =>
+					{filteredTournaments.map((tournament: Tournament) =>
 						renderTournamentCard(tournament),
 					)}
 				</div>
