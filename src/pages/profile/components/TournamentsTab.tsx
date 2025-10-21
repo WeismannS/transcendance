@@ -1,7 +1,7 @@
 import Miku, { useState } from "Miku";
-import type { Tournament } from "./types";
 import { useUserProfile } from "../../../hooks/useStates";
 import { leaveTournament } from "../../../services/api/tournament";
+import type { Tournament } from "./types";
 
 interface TournamentsTabProps {
 	tournamentHistory: Tournament[];

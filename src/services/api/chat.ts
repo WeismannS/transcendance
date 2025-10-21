@@ -1,6 +1,6 @@
 import { stateManager } from "../../store/StateManager";
-import type { Conversation } from "./types";
 import { API_URL } from "./config";
+import type { Conversation } from "./types";
 
 export function initializeChatWebSocket() {
 	const extractTokenFromCookies = (): string | null => {

@@ -1,4 +1,4 @@
-import type { Conversation, Profile, Notification } from "../../types/user";
+import type { Conversation, Notification, Profile } from "../../types/user";
 
 export type { Conversation, Profile, Notification };
 

@@ -1,11 +1,7 @@
-import Miku, { useEffect, useState } from "../Miku/src/index";
 import { Link } from "Miku/Router";
+import Miku, { useEffect, useState } from "../Miku/src/index";
 import { API_URL, searchProfiles, sendFriendRequest } from "../services/api";
-import {
-	type SocialState,
-	stateManager,
-	type UserProfileState,
-} from "../store/StateManager.ts";
+import { type UserProfileState } from "../store/StateManager.ts";
 import type { ProfileOverview } from "../types/user.ts";
 
 interface UniversalHeaderProps {
@@ -49,19 +45,6 @@ export default function UniversalHeader({
 			})
 			.finally(() => {
 				setIsSearching(false);
-			});
-	};
-
-	const handleSendFriendRequest = (userId: string, username: string) => {
-		sendFriendRequest(userId, username)
-			.then((success) => {
-				if (success) {
-					// Update the search results to show request sent
-					setSearchResults((prev) => prev.filter((user) => user.id !== userId));
-				}
-			})
-			.catch((error) => {
-				console.error("Failed to send friend request:", error);
 			});
 	};
 
@@ -139,9 +122,6 @@ export default function UniversalHeader({
 									{searchResults.length > 0 && (
 										<div className="py-2">
 											{searchResults.map((user) => {
-												const socialState = stateManager.getState(
-													"social",
-												) as SocialState;
 												return (
 													<div
 														key={user.id}

@@ -1,42 +1,42 @@
-export { API_URL, checkAuthStatus } from "./api/config";
 export { logOut } from "./api/auth";
 export {
-	sendFriendRequest,
+	formatTime,
+	getAllConversations,
+	getOrCreateConversation,
+	initializeChatWebSocket,
+	sendMessage,
+} from "./api/chat";
+export { API_URL, checkAuthStatus } from "./api/config";
+export {
 	acceptFriendRequest,
+	blockUser,
 	declineFriendRequest,
 	removeFriend,
-	blockUser,
+	sendFriendRequest,
 	unblockUser,
 } from "./api/friends";
 export {
-	updateProfile,
-	searchProfiles,
-	getProfileByUsername,
-	getPlayerProfile,
-} from "./api/profile";
-export {
-	initializeChatWebSocket,
-	getOrCreateConversation,
-	getAllConversations,
-	sendMessage,
-	formatTime,
-} from "./api/chat";
-export { initializeNotificationWs, isOnline } from "./api/notifications";
-export {
-	finishGame,
-	rejectChallenge,
 	acceptChallenge,
+	finishGame,
 	gameConnect,
+	rejectChallenge,
 	sendChallenge,
 } from "./api/game";
+export { initializeNotificationWs, isOnline } from "./api/notifications";
+export {
+	getPlayerProfile,
+	getProfileByUsername,
+	searchProfiles,
+	updateProfile,
+} from "./api/profile";
 export {
 	createTournament,
+	getTournament,
+	getTournamentMatches,
+	getTournaments,
 	joinTournament,
 	leaveTournament,
 	startTournament,
 	stopTournament,
-	getTournaments,
-	getTournament,
-	getTournamentMatches,
 } from "./api/tournament";
 export * from "./api/types";

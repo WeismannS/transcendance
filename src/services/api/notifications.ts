@@ -1,7 +1,7 @@
+import { redirect } from "Miku/Router";
 import { useNotifications } from "../../pages/use-notification";
 import { stateManager } from "../../store/StateManager";
 import { isNotificationType } from "../../types/user";
-import { redirect } from "Miku/Router";
 import { acceptChallenge, rejectChallenge } from "./game";
 import { sendTournamentChallenge } from "./tournament";
 

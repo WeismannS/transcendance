@@ -40,8 +40,6 @@ export async function joinTournament(tournamentId: string, username: string) {
 			const errorData = await response.json();
 			throw new Error(errorData.error || "Failed to join tournament");
 		}
-
-		const result = await response.json();
 		return { success: true, data: { id: tournamentId } };
 	} catch (error) {
 		console.error("Failed to join tournament:", error);
@@ -63,7 +61,6 @@ export async function leaveTournament(tournamentId: string) {
 			throw new Error(errorData.error || "Failed to leave tournament");
 		}
 
-		const result = await response.json();
 		return { success: true } as const;
 	} catch (error) {
 		console.error("Failed to leave tournament:", error);

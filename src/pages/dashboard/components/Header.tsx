@@ -55,20 +55,6 @@ export default function Header({
 				setIsSearching(false);
 			});
 	};
-
-	const handleSendFriendRequest = (userId: string, username: string) => {
-		sendFriendRequest(userId, username)
-			.then((success) => {
-				if (success) {
-					// Update the search results to show request sent
-					setSearchResults((prev) => prev.filter((user) => user.id !== userId));
-				}
-			})
-			.catch((error) => {
-				console.error("Failed to send friend request:", error);
-			});
-	};
-
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
 			if (searchQuery) {
@@ -138,9 +124,6 @@ export default function Header({
 									{searchResults.length > 0 && (
 										<div className="py-2">
 											{searchResults.map((user) => {
-												const socialState = stateManager.getState(
-													"social",
-												) as SocialState;
 												return (
 													<div
 														key={user.id}

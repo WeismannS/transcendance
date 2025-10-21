@@ -17,8 +17,7 @@ export default function Overview() {
 	const userProfile = stateManager.getState<UserProfileState>("userProfile");
 	const gameState = stateManager.getState<GameState>("gameState");
 	const socialState = stateManager.getState<SocialState>("social");
-	const achievementsState =
-		stateManager.getState<AchievementsState>("achievements");
+
 	const notificationsState =
 		stateManager.getState<NotificationsState>("notifications");
 
@@ -36,8 +35,6 @@ export default function Overview() {
 	const recentGames = gameState?.history?.slice(0, 5) || [];
 	const onlineFriends =
 		socialState?.friends?.filter((friend) => friend.status === "online") || [];
-	const unlockedAchievements =
-		achievementsState?.userAchievementIds?.length || 0;
 
 	const handleQuickMatch = () => {
 		redirect("/game");

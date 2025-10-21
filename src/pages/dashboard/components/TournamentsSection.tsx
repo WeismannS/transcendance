@@ -1,6 +1,5 @@
-import Miku, { useEffect, useState, useRender } from "Miku";
-import { useUserProfile, useTournaments } from "../../../hooks/useStates.ts";
-import type { Tournament } from "../../../types/user";
+import Miku, { useState } from "Miku";
+import { useTournaments, useUserProfile } from "../../../hooks/useStates.ts";
 import {
 	API_URL,
 	createTournament,
@@ -12,12 +11,12 @@ import {
 	stopTournament,
 } from "../../../services/api";
 import { stateManager } from "../../../store/StateManager";
+import type { Tournament } from "../../../types/user";
 
 // Use canonical Tournament type from src/types/user.ts
 
 export default function TournamentsSection({}) {
 	const userProfile = useUserProfile();
-	const render = useRender();
 	const tournaments = useTournaments();
 	console.error(tournaments);
 	const loading = tournaments === null;
@@ -537,9 +536,6 @@ export default function TournamentsSection({}) {
 											{roundMatches.map((match) => {
 												const player1Name = match.player1?.displayName || "TBD";
 												const player2Name = match.player2?.displayName || "TBD";
-												const isLive =
-													match.status === "active" ||
-													match.status === "ACTIVE";
 												const isCompleted =
 													match.status === "completed" ||
 													match.status === "COMPLETED";

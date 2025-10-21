@@ -6,35 +6,6 @@ import { API_URL, gameConnect, getPlayerProfile } from "../../services/api";
 import type { UserProfileState } from "../../store/StateManager.ts";
 import { stateManager } from "../../store/StateManager.ts";
 
-interface GameUpdate {
-	type:
-		| "gameUpdate"
-		| "gameEnd"
-		| "scoreUpdate"
-		| "reconnection"
-		| "connected"
-		| "gameCreated"
-		| "playerDisconnected"
-		| "gameRejected"
-		| "gamePaused"
-		| "gameResumed";
-	gameId?: string;
-	gameBoard?: GameBoard;
-	score?: Score;
-	gameStarted?: boolean;
-	playerNumber?: number;
-	opponent?: string; // User ID of the opponent
-	mode?: string;
-	waitingForOpponent?: boolean;
-	winner?: string;
-	finalScore?: Score;
-	message?: string;
-	reason?: string;
-	isPaused?: boolean;
-	pauseReason?: string;
-	disconnectedPlayer?: string;
-}
-
 interface GameBoard {
 	player1: Player;
 	player2: Player;
@@ -73,13 +44,11 @@ export default function GamePage() {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const animationRef = useRef<number | null>(null);
 	const gameSocket = useRef<WebSocket | null>(null);
-	const [gameState, setGameState] = useState("menu"); // menu, playing, paused, finished, connecting
-	const [gameMode, setGameMode] = useState("quickmatch"); // quickmatch, practice, tournament
+	const [gameState, setGameState] = useState("connecting"); // connecting, playing, paused, finished
 	const [isVisible, setIsVisible] = useState(false);
 	const [opponent, setOpponent] = useState({
 		name: "Opponent",
 		avatar: "OP",
-		difficulty: "intermediate",
 	});
 
 	// Store both player information to display correctly based on paddle sides
@@ -111,7 +80,6 @@ export default function GamePage() {
 	// Game state
 	const [score, setScore] = useState({ player: 0, opponent: 0 });
 	const scoreRef = useRef(score);
-	const [sets, setSets] = useState({ player: 0, opponent: 0 });
 	const [gameTime, setGameTime] = useState(0);
 
 	// Controls
@@ -132,9 +100,6 @@ export default function GamePage() {
 	const BACKEND_HEIGHT = 10; // Backend game height
 	const BACKEND_PADDLE_HEIGHT = 2; // Backend paddle height
 	const BACKEND_PADDLE_WIDTH = 0.5; // Backend paddle width
-	const WINNING_SCORE = 11;
-	const WINNING_SETS = 2;
-
 	// Scale factors for coordinate conversion
 	const SCALE_X = CANVAS_WIDTH / BACKEND_WIDTH;
 	const SCALE_Y = CANVAS_HEIGHT / BACKEND_HEIGHT;
@@ -364,79 +329,12 @@ export default function GamePage() {
 		};
 	}, [gameState]); // Fixed: removed gameId dependency
 
-	// Send paddle movement in the format backend expects
-	const sendPaddleMove = (direction: "up" | "down") => {
-		console.log("=== PADDLE MOVE DEBUG ===");
-		console.log("gameSocket.current:", gameSocket.current);
-		console.log("gameSocket.current type:", typeof gameSocket.current);
-		console.log(
-			"gameSocket.current readyState:",
-			gameSocket.current?.readyState,
-		);
-		console.log("WebSocket.OPEN constant:", WebSocket.OPEN);
-		console.log("Current game state:", gameState);
-		console.log("Player number:", playerNumber);
-		console.log("Game ID:", gameId);
-		console.log("========================");
-
-		if (
-			gameSocket.current &&
-			gameSocket.current.readyState === WebSocket.OPEN
-		) {
-			try {
-				const message = JSON.stringify({
-					type: "move",
-					direction: direction,
-				});
-				console.log("Sending paddle move:", direction, message);
-				gameSocket.current.send(message);
-				console.log("Message sent successfully");
-			} catch (error) {
-				console.error("Failed to send paddle movement:", error);
-			}
-		} else {
-			console.warn("Cannot send paddle move - socket not ready:", {
-				socket: !!gameSocket.current,
-				readyState: gameSocket.current?.readyState,
-				gameState: gameState,
-				socketReference: gameSocket.current,
-			});
-		}
-	};
-
 	// Throttled paddle movement sending for multiplayer
 	const sendPaddleMoveThrottled = useRef({
 		lastSent: 0,
 		throttleMs: 16, // ~60 FPS
 		lastDirection: null as string | null,
 	});
-
-	const sendPaddleMoveIfNeeded = (direction: "up" | "down") => {
-		console.log("=== 1PADDLE MOVE DEBUG ===");
-		console.log("gameSocket.current:", gameSocket.current);
-		console.log("gameSocket.current type:", typeof gameSocket.current);
-		console.log(
-			"gameSocket.current readyState:",
-			gameSocket.current?.readyState,
-		);
-		console.log("WebSocket.OPEN constant:", WebSocket.OPEN);
-		console.log("Current game state:", gameState);
-		console.log("Player number:", playerNumber);
-		console.log("Game ID:", gameId);
-		console.log("========================");
-		const now = Date.now();
-		const throttleRef = sendPaddleMoveThrottled.current;
-
-		// Only send if enough time has passed OR direction changed
-		if (
-			now - throttleRef.lastSent > throttleRef.throttleMs ||
-			throttleRef.lastDirection !== direction
-		) {
-			sendPaddleMove(direction);
-			throttleRef.lastSent = now;
-			throttleRef.lastDirection = direction;
-		}
-	};
 
 	useEffect(() => {
 		scoreRef.current = score;
@@ -524,7 +422,6 @@ export default function GamePage() {
 														opponentProfile.displayName ||
 														`Player ${opponentId}`,
 													avatar: opponentProfile.avatar || "OP",
-													difficulty: "intermediate",
 												});
 
 												// Update the appropriate player info slot for the opponent
@@ -565,7 +462,6 @@ export default function GamePage() {
 												setOpponent({
 													name: `Player ${opponentId}`,
 													avatar: "OP",
-													difficulty: "intermediate",
 												});
 
 												const opponentPlayerNumber =
@@ -703,7 +599,6 @@ export default function GamePage() {
 														opponentProfile.displayName ||
 														`Player ${opponentId}`,
 													avatar: opponentProfile.avatar || "OP",
-													difficulty: "intermediate",
 												});
 
 												const opponentPlayerNumber =
@@ -742,7 +637,6 @@ export default function GamePage() {
 												setOpponent({
 													name: `Player ${opponentId}`,
 													avatar: "OP",
-													difficulty: "intermediate",
 												});
 
 												const opponentPlayerNumber =
@@ -824,7 +718,8 @@ export default function GamePage() {
 									setConnectionError(
 										message.message || "Game invitation was rejected",
 									);
-									setGameState("menu");
+									// Don't return to a removed menu — show connecting/error UI
+									setGameState("connecting");
 									break;
 
 								default:
@@ -931,7 +826,8 @@ export default function GamePage() {
 					setConnectionError(
 						"Failed to connect to game. Please check your connection and try again.",
 					);
-					setGameState("menu");
+					// Menu removed — show connecting/error UI which includes back link
+					setGameState("connecting");
 				}
 			};
 
@@ -1212,9 +1108,8 @@ export default function GamePage() {
 				handleMultiplayerLogic();
 				render(ctx);
 			} else {
-				// Local game - full game logic including AI and ball physics
-				console.log("🏠 Running local game logic");
-				runLocalGameLogic();
+				// No client-side game simulation. Wait for server updates.
+				// Optionally render using last known server state.
 				render(ctx);
 			}
 
@@ -1222,7 +1117,8 @@ export default function GamePage() {
 			animationRef.current = requestAnimationFrame(gameLoop);
 		};
 
-		if (gameState === "playing" || gameState === "paused") {
+		// Only start the animation/game loop if the game is playing and connected to a server
+		if ((gameState === "playing" || gameState === "paused") && gameId) {
 			console.log(
 				"🎯 STARTING GAME LOOP - gameId:",
 				gameId,
@@ -1315,202 +1211,9 @@ export default function GamePage() {
 		}
 	};
 
-	// Send stop movement message to server
-	const sendPaddleStop = () => {
-		const throttleRef = sendPaddleMoveThrottled.current;
-		if (
-			gameSocket.current &&
-			gameSocket.current.readyState === WebSocket.OPEN &&
-			throttleRef.lastDirection
-		) {
-			try {
-				const message = JSON.stringify({
-					type: "stop",
-				});
-				console.log("Sending paddle stop");
-				gameSocket.current.send(message);
-				throttleRef.lastDirection = null; // Reset last direction
-			} catch (error) {
-				console.error("Failed to send paddle stop:", error);
-			}
-		}
-	};
+	// Local game logic removed — all game state is now server-driven. Local simulation and AI eliminated.
 
-	const runLocalGameLogic = () => {
-		console.log("Running local game logic");
-		const { ball, leftPaddle, rightPaddle } = gameObjects.current;
-
-		// Determine which paddle the current player controls based on their player number
-		const currentPlayerPaddle = playerNumber === 1 ? leftPaddle : rightPaddle;
-		const opponentPlayerPaddle = playerNumber === 1 ? rightPaddle : leftPaddle;
-
-		// Move player paddle - using realistic speed (20px per frame at 60fps)
-		const paddleSpeed = 8;
-		if (keys.up && currentPlayerPaddle.y > 0) {
-			currentPlayerPaddle.y = Math.max(0, currentPlayerPaddle.y - paddleSpeed);
-		}
-		if (
-			keys.down &&
-			currentPlayerPaddle.y < CANVAS_HEIGHT - currentPlayerPaddle.height
-		) {
-			currentPlayerPaddle.y = Math.min(
-				CANVAS_HEIGHT - currentPlayerPaddle.height,
-				currentPlayerPaddle.y + paddleSpeed,
-			);
-		}
-
-		// AI opponent movement - track ball with some lag for challenge
-		const paddleCenter =
-			opponentPlayerPaddle.y + opponentPlayerPaddle.height / 2;
-		const ballY = ball.y;
-		const aiSpeed = 6;
-
-		if (paddleCenter < ballY - 20) {
-			opponentPlayerPaddle.y = Math.min(
-				opponentPlayerPaddle.y + aiSpeed,
-				CANVAS_HEIGHT - opponentPlayerPaddle.height,
-			);
-		} else if (paddleCenter > ballY + 20) {
-			opponentPlayerPaddle.y = Math.max(opponentPlayerPaddle.y - aiSpeed, 0);
-		}
-
-		// Initialize ball velocity if not set
-		if (!ball.vx || !ball.vy) {
-			ball.vx = 6 * (Math.random() > 0.5 ? 1 : -1);
-			ball.vy = 4 * (Math.random() > 0.5 ? 1 : -1);
-		}
-
-		// Move ball
-		ball.x += ball.vx;
-		ball.y += ball.vy;
-
-		// Ball collision with top and bottom walls
-		if (ball.y <= ball.radius || ball.y >= CANVAS_HEIGHT - ball.radius) {
-			ball.vy = -ball.vy;
-			ball.y = Math.max(
-				ball.radius,
-				Math.min(ball.y, CANVAS_HEIGHT - ball.radius),
-			);
-		}
-
-		// Ball collision with paddles - Using AABB collision detection
-		// Now with consistent positioning: leftPaddle = LEFT, rightPaddle = RIGHT
-
-		// Debug paddle positions
-		if (Math.random() < 0.01) {
-			// Log occasionally to avoid spam
-			console.log("Paddle positions:", {
-				leftPaddle: {
-					x: leftPaddle.x,
-					y: leftPaddle.y,
-					width: leftPaddle.width,
-					height: leftPaddle.height,
-				},
-				rightPaddle: {
-					x: rightPaddle.x,
-					y: rightPaddle.y,
-					width: rightPaddle.width,
-					height: rightPaddle.height,
-				},
-				ball: {
-					x: ball.x,
-					y: ball.y,
-					radius: ball.radius,
-					vx: ball.vx,
-					vy: ball.vy,
-				},
-			});
-		}
-
-		// Left paddle collision (AABB method)
-		if (ball.vx < 0) {
-			// Ball moving left
-			const ballLeft = ball.x - ball.radius;
-			const ballRight = ball.x + ball.radius;
-			const ballTop = ball.y - ball.radius;
-			const ballBottom = ball.y + ball.radius;
-
-			const paddleLeft = leftPaddle.x;
-			const paddleRight = leftPaddle.x + leftPaddle.width;
-			const paddleTop = leftPaddle.y;
-			const paddleBottom = leftPaddle.y + leftPaddle.height;
-
-			// Check AABB collision
-			if (
-				ballLeft <= paddleRight &&
-				ballRight >= paddleLeft &&
-				ballTop <= paddleBottom &&
-				ballBottom >= paddleTop
-			) {
-				console.log("Left paddle AABB collision detected!");
-				ball.vx = Math.abs(ball.vx); // Ensure ball goes right
-				ball.x = paddleRight + ball.radius; // Position ball to the right of paddle
-
-				// Add angle variation based on hit position
-				const hitPos =
-					(ball.y - (paddleTop + (paddleBottom - paddleTop) / 2)) /
-					((paddleBottom - paddleTop) / 2);
-				ball.vy += hitPos * 2;
-			}
-		}
-
-		// Right paddle collision (AABB method)
-		if (ball.vx > 0) {
-			// Ball moving right
-			const ballLeft = ball.x - ball.radius;
-			const ballRight = ball.x + ball.radius;
-			const ballTop = ball.y - ball.radius;
-			const ballBottom = ball.y + ball.radius;
-
-			const paddleLeft = rightPaddle.x;
-			const paddleRight = rightPaddle.x + rightPaddle.width;
-			const paddleTop = rightPaddle.y;
-			const paddleBottom = rightPaddle.y + rightPaddle.height;
-
-			// Check AABB collision
-			if (
-				ballLeft <= paddleRight &&
-				ballRight >= paddleLeft &&
-				ballTop <= paddleBottom &&
-				ballBottom >= paddleTop
-			) {
-				console.log("Right paddle AABB collision detected!");
-				ball.vx = -Math.abs(ball.vx); // Ensure ball goes left
-				ball.x = paddleLeft - ball.radius; // Position ball to the left of paddle
-
-				// Add angle variation based on hit position
-				const hitPos =
-					(ball.y - (paddleTop + (paddleBottom - paddleTop) / 2)) /
-					((paddleBottom - paddleTop) / 2);
-				ball.vy += hitPos * 2;
-			}
-		}
-
-		// Limit ball speed
-		const maxSpeed = 12;
-		if (Math.abs(ball.vx) > maxSpeed) ball.vx = maxSpeed * Math.sign(ball.vx);
-		if (Math.abs(ball.vy) > maxSpeed) ball.vy = maxSpeed * Math.sign(ball.vy);
-
-		// Score points
-		if (ball.x < -ball.radius) {
-			setScore((prev) => ({ ...prev, opponent: prev.opponent + 1 }));
-			resetBall();
-		}
-		if (ball.x > CANVAS_WIDTH + ball.radius) {
-			setScore((prev) => ({ ...prev, player: prev.player + 1 }));
-			resetBall();
-		}
-	};
-
-	const resetBall = () => {
-		gameObjects.current.ball = {
-			x: CANVAS_WIDTH / 2,
-			y: CANVAS_HEIGHT / 2,
-			radius: BALL_RADIUS,
-			vx: 6 * (Math.random() > 0.5 ? 1 : -1),
-			vy: 4 * (Math.random() > 0.5 ? 1 : -1),
-		};
-	};
+	// resetBall removed — server will control ball state
 
 	const render = (ctx: CanvasRenderingContext2D) => {
 		const { ball, leftPaddle, rightPaddle } = gameObjects.current;
@@ -1605,141 +1308,15 @@ export default function GamePage() {
 		}
 	};
 
-	// Rest of the component methods remain the same...
-	const startGame = (mode: string) => {
-		setGameMode(mode);
-		setGameState("playing");
-		setScore({ player: 0, opponent: 0 });
-		setSets({ player: 0, opponent: 0 });
-		setGameTime(0);
-
-		// Reset game objects for local play
-		gameObjects.current = {
-			ball: {
-				x: CANVAS_WIDTH / 2,
-				y: CANVAS_HEIGHT / 2,
-				radius: BALL_RADIUS,
-				vx: 6 * (Math.random() > 0.5 ? 1 : -1),
-				vy: 4 * (Math.random() > 0.5 ? 1 : -1),
-			},
-			leftPaddle: {
-				x: PADDLE_WIDTH / 2,
-				y: CANVAS_HEIGHT / 2 - PADDLE_HEIGHT / 2,
-				width: PADDLE_WIDTH,
-				height: PADDLE_HEIGHT,
-			},
-			rightPaddle: {
-				x: CANVAS_WIDTH - PADDLE_WIDTH * 1.5,
-				y: CANVAS_HEIGHT / 2 - PADDLE_HEIGHT / 2,
-				width: PADDLE_WIDTH,
-				height: PADDLE_HEIGHT,
-			},
-		};
-	};
-
-	const endGame = (result: "win" | "loss") => {
-		setGameState("finished");
-		const finalScore = `${sets.player + (result === "win" ? 1 : 0)}-${
-			sets.opponent + (result === "loss" ? 1 : 0)
-		}`;
-		const xpGained = result === "win" ? 45 + Math.floor(gameTime / 10) : 15;
-
-		setMatchResults({
-			result: result,
-			opponent: opponent.name,
-			score: finalScore,
-			duration: formatTime(gameTime),
-			xpGained,
-			pointsGained: result === "win" ? 25 : -10,
-		});
-	};
-
 	const formatTime = (seconds: number) => {
 		const mins = Math.floor(seconds / 60);
 		const secs = seconds % 60;
 		return `${mins}:${secs.toString().padStart(2, "0")}`;
 	};
 
-	// Check for set/match win (only for local games)
-	useEffect(() => {
-		if (!gameId) {
-			// Only for local games
-			if (score.player >= WINNING_SCORE && score.player - score.opponent >= 2) {
-				setSets((prev) => ({ ...prev, player: prev.player + 1 }));
-				setScore({ player: 0, opponent: 0 });
+	// Local scoring logic removed; scoring and match end are server-driven.
 
-				if (sets.player + 1 >= WINNING_SETS) {
-					endGame("win");
-				}
-			} else if (
-				score.opponent >= WINNING_SCORE &&
-				score.opponent - score.player >= 2
-			) {
-				setSets((prev) => ({ ...prev, opponent: prev.opponent + 1 }));
-				setScore({ player: 0, opponent: 0 });
-
-				if (sets.opponent + 1 >= WINNING_SETS) {
-					endGame("loss");
-				}
-			}
-		}
-	}, [score, sets, gameId]);
-
-	const renderGameMenu = () => (
-		<div className="flex items-center justify-center min-h-screen">
-			<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-md w-full">
-				<div className="text-center mb-8">
-					<h1 className="text-4xl font-bold mb-4">
-						<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-							Ping Pong Pro
-						</span>
-					</h1>
-					<p className="text-gray-300">Choose your game mode</p>
-				</div>
-
-				<div className="space-y-4">
-					<button
-						onClick={() => startGame("quickmatch")}
-						className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-bold text-lg hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105"
-					>
-						Quick Match
-					</button>
-
-					<button
-						onClick={() => startGame("practice")}
-						className="w-full py-4 bg-gray-700 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition-all"
-					>
-						Practice Mode
-					</button>
-
-					<button
-						onClick={() => startGame("tournament")}
-						className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-all"
-					>
-						Tournament Match
-					</button>
-				</div>
-
-				<div className="mt-8 p-4 bg-gray-700/30 rounded-xl">
-					<h3 className="text-white font-semibold mb-2">Controls:</h3>
-					<div className="text-gray-300 text-sm space-y-1">
-						<div>↑ / W - Move paddle up</div>
-						<div>↓ / S - Move paddle down</div>
-						<div>Space - Pause/Resume</div>
-					</div>
-				</div>
-
-				<div className="mt-6 text-center">
-					<Link
-						to="/dashboard"
-						className="text-orange-400 hover:text-orange-300 transition-colors"
-					>
-						← Back to Dashboard
-					</Link>
-				</div>
-			</div>
-		</div>
-	);
+	// Menu removed: users are auto-connected/auto-started. Keep function placeholder if needed later.
 
 	const renderGameUI = () => {
 		const leftPlayer = getLeftSidePlayer();
@@ -1779,16 +1356,6 @@ export default function GamePage() {
 								</div>
 							</div>
 						</div>
-
-						<div className="text-center">
-							<div className="text-white font-bold text-lg">
-								Sets: {sets.player} - {sets.opponent}
-							</div>
-							<div className="text-gray-400 text-sm">
-								{formatTime(gameTime)}
-							</div>
-						</div>
-
 						{/* RIGHT SIDE PLAYER (Opponent) */}
 						<div className="flex items-center space-x-4">
 							<div>
@@ -1848,25 +1415,6 @@ export default function GamePage() {
 				</div>
 
 				{/* Game Controls */}
-				<div className="w-full max-w-4xl mt-4">
-					<div className="flex items-center justify-center space-x-4">
-						<button
-							onClick={() =>
-								setGameState(gameState === "paused" ? "playing" : "paused")
-							}
-							className="bg-gray-700 text-white px-6 py-2 rounded-xl hover:bg-gray-600 transition-all"
-						>
-							{gameState === "paused" ? "Resume" : "Pause"}
-						</button>
-
-						<button
-							onClick={() => setGameState("menu")}
-							className="bg-red-600 text-white px-6 py-2 rounded-xl hover:bg-red-700 transition-all"
-						>
-							Quit Game
-						</button>
-					</div>
-				</div>
 			</div>
 		);
 	};
@@ -1889,7 +1437,6 @@ export default function GamePage() {
 							{matchResults?.result === "win" ? "Victory!" : "Defeat"}
 						</span>
 					</h2>
-					<p className="text-gray-300">vs {matchResults?.opponent}</p>
 				</div>
 
 				<div className="space-y-4 mb-8">
@@ -1897,58 +1444,13 @@ export default function GamePage() {
 						<span className="text-gray-400">Final Score:</span>
 						<span className="text-white font-bold">{matchResults?.score}</span>
 					</div>
-
-					<div className="flex justify-between items-center p-3 bg-gray-700/30 rounded-xl">
-						<span className="text-gray-400">Duration:</span>
-						<span className="text-white font-bold">
-							{matchResults?.duration}
-						</span>
-					</div>
-
-					<div className="flex justify-between items-center p-3 bg-gray-700/30 rounded-xl">
-						<span className="text-gray-400">XP Gained:</span>
-						<span className="text-orange-400 font-bold">
-							+{matchResults?.xpGained}
-						</span>
-					</div>
-
-					<div className="flex justify-between items-center p-3 bg-gray-700/30 rounded-xl">
-						<span className="text-gray-400">Rank Points:</span>
-						<span
-							className={`font-bold ${
-								(matchResults?.pointsGained ?? 0) > 0
-									? "text-green-400"
-									: "text-red-400"
-							}`}
-						>
-							{(matchResults?.pointsGained ?? 0) > 0 ? "+" : ""}
-							{matchResults?.pointsGained ?? 0}
-						</span>
-					</div>
 				</div>
-
-				<div className="space-y-3">
-					<button
-						onClick={() => startGame(gameMode)}
-						className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-bold hover:from-cyan-600 hover:to-blue-600 transition-all"
-					>
-						Play Again
-					</button>
-
-					<button
-						onClick={() => setGameState("menu")}
-						className="w-full py-3 bg-gray-700 text-white rounded-xl hover:bg-gray-600 transition-all"
-					>
-						Main Menu
-					</button>
-
-					<Link
-						to="/dashboard"
-						className="block w-full py-3 bg-blue-600 text-white text-center rounded-xl hover:bg-blue-700 transition-all"
-					>
-						Back to Dashboard
-					</Link>
-				</div>
+				<Link
+					to="/dashboard"
+					className="block w-full py-3 bg-blue-600 text-white text-center rounded-xl hover:bg-blue-700 transition-all"
+				>
+					Back to Dashboard
+				</Link>
 			</div>
 		</div>
 	);
@@ -2022,7 +1524,6 @@ export default function GamePage() {
 				}`}
 			>
 				{gameState === "connecting" && renderConnecting()}
-				{gameState === "menu" && !gameId && renderGameMenu()}
 				{gameState === "playing" && renderGameUI()}
 				{gameState === "paused" && renderPausedGame()}
 				{gameState === "finished" && renderGameResults()}

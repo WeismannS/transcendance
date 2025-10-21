@@ -216,7 +216,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					email: errorData.message || "Authentication failed",
 				}));
 			}
-		} catch (err) {
+		} catch (_err) {
 			setToast({ message: "Network error", type: "error" });
 		}
 
@@ -284,7 +284,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					type: "error",
 				});
 			}
-		} catch (error) {
+		} catch (_error) {
 			setToast({ message: "2FA verification failed", type: "error" });
 		}
 	};

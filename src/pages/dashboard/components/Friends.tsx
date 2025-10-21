@@ -23,7 +23,7 @@ export default function Friends({
 	const [searchQuery, setSearchQuery] = useState("");
 	const [searchResults, setSearchResults] = useState<ProfileOverview[]>([]);
 	const [isSearching, setIsSearching] = useState(false);
-	const [sentRequests, setSentRequests] = useState(new Set());
+
 	const [showConfirmRemove, setShowConfirmRemove] = useState<string | null>(
 		null,
 	);
@@ -72,15 +72,9 @@ export default function Friends({
 		username: string;
 		avatar: string;
 	}) {
-		sendFriendRequest(userId, username)
-			.then((success) => {
-				if (success) {
-					setSentRequests((prev) => new Set([...prev, userId]));
-				}
-			})
-			.catch((error) => {
-				console.error("Failed to send friend request:", error);
-			});
+		sendFriendRequest(userId, username).catch((error) => {
+			console.error("Failed to send friend request:", error);
+		});
 	}
 
 	function handleRemoveFriend(friendId: string, friendName: string) {
@@ -89,7 +83,6 @@ export default function Friends({
 
 	function confirmRemoveFriend() {
 		if (showConfirmRemove) {
-			const friend = friends.find((f) => f.id === showConfirmRemove);
 			removeFriend(showConfirmRemove).catch((error) => {
 				console.error("Failed to remove friend:", error);
 				addNotification({
@@ -387,11 +380,6 @@ export default function Friends({
 														// alert(`Challenge sent to ${friend.displayName}!`);
 													} catch (error) {
 														console.error("Failed to send challenge:", error);
-														// Show error message to user
-														const errorMessage =
-															error instanceof Error
-																? error.message
-																: "Unknown error occurred";
 														// alert(
 														//   `Failed to send challenge to ${friend.displayName}: ${errorMessage}`
 														// );

@@ -3,7 +3,6 @@ import { Router, redirect } from "Miku/Router";
 import HomePage from "./pages/app_home/index.tsx";
 import DashboardPage from "./pages/dashboard/index.tsx";
 import GamePage from "./pages/game/index.tsx";
-import LeaderboardPage from "./pages/leaderboard/index.tsx";
 import { NotificationContainer } from "./pages/notification.tsx";
 import UserHomePage from "./pages/profile/index.tsx";
 import SignInPage from "./pages/sign_in/index.tsx";
@@ -27,7 +26,6 @@ const ProtectedRoutes = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
 				Component={UserHomePage}
 				isLoggedIn={isLoggedIn}
 			/>
-			<Router path="/leaderboard" Component={LeaderboardPage} />
 			<Router path="/game/" Component={GamePage} />
 			<Router path="/game/:gameId" Component={GamePage} />
 		</>

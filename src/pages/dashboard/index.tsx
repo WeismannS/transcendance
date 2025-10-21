@@ -1,10 +1,14 @@
+import Miku, { useEffect, useState } from "Miku";
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
-import Miku, { useEffect, useState } from "Miku";
-import { API_URL, logOut, updateProfile } from "../../services/api";
-import { getTournaments } from "../../services/api";
+import {
+	API_URL,
+	getTournaments,
+	logOut,
+	updateProfile,
+} from "../../services/api";
 import { stateManager } from "../../store/StateManager";
-import { Achievement, User } from "../../types/user.ts";
+import { useNotifications } from "../use-notification";
 import {
 	AnimatedBackground,
 	ChatsSection,
@@ -15,18 +19,10 @@ import {
 	ProfileSection,
 	TournamentsSection,
 } from "./components/index.ts";
-import { useNotifications } from "../use-notification";
 
 export default function DashboardPage() {
-	const {
-		identity,
-		profile,
-		gameState,
-		social,
-		achievements,
-		notifications,
-		messages,
-	} = useDashboardData();
+	const { profile, gameState, social, achievements, notifications } =
+		useDashboardData();
 	const { addNotification } = useNotifications();
 	// Check if we should start with a specific section (e.g., from profile message button)
 	const initialSection =
@@ -49,11 +45,7 @@ export default function DashboardPage() {
 	}, []);
 
 	const [isVisible, setIsVisible] = useState(false);
-	const [tournamentsLoading, setTournamentsLoading] = useState(false);
-	const [tournamentsError, setTournamentsError] = useState<string | null>(null);
 	const [ballPosition, setBallPosition] = useState({ x: 90, y: 10 });
-	const [notificationCount, setNotificationCount] = useState(3);
-	const [onlineUsers, setOnlineUsers] = useState(0);
 	const [userStats, setUserStats] = useState({
 		wins: gameState?.stats.wins ?? 0,
 		losses: gameState?.stats.losses ?? 0,
@@ -76,13 +68,10 @@ export default function DashboardPage() {
 		// Load tournaments into global state on dashboard mount
 		const loadTournaments = async () => {
 			try {
-				setTournamentsLoading(true);
 				const tournamentsData = await getTournaments();
 				stateManager.setState("tournaments", tournamentsData);
-			} catch (err: any) {
-				setTournamentsError(err.message || "Failed to load tournaments");
+			} catch (_err) {
 			} finally {
-				setTournamentsLoading(false);
 			}
 		};
 		loadTournaments();
@@ -183,8 +172,8 @@ export default function DashboardPage() {
 			<UniversalHeader
 				onLogout={logOut}
 				profile={profile}
-				onlineUsers={social?.onlineUsers || onlineUsers}
-				notifications={notifications?.unreadCount || notificationCount}
+				onlineUsers={social?.onlineUsers || 0}
+				notifications={notifications?.unreadCount || 0}
 			/>
 
 			{/* Navigation */}

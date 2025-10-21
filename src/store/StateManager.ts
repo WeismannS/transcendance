@@ -14,8 +14,8 @@ import type {
 	GameStats,
 	Message,
 	ProfileOverview,
-	User,
 	Tournament,
+	User,
 } from "../types/user.ts";
 
 export interface UserIdentityState {

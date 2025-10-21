@@ -14,11 +14,15 @@
 		"indentStyle": "tab"
 	},
 	"linter": {
-		"enabled": false,
+		"enabled": true,
 		"rules": {
 			"recommended": false,
-			"suspicious": {
-				"noConsole": "error"
+
+			"correctness": {
+				"noUnusedVariables": "error"
+			},
+			"performance": {
+				"noBarrelFile": "warn"
 			}
 		}
 	},
