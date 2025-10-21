@@ -1,5 +1,6 @@
 import Miku, { useEffect, useRef, useState } from "Miku";
 import { redirect } from "Miku/Router";
+import AnimatedBackground from "../../components/AnimatedBackground";
 import { API_URL } from "../../services/api/config";
 
 export default function AuthPage({ setIsLoggedIn }: any) {
@@ -258,38 +259,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		});
 	};
 
-	// Create consistent component arrays to help reconciliation
-	const backgroundElements = [
-		<div
-			key="bg-dot-1"
-			className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"
-		></div>,
-		<div
-			key="bg-dot-2"
-			className="absolute top-40 right-20 w-1 h-1 bg-cyan-300 rounded-full animate-ping"
-		></div>,
-		<div
-			key="bg-dot-3"
-			className="absolute bottom-32 right-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"
-		></div>,
-		<div
-			key="ping-pong-ball"
-			className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full shadow-lg transition-all duration-3000 ease-in-out"
-			style={{
-				left: `${ballPosition.x}%`,
-				top: `${ballPosition.y}%`,
-				transform: "translate(-50%, -50%)",
-			}}
-		></div>,
-		<div
-			key="shape-1"
-			className="absolute top-1/4 left-1/4 w-32 h-32 border border-cyan-500/20 rounded-full"
-		></div>,
-		<div
-			key="shape-2"
-			className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-blue-500/20 rounded-full"
-		></div>,
-	];
+	// Background is rendered by a shared AnimatedBackground component
 
 	// Build form fields array consistently
 	const formFields = [];
@@ -434,12 +404,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 			className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden"
 		>
 			{/* Animated Background Elements */}
-			<div
-				key="background-container"
-				className="absolute inset-0 overflow-hidden"
-			>
-				{backgroundElements}
-			</div>
+			<AnimatedBackground ballPosition={ballPosition} />
 
 			{/* Header */}
 			<header key="header" className="relative z-10 px-6 py-8">

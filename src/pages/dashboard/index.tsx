@@ -1,4 +1,5 @@
 import Miku, { useEffect, useState } from "Miku";
+import AnimatedBackground from "../../components/AnimatedBackground";
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
 import { logOut } from "../../services/api/auth";
@@ -7,7 +8,6 @@ import { updateProfile } from "../../services/api/profile";
 import { getTournaments } from "../../services/api/tournament";
 import { stateManager } from "../../store/StateManager";
 import { useNotifications } from "../use-notification";
-import AnimatedBackground from "./components/AnimatedBackground.tsx";
 import ChatsSection from "./components/ChatsSection.tsx";
 import Friends from "./components/Friends.tsx";
 import Navigation from "./components/Navigation.tsx";

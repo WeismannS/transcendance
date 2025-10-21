@@ -1,5 +1,6 @@
 import Miku, { useEffect, useState } from "Miku";
 import { Link, redirect } from "Miku/Router";
+import AnimatedBackground from "../../components/AnimatedBackground";
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { logOut } from "../../services/api/auth";
 import { getOrCreateConversation } from "../../services/api/chat";
@@ -26,7 +27,6 @@ import type {
 	Achievement as UserAchievement,
 } from "../../types/user.ts";
 import AchievementsTab from "./components/AchievementsTab.tsx";
-import AnimatedBackground from "./components/AnimatedBackground.tsx";
 import MatchesTab from "./components/MatchesTab.tsx";
 import OverviewTab from "./components/OverviewTab.tsx";
 import ProfileHeader from "./components/ProfileHeader.tsx";

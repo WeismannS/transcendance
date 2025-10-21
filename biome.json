@@ -17,7 +17,6 @@
 		"enabled": true,
 		"rules": {
 			"recommended": false,
-
 			"correctness": {
 				"noUnusedVariables": "error"
 			},

@@ -21,19 +21,17 @@ export async function updateProfile(profileData: any) {
 			body: formData,
 			credentials: "include",
 		});
-		if (!response.ok) {
-			throw new Error(`${response.statusText}`);
-		} else {
-			const profile = await response.json();
-			stateManager.emit("PROFILE_UPDATED", {
-				...profileData,
-				avatar: profile.avatarUrl,
-			});
-		}
+
+		const res = await response.json();
+		stateManager.emit("PROFILE_UPDATED", {
+			...profileData,
+			avatar: res.avatarUrl,
+		});
+		if (!response.ok) throw new Error(`${res.error}`);
 		return { success: true };
 	} catch (error) {
 		console.error("Failed to update profile:", error);
-		return { error, success: false };
+		return { error: (error as Error).message, success: false };
 	}
 }
 
