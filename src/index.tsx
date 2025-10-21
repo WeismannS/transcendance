@@ -26,7 +26,6 @@ const ProtectedRoutes = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
 				Component={UserHomePage}
 				isLoggedIn={isLoggedIn}
 			/>
-			<Router path="/game/" Component={GamePage} />
 			<Router path="/game/:gameId" Component={GamePage} />
 		</>
 	);

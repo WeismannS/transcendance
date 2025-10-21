@@ -44,12 +44,6 @@ export default function Overview() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<h2 className="text-3xl font-bold text-white">Dashboard Overview</h2>
-				<button
-					onClick={handleQuickMatch}
-					className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105"
-				>
-					🚀 Quick Match
-				</button>
 			</div>
 
 			{/* Quick Stats */}
