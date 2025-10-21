@@ -1,15 +1,15 @@
 import Miku, { useState } from "Miku";
 import { useTournaments, useUserProfile } from "../../../hooks/useStates.ts";
+import { API_URL } from "../../../services/api/config";
+import { sendChallenge } from "../../../services/api/game";
 import {
-	API_URL,
 	createTournament,
 	getTournamentMatches,
 	joinTournament,
 	leaveTournament,
-	sendChallenge,
 	startTournament,
 	stopTournament,
-} from "../../../services/api";
+} from "../../../services/api/tournament";
 import { stateManager } from "../../../store/StateManager";
 import type { Tournament } from "../../../types/user";
 

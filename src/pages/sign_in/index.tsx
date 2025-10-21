@@ -1,6 +1,6 @@
 import Miku, { useEffect, useRef, useState } from "Miku";
 import { redirect } from "Miku/Router";
-import { API_URL } from "../../services/api";
+import { API_URL } from "../../services/api/config";
 
 export default function AuthPage({ setIsLoggedIn }: any) {
 	const [isVisible, setIsVisible] = useState(false);

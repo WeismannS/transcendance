@@ -1,11 +1,8 @@
 import Miku, { useEffect, useRef, useState } from "Miku";
 import { useMessages, useUserProfile } from "../../../hooks/useStates.ts";
-import {
-	API_URL,
-	formatTime,
-	sendChallenge,
-	sendMessage,
-} from "../../../services/api";
+import { formatTime, sendMessage } from "../../../services/api/chat";
+import { API_URL } from "../../../services/api/config";
+import { sendChallenge } from "../../../services/api/game";
 import { stateManager } from "../../../store/StateManager.ts";
 import type {
 	Conversation,

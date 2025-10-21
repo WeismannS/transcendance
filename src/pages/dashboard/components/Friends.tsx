@@ -1,16 +1,17 @@
 import Miku, { useEffect, useState } from "Miku";
 import {
-	API_URL,
-	acceptFriendRequest,
-	checkAuthStatus,
-	declineFriendRequest,
 	formatTime,
 	getOrCreateConversation,
+} from "../../../services/api/chat";
+import { API_URL, checkAuthStatus } from "../../../services/api/config";
+import {
+	acceptFriendRequest,
+	declineFriendRequest,
 	removeFriend,
-	searchProfiles,
-	sendChallenge,
 	sendFriendRequest,
-} from "../../../services/api";
+} from "../../../services/api/friends";
+import { sendChallenge } from "../../../services/api/game";
+import { searchProfiles } from "../../../services/api/profile";
 import { type SocialState, stateManager } from "../../../store/StateManager.ts";
 import type { ProfileOverview } from "../../../types/user.ts";
 import { useNotifications } from "../../use-notification.tsx";

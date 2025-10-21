@@ -1,10 +1,10 @@
 import { redirect } from "Miku/Router";
 import type { Notification } from "../pages/use-notification.ts";
+import { initializeChatWebSocket } from "../services/api/chat";
 import {
-	initializeChatWebSocket,
 	initializeNotificationWs,
 	isOnline,
-} from "../services/api";
+} from "../services/api/notifications";
 import type {
 	Achievement,
 	Conversation,

@@ -259,13 +259,6 @@ export default function UserHomePage() {
 									></div>
 								</div>
 							</div>
-
-							{/* Quick Play */}
-							<div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl p-6 text-center cursor-pointer hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105">
-								<div className="text-2xl mb-2">⚡</div>
-								<div className="font-bold">Quick Match</div>
-								<div className="text-sm opacity-90">Find opponent</div>
-							</div>
 						</div>
 
 						{/* Main Content Grid */}

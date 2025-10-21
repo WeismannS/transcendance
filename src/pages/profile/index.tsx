@@ -1,16 +1,16 @@
 import Miku, { useEffect, useState } from "Miku";
 import { Link, redirect } from "Miku/Router";
 import UniversalHeader from "../../components/UniversalHeader.tsx";
+import { logOut } from "../../services/api/auth";
+import { getOrCreateConversation } from "../../services/api/chat";
 import {
 	blockUser,
-	getOrCreateConversation,
-	getProfileByUsername,
-	logOut,
 	removeFriend,
-	sendChallenge,
 	sendFriendRequest,
 	unblockUser,
-} from "../../services/api";
+} from "../../services/api/friends";
+import { sendChallenge } from "../../services/api/game";
+import { getProfileByUsername } from "../../services/api/profile";
 import type {
 	AchievementsState,
 	GameState,
@@ -25,21 +25,21 @@ import type {
 	Profile,
 	Achievement as UserAchievement,
 } from "../../types/user.ts";
+import AchievementsTab from "./components/AchievementsTab.tsx";
+import AnimatedBackground from "./components/AnimatedBackground.tsx";
+import MatchesTab from "./components/MatchesTab.tsx";
+import OverviewTab from "./components/OverviewTab.tsx";
+import ProfileHeader from "./components/ProfileHeader.tsx";
+import TabNavigation from "./components/TabNavigation.tsx";
+import TournamentsTab from "./components/TournamentsTab.tsx";
 import {
 	type Achievement,
-	AchievementsTab,
-	AnimatedBackground,
 	type Match,
-	MatchesTab,
 	type MutualMatch,
-	OverviewTab,
-	ProfileHeader,
 	type ProfileUser,
 	type Tab,
-	TabNavigation,
 	type Tournament,
-	TournamentsTab,
-} from "./components/index.ts";
+} from "./components/types.ts";
 
 export default function UserProfilePage({
 	isLoggedIn,

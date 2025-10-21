@@ -7,11 +7,11 @@ import { NotificationContainer } from "./pages/notification.tsx";
 import UserHomePage from "./pages/profile/index.tsx";
 import SignInPage from "./pages/sign_in/index.tsx";
 import {
-	API_URL,
 	getAllConversations,
 	initializeChatWebSocket,
-	initializeNotificationWs,
-} from "./services/api";
+} from "./services/api/chat";
+import { API_URL } from "./services/api/config";
+import { initializeNotificationWs } from "./services/api/notifications";
 import { stateManager } from "./store/StateManager.ts";
 
 const aa = document.body.querySelector("#app");

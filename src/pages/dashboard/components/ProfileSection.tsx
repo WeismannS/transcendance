@@ -220,10 +220,6 @@ export default function ProfileSection({
 							</div>
 						</div>
 					</div>
-
-					<button className="w-full mt-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-bold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-lg">
-						<Link to="/game">🏓 Quick Play</Link>
-					</button>
 				</div>
 
 				{/* Stats & Achievements */}

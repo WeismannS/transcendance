@@ -2,7 +2,7 @@
 
 import Miku from "Miku";
 import { redirect } from "Miku/Router";
-import { formatTime } from "../../../services/api";
+import { formatTime } from "../../../services/api/chat";
 import type {
 	AchievementsState,
 	GameState,
@@ -38,10 +38,6 @@ export default function Overview() {
 
 	const handleQuickMatch = () => {
 		redirect("/game");
-	};
-
-	const handleViewLeaderboard = () => {
-		redirect("/leaderboard");
 	};
 
 	return (
@@ -103,45 +99,6 @@ export default function Overview() {
 							</p>
 						</div>
 						<div className="text-4xl">👥</div>
-					</div>
-				</div>
-			</div>
-
-			{/* Quick Actions */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				<div
-					onClick={handleViewLeaderboard}
-					className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-green-500/50 transition-all cursor-pointer group"
-				>
-					<div className="flex items-center space-x-4">
-						<div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-							<span className="text-white font-bold text-xl">📊</span>
-						</div>
-						<div>
-							<h3 className="text-xl font-bold text-white">Leaderboard</h3>
-							<p className="text-gray-400">Check global rankings</p>
-						</div>
-					</div>
-					<div className="mt-4 text-green-400 font-semibold">
-						View Leaderboard →
-					</div>
-				</div>
-
-				<div
-					onClick={handleQuickMatch}
-					className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-blue-500/50 transition-all cursor-pointer group"
-				>
-					<div className="flex items-center space-x-4">
-						<div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-							<span className="text-white font-bold text-xl">🏓</span>
-						</div>
-						<div>
-							<h3 className="text-xl font-bold text-white">Quick Match</h3>
-							<p className="text-gray-400">Find an opponent instantly</p>
-						</div>
-					</div>
-					<div className="mt-4 text-blue-400 font-semibold">
-						Start Playing →
 					</div>
 				</div>
 			</div>

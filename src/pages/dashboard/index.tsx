@@ -1,24 +1,19 @@
 import Miku, { useEffect, useState } from "Miku";
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { useDashboardData } from "../../hooks/useStates.ts";
-import {
-	API_URL,
-	getTournaments,
-	logOut,
-	updateProfile,
-} from "../../services/api";
+import { logOut } from "../../services/api/auth";
+import { API_URL } from "../../services/api/config";
+import { updateProfile } from "../../services/api/profile";
+import { getTournaments } from "../../services/api/tournament";
 import { stateManager } from "../../store/StateManager";
 import { useNotifications } from "../use-notification";
-import {
-	AnimatedBackground,
-	ChatsSection,
-	FloatingQuickMatchButton,
-	Friends,
-	Navigation,
-	Overview,
-	ProfileSection,
-	TournamentsSection,
-} from "./components/index.ts";
+import AnimatedBackground from "./components/AnimatedBackground.tsx";
+import ChatsSection from "./components/ChatsSection.tsx";
+import Friends from "./components/Friends.tsx";
+import Navigation from "./components/Navigation.tsx";
+import Overview from "./components/Overview.tsx";
+import ProfileSection from "./components/ProfileSection.tsx";
+import TournamentsSection from "./components/TournamentsSection.tsx";
 
 export default function DashboardPage() {
 	const { profile, gameState, social, achievements, notifications } =
@@ -217,9 +212,6 @@ export default function DashboardPage() {
 					</div>
 				</div>
 			</main>
-
-			{/* Floating Quick Match Button */}
-			<FloatingQuickMatchButton />
 		</div>
 	);
 }

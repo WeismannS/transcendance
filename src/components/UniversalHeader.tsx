@@ -1,6 +1,8 @@
 import { Link } from "Miku/Router";
 import Miku, { useEffect, useState } from "../Miku/src/index";
-import { API_URL, searchProfiles, sendFriendRequest } from "../services/api";
+import { API_URL } from "../services/api/config";
+import { sendFriendRequest } from "../services/api/friends";
+import { searchProfiles } from "../services/api/profile";
 import { type UserProfileState } from "../store/StateManager.ts";
 import type { ProfileOverview } from "../types/user.ts";
 
