@@ -31,7 +31,6 @@ import MatchesTab from "./components/MatchesTab.tsx";
 import OverviewTab from "./components/OverviewTab.tsx";
 import ProfileHeader from "./components/ProfileHeader.tsx";
 import TabNavigation from "./components/TabNavigation.tsx";
-import TournamentsTab from "./components/TournamentsTab.tsx";
 import {
 	type Achievement,
 	type Match,
@@ -343,11 +342,6 @@ export default function UserProfilePage({
 					achievementsState.allAchievements,
 				)
 			: [];
-
-	const tournamentHistory: Tournament[] = [
-		// Mock tournament data - you'd need to add this to your Profile type
-	];
-
 	const mutualHistory: MutualMatch[] = profileData
 		? profileData.gamesH2h.map((game, index) => ({
 				id: index,
@@ -361,7 +355,6 @@ export default function UserProfilePage({
 		{ id: "overview", label: "Overview", icon: "📊" },
 		{ id: "matches", label: "Recent Matches", icon: "🏓" },
 		{ id: "achievements", label: "Achievements", icon: "🏆" },
-		{ id: "tournaments", label: "Tournaments", icon: "👑" },
 	];
 
 	useEffect(() => {
@@ -500,8 +493,6 @@ export default function UserProfilePage({
 				return <MatchesTab recentMatches={recentMatches} />;
 			case "achievements":
 				return <AchievementsTab achievements={achievements} />;
-			case "tournaments":
-				return <TournamentsTab tournamentHistory={tournamentHistory} />;
 			default:
 				return (
 					<OverviewTab
