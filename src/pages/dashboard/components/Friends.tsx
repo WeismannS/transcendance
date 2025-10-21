@@ -245,14 +245,16 @@ export default function Friends({
 															{user.displayName}
 														</h4>
 														<div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
-															<span>Rank #{user.rank}</span>
+															<span>
+																Rank {user.rank ? `#${user.rank}` : "Unranked"}
+															</span>
 														</div>
 													</div>
 												</div>
 												<div className="flex items-center space-x-2">
 													<div className="text-right text-sm mr-3">
 														<div className="text-orange-400 font-bold">
-															#{user.rank}
+															#{user.rank ? user.rank : "Unranked"}
 														</div>
 														<div className="text-gray-400">{user.status}</div>
 													</div>
@@ -352,7 +354,7 @@ export default function Friends({
 											</div>
 											<div className="text-right">
 												<div className="text-orange-400 font-bold">
-													#{friend.rank}
+													{friend.rank ? `#${friend.rank}` : "Unranked"}
 												</div>
 												<div className="text-green-400 text-xs">
 													{friend.status}
@@ -470,7 +472,7 @@ export default function Friends({
 									<div className="flex items-center space-x-4">
 										<div className="text-right text-sm">
 											<div className="text-orange-400 font-bold">
-												#{friend.rank}
+												{friend.rank ? `#${friend.rank}` : "Unranked"}
 											</div>
 										</div>
 										<div className="flex space-x-1">
@@ -591,10 +593,6 @@ export default function Friends({
 													{request.user.displayName}
 												</h4>
 											</div>
-										</div>
-										<div className="text-sm text-gray-300 mb-3">
-											<div>Rank #{request.user.rank}</div>
-											<div className="text-gray-400">{request.createdAt}</div>
 										</div>
 										<div className="flex space-x-2">
 											<button

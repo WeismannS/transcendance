@@ -24,12 +24,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 	const [oauthLoading, setOauthLoading] = useState({
 		google: false,
 	});
-	const [show2FAModal, setShow2FAModal] = useState(false);
-	const [twoFACode, setTwoFACode] = useState("");
-	const [tempToken, setTempToken] = useState("");
-	const [pendingUser, setPendingUser] = useState<{ email: string } | null>(
-		null,
-	);
 
 	useEffect(() => {
 		setIsVisible(true);
@@ -70,9 +64,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 				case "GOOGLE_AUTH_2FA_REQUIRED":
 					console.log("Google auth 2FA required");
 					setOauthLoading((prev) => ({ ...prev, google: false }));
-					setTempToken(event.data.tempToken);
-					setPendingUser(event.data.user);
-					setShow2FAModal(true);
 					setToast({ message: "2FA verification required", type: "info" });
 					break;
 
@@ -251,44 +242,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		console.log("Popup opened successfully");
 	};
 
-	const handle2FASubmit = async () => {
-		if (!twoFACode || twoFACode.length !== 6) {
-			setToast({ message: "Please enter a valid 6-digit code", type: "error" });
-			return;
-		}
-
-		try {
-			const response = await fetch(API_URL + "/auth/verify-2fa", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${tempToken}`,
-				},
-				credentials: "include",
-				body: JSON.stringify({ code: twoFACode }),
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				setShow2FAModal(false);
-				setTwoFACode("");
-				setTempToken("");
-				setPendingUser(null);
-				setToast({ message: "2FA verification successful!", type: "success" });
-				// Handle successful login
-				console.log("User fully authenticated:", data.user);
-			} else {
-				const errorData = await response.json();
-				setToast({
-					message: errorData.message || "Invalid 2FA code",
-					type: "error",
-				});
-			}
-		} catch (_error) {
-			setToast({ message: "2FA verification failed", type: "error" });
-		}
-	};
-
 	const toggleAuthMode = () => {
 		setIsSignUp(!isSignUp);
 		setFormData({
@@ -369,7 +322,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		</div>,
 	);
 
-	// Email field
 	formFields.push(
 		<div key="email-field">
 			<label
@@ -641,62 +593,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					</div>
 				</div>
 			</main>
-
-			{/* 2FA Modal */}
-			{show2FAModal && (
-				<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-					<div className="bg-gray-800 rounded-2xl p-8 max-w-md w-full border border-gray-700">
-						<div className="text-center mb-6">
-							<h2 className="text-2xl font-bold text-white mb-2">
-								Two-Factor Authentication
-							</h2>
-							<p className="text-gray-300">
-								Please enter the 6-digit code from your authenticator app
-							</p>
-							{pendingUser && (
-								<p className="text-sm text-cyan-400 mt-2">
-									Signing in as {pendingUser.email}
-								</p>
-							)}
-						</div>
-
-						<div className="mb-6">
-							<input
-								type="text"
-								value={twoFACode}
-								onChange={(e) =>
-									setTwoFACode(e.target.value.replace(/\D/g, "").slice(0, 6))
-								}
-								placeholder="000000"
-								className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-cyan-500"
-								maxLength={6}
-							/>
-						</div>
-
-						<div className="flex space-x-4">
-							<button
-								onClick={() => {
-									setShow2FAModal(false);
-									setTwoFACode("");
-									setTempToken("");
-									setPendingUser(null);
-								}}
-								className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors"
-							>
-								Cancel
-							</button>
-							<button
-								onClick={handle2FASubmit}
-								disabled={twoFACode.length !== 6}
-								className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								Verify
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
-
 			{/* Toast Notification */}
 			{toast.message && (
 				<div
