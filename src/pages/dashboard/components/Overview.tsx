@@ -2,18 +2,15 @@
 
 import Miku from "Miku";
 import { redirect } from "Miku/Router";
-import { formatTime } from "../../../services/api/chat";
 import type {
-	AchievementsState,
 	GameState,
 	NotificationsState,
 	SocialState,
-	UserProfileState,
+	UserProfileState
 } from "../../../store/StateManager.ts";
 import { stateManager } from "../../../store/StateManager.ts";
 
 export default function Overview() {
-	// Get data from state managers - these are reactive
 	const userProfile = stateManager.getState<UserProfileState>("userProfile");
 	const gameState = stateManager.getState<GameState>("gameState");
 	const socialState = stateManager.getState<SocialState>("social");
@@ -21,7 +18,6 @@ export default function Overview() {
 	const notificationsState =
 		stateManager.getState<NotificationsState>("notifications");
 
-	// Calculate derived data from state managers
 	const userStats = gameState?.stats || {
 		totalGames: 0,
 		wins: 0,
@@ -46,7 +42,6 @@ export default function Overview() {
 				<h2 className="text-3xl font-bold text-white">Dashboard Overview</h2>
 			</div>
 
-			{/* Quick Stats */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 				<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6 hover:border-cyan-500/50 transition-all">
 					<div className="flex items-center justify-between">
@@ -97,7 +92,6 @@ export default function Overview() {
 				</div>
 			</div>
 
-			{/* Recent Activity from Game History */}
 			<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 				<h3 className="text-xl font-bold text-white mb-4">Recent Activity</h3>
 				<div className="space-y-4">
@@ -151,7 +145,6 @@ export default function Overview() {
 				</div>
 			</div>
 
-			{/* Notifications Summary */}
 			{notificationsState && notificationsState.unreadCount > 0 && (
 				<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 					<div className="flex items-center justify-between">

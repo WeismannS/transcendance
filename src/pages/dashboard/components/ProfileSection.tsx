@@ -1,5 +1,4 @@
 import Miku from "Miku";
-import { Link } from "Miku/Router";
 import type {
 	GameState,
 	UserProfileState,
@@ -63,14 +62,12 @@ export default function ProfileSection({
 				<div className="flex items-center space-x-4">
 					{isEditMode ? (
 						<>
-							{/* Save Button (Orange) */}
 							<button
 								onClick={handleSave}
 								className="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg"
 							>
 								✓ Save Changes
 							</button>
-							{/* Cancel Button (Gray) */}
 							<button
 								onClick={handleCancel}
 								className="bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white px-6 py-2 rounded-full font-semibold transition-all border border-gray-600 hover:border-gray-500"
@@ -79,7 +76,6 @@ export default function ProfileSection({
 							</button>
 						</>
 					) : (
-						// Edit Profile Button
 						<button
 							onClick={() => setIsEditMode(true)}
 							className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
@@ -91,10 +87,8 @@ export default function ProfileSection({
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Profile Info */}
 				<div className="lg:col-span-1 bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 					<div className="text-center">
-						{/* --- AVATAR --- */}
 						<div className="relative w-24 h-24 mx-auto mb-4 group">
 							<div className="w-24 h-24 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
 								{editableProfile.avatarPreview ? (
@@ -137,7 +131,6 @@ export default function ProfileSection({
 							)}
 						</div>
 
-						{/* --- NAME --- */}
 						<div className="mb-4">
 							{isEditMode ? (
 								<div className="relative">
@@ -157,7 +150,6 @@ export default function ProfileSection({
 							)}
 						</div>
 
-						{/* --- BIO --- */}
 						<div className="mb-6">
 							{isEditMode ? (
 								<div className="relative">
@@ -187,7 +179,6 @@ export default function ProfileSection({
 						</div>
 					</div>
 
-					{/* Stats */}
 					<div className="space-y-4 bg-gray-700/30 rounded-xl p-4">
 						<div className="flex justify-between items-center">
 							<span className="text-gray-400 text-sm">Total Wins</span>
@@ -222,9 +213,7 @@ export default function ProfileSection({
 					</div>
 				</div>
 
-				{/* Stats & Achievements */}
 				<div className="lg:col-span-2 space-y-6">
-					{/* Performance Chart */}
 					<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 						<h3 className="text-xl font-bold text-white mb-4">
 							Recent Performance
@@ -276,7 +265,6 @@ export default function ProfileSection({
 						</div>
 					</div>
 
-					{/* Achievements */}
 					<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 						<h3 className="text-xl font-bold text-white mb-4">Achievements</h3>
 						<div className="grid grid-cols-2 md:grid-cols-4 gap-4">

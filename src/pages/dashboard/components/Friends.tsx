@@ -122,7 +122,6 @@ export default function Friends({
 				</button>
 			</div>
 
-			{/* Confirm Remove Friend Modal */}
 			{showConfirmRemove && (
 				<div className="fixed inset-0  flex items-center justify-center z-50">
 					<div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md mx-4">
@@ -150,7 +149,6 @@ export default function Friends({
 				</div>
 			)}
 
-			{/* Add Friends Modal */}
 			{showAddFriendsModal && (
 				<div className="fixed inset-0 flex items-center justify-center z-50">
 					<div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-hidden">
@@ -164,7 +162,6 @@ export default function Friends({
 							</button>
 						</div>
 
-						{/* Search Input */}
 						<div className="mb-6">
 							<div className="relative">
 								<input
@@ -184,7 +181,6 @@ export default function Friends({
 							</div>
 						</div>
 
-						{/* Search Results */}
 						<div className="max-h-96 overflow-y-auto">
 							{searchQuery && searchResults.length === 0 && !isSearching && (
 								<div className="text-center py-8">
@@ -298,9 +294,7 @@ export default function Friends({
 			)}
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Friends List */}
 				<div className="lg:col-span-2 space-y-6">
-					{/* Online Friends */}
 					<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 						<h3 className="text-xl font-bold text-white mb-4 flex items-center">
 							<span className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
@@ -366,26 +360,17 @@ export default function Friends({
 											<button
 												onClick={async () => {
 													try {
-														// Check authentication status first
 														const isAuthenticated = await checkAuthStatus();
 														if (!isAuthenticated) {
-															// alert(
-															//   "You are not logged in. Please refresh the page and log in again."
-															// );
 															return;
 														}
 
 														await sendChallenge(friend.id);
-														// Show success message
 														console.log(
 															`Challenge sent to ${friend.displayName}`,
 														);
-														// alert(`Challenge sent to ${friend.displayName}!`);
 													} catch (error) {
 														console.error("Failed to send challenge:", error);
-														// alert(
-														//   `Failed to send challenge to ${friend.displayName}: ${errorMessage}`
-														// );
 													}
 												}}
 												disabled={friend.status !== "online"}
@@ -422,7 +407,6 @@ export default function Friends({
 						</div>
 					</div>
 
-					{/* All Friends */}
 					<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 						<h3 className="text-xl font-bold text-white mb-4">
 							All Friends ({friends.length})
@@ -479,7 +463,6 @@ export default function Friends({
 											<button
 												onClick={async () => {
 													try {
-														// Check authentication status first
 														const isAuthenticated = await checkAuthStatus();
 														if (!isAuthenticated) {
 															alert(
@@ -489,14 +472,11 @@ export default function Friends({
 														}
 
 														await sendChallenge(friend.id);
-														// Show success message
 														console.log(
 															`Challenge sent to ${friend.displayName}`,
 														);
-														// alert(`Challenge sent to ${friend.displayName}!`);
 													} catch (error) {
 														console.error("Failed to send challenge:", error);
-														// Show error message to user
 														const errorMessage =
 															error instanceof Error
 																? error.message
@@ -551,9 +531,7 @@ export default function Friends({
 					</div>
 				</div>
 
-				{/* Friend Requests & Quick Actions */}
 				<div className="space-y-6">
-					{/* Friend Requests */}
 					<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 						<h3 className="text-xl font-bold text-white mb-4 flex items-center">
 							Friend Requests
@@ -624,7 +602,6 @@ export default function Friends({
 						)}
 					</div>
 
-					{/* Friend Stats */}
 					<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 						<h3 className="text-xl font-bold text-white mb-4">Friend Stats</h3>
 						<div className="space-y-3">

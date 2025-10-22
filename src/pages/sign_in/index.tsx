@@ -19,7 +19,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		confirmPassword: "",
 		name: "",
 	});
-	// background animation handled by AnimatedBackground (customized timing below)
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [oauthLoading, setOauthLoading] = useState({
@@ -29,11 +28,8 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 	useEffect(() => {
 		setIsVisible(true);
 
-		// Animated background handled by AnimatedBackground component (no local interval needed)
 
-		// Listen for OAuth messages from popup
 		const handleMessage = (event: MessageEvent) => {
-			// Be more permissive with origins during development
 			if (
 				event.origin !== window.location.origin &&
 				event.origin !== "http://localhost:3000"
@@ -49,10 +45,9 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					console.log("Google auth success received");
 					setOauthLoading((prev) => ({ ...prev, google: false }));
 					setToast({ message: "Google sign-in successful!", type: "success" });
-					// Handle successful login - redirect or update app state
 					setTimeout(() => {
 						setIsLoggedIn(true);
-						redirect("/dashboard"); // Redirect to dashboard or home page
+						redirect("/dashboard");
 					}, 1000);
 					break;
 
@@ -80,7 +75,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		window.addEventListener("message", handleMessage);
 
 		return () => {
-			// no local interval to clear
 			window.removeEventListener("message", handleMessage);
 		};
 	}, []);
@@ -189,7 +183,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 				});
 				setTimeout(() => {
 					setIsLoggedIn(true);
-					redirect("/dashboard"); // Redirect to dashboard or home page
+					redirect("/dashboard");
 				}, 1000);
 			} else {
 				const errorData = await res.json();
@@ -216,14 +210,12 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 
 		console.log("Opening Google OAuth popup...");
 
-		// Open Google OAuth popup
 		const popup = window.open(
 			API_URL + "/api/auth/google",
 			"google-oauth",
 			"width=500,height=600,scrollbars=yes,resizable=yes",
 		);
 
-		// Check if popup was blocked
 		if (!popup) {
 			console.log("Popup was blocked");
 			setOauthLoading((prev) => ({ ...prev, google: false }));
@@ -253,12 +245,9 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		});
 	};
 
-	// Background is rendered by a shared AnimatedBackground component
 
-	// Build form fields array consistently
 	const formFields = [];
 
-	// Always add name field but conditionally show it
 	formFields.push(
 		<div key="name-field" style={{ display: isSignUp ? "block" : "none" }}>
 			<label
@@ -313,7 +302,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		</div>,
 	);
 
-	// Password field
 	formFields.push(
 		<div key="password-field">
 			<label
@@ -351,7 +339,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		</div>,
 	);
 
-	// Always add confirm password field but conditionally show it
 	formFields.push(
 		<div
 			key="confirm-password-field"
@@ -397,10 +384,8 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 			key="auth-page"
 			className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden"
 		>
-			{/* Animated Background Elements */}
 			<AnimatedBackground intervalMs={4500} />
 
-			{/* Header */}
 			<header key="header" className="relative z-10 px-6 py-8">
 				<nav
 					key="nav"
@@ -436,7 +421,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 				</nav>
 			</header>
 
-			{/* Main Content */}
 			<main
 				key="main"
 				className="relative z-10 px-6 flex items-center justify-center min-h-[calc(100vh-200px)]"
@@ -446,7 +430,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 						key="animated-wrapper"
 						className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
 					>
-						{/* Auth Card */}
 						<div
 							key="auth-card"
 							className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-3xl p-8 shadow-2xl"
@@ -464,7 +447,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 								</p>
 							</div>
 
-							{/* Social Login Buttons */}
 							<div key="social-buttons" className="space-y-3 mb-6">
 								<button
 									key="google-btn"
@@ -486,7 +468,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 								</button>
 							</div>
 
-							{/* Divider */}
 							<div key="divider" className="flex items-center my-6">
 								<div
 									key="divider-left"
@@ -501,7 +482,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 								></div>
 							</div>
 
-							{/* Auth Form */}
 							<div key="auth-form" className="space-y-6">
 								{formFields}
 
@@ -533,7 +513,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 								</button>
 							</div>
 
-							{/* Footer */}
 							<div key="card-footer" className="text-center mt-6">
 								<p key="footer-text" className="text-gray-400 text-sm">
 									{isSignUp
@@ -552,7 +531,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					</div>
 				</div>
 			</main>
-			{/* Toast Notification */}
 			{toast.message && (
 				<div
 					className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg text-sm font-semibold z-50 transition-all ${

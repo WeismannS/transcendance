@@ -7,7 +7,7 @@ export type ProfileOverview = {
 	bio: string;
 	status: "online" | "offline" | "In Game" | "in Tournament";
 	rank: number | null;
-	createdAt: string; // ISO date string
+	createdAt: string;
 };
 
 export interface Profile {

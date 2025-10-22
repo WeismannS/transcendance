@@ -24,7 +24,6 @@ export interface Notification {
 	onView?: () => void;
 }
 
-// Global notification state using a simple object
 const notificationState = {
 	notifications: [] as Notification[],
 	listeners: [] as Array<(notifications: Notification[]) => void>,
@@ -35,20 +34,16 @@ export function useNotifications() {
 	const listenerRef = useRef<(notifications: Notification[]) => void>();
 
 	useEffect(() => {
-		// Create listener function
 		const listener = (newNotifications: Notification[]) => {
 			setNotifications([...newNotifications]);
 		};
 
 		listenerRef.current = listener;
 
-		// Add listener to global state
 		notificationState.listeners.push(listener);
 
-		// Set initial state
 		setNotifications([...notificationState.notifications]);
 
-		// Cleanup
 		return () => {
 			const index = notificationState.listeners.indexOf(listener);
 			if (index > -1) {
@@ -65,15 +60,12 @@ export function useNotifications() {
 			duration: notification.duration ?? 5000,
 		};
 
-		// Add to global state
 		notificationState.notifications.push(newNotification);
 
-		// Notify all listeners
 		notificationState.listeners.forEach((listener) => {
 			listener(notificationState.notifications);
 		});
 
-		// Auto remove after duration
 		if (newNotification.duration && newNotification.duration > 0) {
 			setTimeout(() => {
 				removeNotification(id);
@@ -86,7 +78,6 @@ export function useNotifications() {
 		if (index > -1) {
 			notificationState.notifications.splice(index, 1);
 
-			// Notify all listeners
 			notificationState.listeners.forEach((listener) => {
 				listener(notificationState.notifications);
 			});
@@ -96,7 +87,6 @@ export function useNotifications() {
 	const clearAll = () => {
 		notificationState.notifications.length = 0;
 
-		// Notify all listeners
 		notificationState.listeners.forEach((listener) => {
 			listener(notificationState.notifications);
 		});

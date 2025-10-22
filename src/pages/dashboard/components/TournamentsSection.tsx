@@ -1,6 +1,5 @@
 import Miku, { useState } from "Miku";
 import { useTournaments, useUserProfile } from "../../../hooks/useStates.ts";
-import { API_URL } from "../../../services/api/config";
 import { sendChallenge } from "../../../services/api/game";
 import {
 	createTournament,
@@ -13,7 +12,6 @@ import {
 import { stateManager } from "../../../store/StateManager";
 import { Tournament } from "./types";
 
-// Use canonical Tournament type from src/types/user.ts
 
 export default function TournamentsSection({}) {
 	const userProfile = useUserProfile();
@@ -37,13 +35,11 @@ export default function TournamentsSection({}) {
 		null,
 	);
 
-	// Create tournament form
 	const [newTournament, setNewTournament] = useState({
 		name: "",
 		startTime: "",
 	});
 
-	// Loading of tournaments moved to dashboard page; this component reads global state via useTournaments
 
 	const loadTournamentMatches = async (tournamentId: string) => {
 		try {
@@ -88,7 +84,6 @@ export default function TournamentsSection({}) {
 		}
 	};
 
-	// No local load effect; dashboard handles loading tournaments on mount
 
 	const handleCreateTournament = async () => {
 		if (!userProfile || !newTournament.name.trim()) return;
@@ -114,7 +109,6 @@ export default function TournamentsSection({}) {
 	const handleRegister = async (tournamentId: string) => {
 		if (!userProfile) return;
 
-		// Optimistic UI update: add the current user to the tournament players locally
 		setJoiningTournamentId(tournamentId);
 
 		const newPlayer = {
@@ -143,7 +137,6 @@ export default function TournamentsSection({}) {
 
 			const res = await joinTournament(tournamentId, userProfile.displayName);
 			if (!res || !res.success) {
-				// revert optimistic change
 				stateManager.updateState<any[]>("tournaments", (prev) => {
 					if (!prev) return prev;
 					return prev.map((t) =>
@@ -166,7 +159,6 @@ export default function TournamentsSection({}) {
 				setError(res?.error || "Failed to join tournament");
 			}
 		} catch (err: any) {
-			// revert optimistic change on error
 			stateManager.updateState<any[]>("tournaments", (prev) => {
 				if (!prev) return prev;
 				return prev.map((t) =>
@@ -197,7 +189,6 @@ export default function TournamentsSection({}) {
 		setLeavingTournamentId(tournamentId);
 
 		try {
-			// Optimistic remove
 			stateManager.updateState<any[]>("tournaments", (prev) => {
 				if (!prev) return prev;
 				return prev.map((t) =>
@@ -219,7 +210,6 @@ export default function TournamentsSection({}) {
 
 			const res = await leaveTournament(tournamentId);
 			if (!res || !res.success) {
-				// revert on failure
 				stateManager.updateState<any[]>("tournaments", (prev) => {
 					if (!prev) return prev;
 					return prev.map((t) =>
@@ -258,7 +248,6 @@ export default function TournamentsSection({}) {
 				setError(res?.error || "Failed to leave tournament");
 			}
 		} catch (err: any) {
-			// revert on error
 			stateManager.updateState<any[]>("tournaments", (prev) => {
 				if (!prev) return prev;
 				return prev.map((t) =>
@@ -807,7 +796,6 @@ export default function TournamentsSection({}) {
 			{renderTournamentDetails()}
 			{showBracket && renderBracket()}
 
-			{/* Header with filters and create button */}
 			<div className="flex items-center justify-between">
 				<h2 className="text-3xl font-bold text-white">Tournaments</h2>
 				<button
@@ -818,7 +806,6 @@ export default function TournamentsSection({}) {
 				</button>
 			</div>
 
-			{/* Search and Filters */}
 			<div className="flex flex-col md:flex-row gap-4">
 				<div className="flex-1">
 					<input
@@ -873,7 +860,6 @@ export default function TournamentsSection({}) {
 				</div>
 			</div>
 
-			{/* Error Display */}
 			{error && (
 				<div className="p-4 bg-red-500 bg-opacity-20 border border-red-500 border-opacity-30 rounded-xl text-black">
 					{error}
@@ -886,7 +872,6 @@ export default function TournamentsSection({}) {
 				</div>
 			)}
 
-			{/* Tournament Grid */}
 			{filteredTournaments.length > 0 ? (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{filteredTournaments.map((tournament: Tournament) =>
@@ -907,7 +892,6 @@ export default function TournamentsSection({}) {
 				</div>
 			)}
 
-			{/* Create Tournament Modal */}
 			{showCreateModal && (
 				<div className="fixed inset-0 backdrop-blur-sm rounded-2xl z-50 flex items-center justify-center p-4">
 					<div className="bg-gray-800 bg-opacity-90 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-md w-full">

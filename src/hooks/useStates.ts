@@ -107,7 +107,6 @@ export function useMessages() {
 	return messages;
 }
 
-// Combined hook for components that need multiple states
 export function useDashboardData() {
 	const identity = useUserIdentity();
 	const profile = useUserProfile();

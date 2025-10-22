@@ -56,25 +56,21 @@ export default function UserProfilePage({
 	const [isOwnProfile, setIsOwnProfile] = useState(false);
 	const [hasPendingRequest, setHasPendingRequest] = useState(false);
 
-	// Get state manager data - these will remain reactive
 	const currentUser = stateManager.getState<UserProfileState>("userProfile");
 	const gameState = stateManager.getState<GameState>("gameState");
 	const socialState = stateManager.getState<SocialState>("social");
 	const achievementsState =
 		stateManager.getState<AchievementsState>("achievements");
 
-	// Extract username from URL - handle both /profile/username and /app_home patterns
 	const getUsername = () => {
 		const pathSegments = window.location.pathname
 			.split("/")
 			.filter((segment) => segment);
 
-		// If path is /profile/:userid
 		if (pathSegments[0] === "profile" && pathSegments[1]) {
 			return pathSegments[1];
 		}
 
-		// If path is /app_home, return current user
 		if (pathSegments[0] === "app_home") {
 			return (
 				currentUser?.displayName.toLowerCase().replace(/\s+/g, "") ||
@@ -86,7 +82,6 @@ export default function UserProfilePage({
 		return null;
 	};
 
-	// Transform Profile data to ProfileUser for components
 	const transformProfileData = (
 		profile: Profile,
 		achievements: UserAchievement[],
@@ -102,14 +97,14 @@ export default function UserProfilePage({
 			name: profile.profile.displayName,
 			username: `@${profile.profile.displayName.toLowerCase().replace(/\s+/g, "")}`,
 			rank: profile.profile.rank,
-			level: Math.floor(profile.gameStats.totalGames / 10) + 1, // Simple level calculation
+			level: Math.floor(profile.gameStats.totalGames / 10) + 1,
 			wins: profile.gameStats.wins,
 			losses: profile.gameStats.losses,
 			winRate: Math.round(winRate * 10) / 10,
 			winStreak: profile.gameStats.currentStreak,
 			currentStreak: profile.gameStats.currentStreak,
 			bestStreak: profile.gameStats.bestStreak,
-			joinDate: new Date(profile.profile.createdAt).toLocaleDateString(), // This would need to be added to the Profile type
+			joinDate: new Date(profile.profile.createdAt).toLocaleDateString(),
 			totalMatches: profile.gameStats.totalGames,
 			tournamentsWon: profile.gameStats.tournamentWins,
 			xp: profile.gameStats.wins * 100 + profile.gameStats.totalGames * 10,
@@ -120,19 +115,17 @@ export default function UserProfilePage({
 		};
 	};
 
-	// Transform GameHistory to Match format
 	const transformGameHistory = (gameHistory: GameHistory[]): Match[] => {
 		console.log("Transforming game history:", gameHistory);
 		return gameHistory.map((game, index) => ({
 			id: game.id,
-			opponent: game.opponentName, // This would need to be added to GameHistory
+			opponent: game.opponentName,
 			result: game.result as "win" | "loss",
 			score: `${game.playerScore}-${game.opponentScore}`,
 			time: new Date(game.playedAt).toLocaleDateString(),
 		}));
 	};
 
-	// Transform achievements
 	const transformAchievements = (
 		userAchievementIds: string[],
 		allAchievements: UserAchievement[],
@@ -147,12 +140,10 @@ export default function UserProfilePage({
 		}));
 	};
 
-	// Check if user is a friend
 	const checkFriendship = (userId: string, friends: Friend[]): boolean => {
 		return friends.some((friend) => friend.id === userId);
 	};
 
-	// Check if there's a pending friend request to this user
 	const checkPendingRequest = (
 		userId: string,
 		sentRequests: any[],
@@ -168,10 +159,8 @@ export default function UserProfilePage({
 		return hasPending;
 	};
 
-	// Extract and memoize username
 	const username = getUsername();
 
-	// Load profile data
 	useEffect(() => {
 		const loadProfile = async () => {
 			setLoading(true);
@@ -184,7 +173,6 @@ export default function UserProfilePage({
 			}
 
 			try {
-				// Debug logging
 				console.log("Profile detection:", {
 					username,
 					currentUserId: currentUser?.id,
@@ -192,21 +180,19 @@ export default function UserProfilePage({
 					pathname: window.location.pathname,
 				});
 
-				// Check if this is the current user's profile - match by ID
 				const isOwn = currentUser && currentUser.id === username;
 				setIsOwnProfile(!!isOwn);
 
 				console.log("Is own profile:", isOwn);
 
 				if (isOwn && currentUser) {
-					// Use current user data from state manager
 					console.log("Using current user data for own profile", gameState);
 					const mockProfile: Profile = {
 						profile: {
 							...currentUser,
 							status: "online" as const,
-							rank: 7, // Default rank, should be in UserProfileState
-							createdAt: currentUser.createdAt || new Date().toISOString(), // Use current date if not available
+							rank: 7,
+							createdAt: currentUser.createdAt || new Date().toISOString(),
 						},
 						gameHistory: gameState?.history || [],
 						gameStats: gameState?.stats || {
@@ -224,29 +210,25 @@ export default function UserProfilePage({
 					};
 
 					setProfileData(mockProfile);
-					setIsFriend(false); // Can't be friends with yourself
-					setHasPendingRequest(false); // Can't have pending request to yourself
-					setIsOnline(true); // Current user is always online
+					setIsFriend(false);
+					setHasPendingRequest(false);
+					setIsOnline(true);
 				} else {
-					// Fetch external user profile
 					const profile = await getProfileByUsername(username);
 					if (profile) {
 						setProfileData(profile);
 
-						// Double check if this is actually the current user's profile by ID
 						const isActuallyOwnProfile =
 							currentUser && currentUser.id === profile.profile.id;
 						setIsOwnProfile(!!isActuallyOwnProfile);
 
 						if (!isActuallyOwnProfile) {
-							// Check if this user is a friend
 							console.log("friends ", socialState);
 							if (socialState) {
 								console.log(socialState.friends);
 								setIsFriend(
 									checkFriendship(profile.profile.id, socialState.friends),
 								);
-								// Check for pending friend requests
 								setHasPendingRequest(
 									checkPendingRequest(
 										profile.profile.id,
@@ -255,11 +237,10 @@ export default function UserProfilePage({
 								);
 							}
 						} else {
-							setIsFriend(false); // Can't be friends with yourself
+							setIsFriend(false);
 							setHasPendingRequest(false);
 						}
 
-						// Check online status (you'd need to implement this)
 						setIsOnline(profile.profile.status === "online");
 					} else {
 						setError("Profile not found");
@@ -274,9 +255,8 @@ export default function UserProfilePage({
 		};
 
 		loadProfile();
-	}, [isLoggedIn, username, currentUser?.id]); // Re-run when username or current user ID changes
+	}, [isLoggedIn, username, currentUser?.id]);
 
-	// Update friend status and pending requests reactively
 	useEffect(() => {
 		if (profileData && !isOwnProfile && socialState) {
 			setIsFriend(checkFriendship(profileData.profile.id, socialState.friends));
@@ -289,7 +269,6 @@ export default function UserProfilePage({
 		}
 	}, [profileData, isOwnProfile, socialState]);
 
-	// Update own profile data reactively
 	useEffect(() => {
 		if (isOwnProfile && currentUser && gameState && achievementsState) {
 			const updatedProfile: Profile = {
@@ -316,7 +295,6 @@ export default function UserProfilePage({
 		}
 	}, [isOwnProfile, currentUser, gameState, achievementsState]);
 
-	// Get transformed data
 	const profileUser =
 		profileData && achievementsState
 			? transformProfileData(
@@ -355,7 +333,6 @@ export default function UserProfilePage({
 		if (!loading) {
 			setIsVisible(true);
 
-			// animated background handled by AnimatedBackground component
 			return undefined;
 		}
 	}, [loading]);
@@ -364,19 +341,16 @@ export default function UserProfilePage({
 		if (!isOwnProfile && profileUser && !hasPendingRequest) {
 			try {
 				if (isFriend) {
-					// Remove friend
 					const success = await removeFriend(profileUser.id);
 					if (success) {
 						setIsFriend(false);
 					}
 				} else {
-					// Send friend request
 					const success = await sendFriendRequest(
 						profileUser.id,
 						profileUser.name,
 					);
 					if (success) {
-						// Set pending request state immediately for better UX
 						setHasPendingRequest(true);
 						console.log("Friend request sent!");
 					}
@@ -400,11 +374,9 @@ export default function UserProfilePage({
 			}
 
 			try {
-				// Create or get conversation with this user
 				const conversation = await getOrCreateConversation(profileUser.id);
 
 				if (conversation) {
-					// Set active chat in state manager
 					const messagesState =
 						stateManager.getState<MessagesState>("messages");
 					if (messagesState) {
@@ -414,11 +386,8 @@ export default function UserProfilePage({
 						});
 					}
 
-					// Store the target section in a way the dashboard can pick it up
-					// We'll use sessionStorage for this
 					sessionStorage.setItem("dashboardActiveSection", "chats");
 
-					// Redirect to dashboard
 					redirect("/dashboard");
 				}
 			} catch (error) {
@@ -429,11 +398,9 @@ export default function UserProfilePage({
 
 	const handleEditProfile = () => {
 		if (isOwnProfile) {
-			// Store the target section and edit mode in sessionStorage
 			sessionStorage.setItem("dashboardActiveSection", "profile");
 			sessionStorage.setItem("dashboardEditMode", "true");
 
-			// Redirect to dashboard
 			redirect("/dashboard");
 		}
 	};
@@ -498,17 +465,14 @@ export default function UserProfilePage({
 						<div
 							className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
 						>
-							{/* Loading Card */}
 							<div
 								key="loading-card"
 								className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-12 shadow-2xl"
 							>
-								{/* Loading Spinner */}
 								<div key="loading-spinner" className="mb-6">
 									<div className="w-16 h-16 mx-auto border-4 border-gray-600 border-t-cyan-500 rounded-full animate-spin"></div>
 								</div>
 
-								{/* Loading Text */}
 								<h2 key="loading-title" className="text-3xl font-bold mb-4">
 									<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
 										Loading Profile
@@ -519,7 +483,6 @@ export default function UserProfilePage({
 									Fetching player information...
 								</p>
 
-								{/* Loading dots animation */}
 								<div
 									key="loading-dots"
 									className="flex justify-center space-x-1 mt-6"
@@ -557,12 +520,10 @@ export default function UserProfilePage({
 						<div
 							className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
 						>
-							{/* Main Error Card */}
 							<div
 								key="main-error-card"
 								className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-12 mb-8 shadow-2xl"
 							>
-								{/* Pensive Emoji with animation */}
 								<div
 									key="pensive-emoji"
 									className="text-8xl mb-6 animate-bounce"
@@ -570,14 +531,12 @@ export default function UserProfilePage({
 									😔
 								</div>
 
-								{/* Error Title */}
 								<h1 key="error-title" className="text-4xl font-bold mb-4">
 									<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
 										Profile Not Found
 									</span>
 								</h1>
 
-								{/* Error Message */}
 								<p
 									key="error-message"
 									className="text-xl text-gray-300 mb-8 leading-relaxed"
@@ -587,7 +546,6 @@ export default function UserProfilePage({
 										: error}
 								</p>
 
-								{/* Suggestions Section */}
 								<div className="bg-gray-700/30 rounded-xl p-6 mb-8">
 									<h3
 										key="suggestions-title"
@@ -616,7 +574,6 @@ export default function UserProfilePage({
 									</div>
 								</div>
 
-								{/* Action Buttons */}
 								<div
 									key="action-buttons"
 									className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -641,7 +598,6 @@ export default function UserProfilePage({
 		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
 			<AnimatedBackground />
 
-			{/* Universal Header */}
 			<UniversalHeader
 				onLogout={logOut}
 				profile={currentUser}

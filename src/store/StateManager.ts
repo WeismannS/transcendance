@@ -31,7 +31,7 @@ export interface UserProfileState {
 export interface GameState {
 	stats: GameStats;
 	history: GameHistory[];
-	currentGame?: any; // For active games
+	currentGame?: any;
 }
 
 export interface SocialState {
@@ -126,7 +126,6 @@ class StateManager {
 	private eventListeners: Map<EventType, Set<(payload: any) => void>> =
 		new Map();
 
-	// State management
 	setState<T>(key: StateKey, state: T) {
 		this.states.set(key, state);
 		this.notifyStateListeners(key, state);
@@ -144,7 +143,6 @@ class StateManager {
 		}
 	}
 
-	// Subscriptions
 	subscribe<T>(key: StateKey, callback: (state: T) => void) {
 		if (!this.listeners.has(key)) {
 			this.listeners.set(key, new Set());
@@ -156,7 +154,6 @@ class StateManager {
 		};
 	}
 
-	// Event bus
 	emit(type: EventType, payload: any) {
 		const event: StateEvent = {
 			type,
@@ -182,7 +179,6 @@ class StateManager {
 		};
 	}
 
-	// Initialize states from User object
 	async initializeFromUser(
 		user: User,
 		achievements: Achievement[],
@@ -252,7 +248,6 @@ class StateManager {
 				});
 				break;
 			case "TOURNAMENT_LEFT":
-				// Remove player from tournament
 				this.updateState<Tournament[]>("tournaments", (prev) => {
 					if (!prev) return prev;
 					return prev.map((t) =>
@@ -267,7 +262,6 @@ class StateManager {
 				});
 				break;
 			case "TOURNAMENT_CANCELLED":
-				// Mark tournament as cancelled
 				this.updateState<Tournament[]>("tournaments", (prev) => {
 					if (!prev) return prev;
 					return prev.map((t) =>
@@ -276,7 +270,6 @@ class StateManager {
 				});
 				break;
 			case "TOURNAMENT_JOINED":
-				// Add player to tournament
 				this.updateState<Tournament[]>("tournaments", (prev) => {
 					if (!prev) return prev;
 					return prev.map((t) =>
@@ -373,7 +366,6 @@ class StateManager {
 						: {
 								...prev,
 								conversations: [...prev.conversations, event.payload],
-								// unreadCount: prev.unreadCount + (event.payload.conversation.unreadCount || 0)
 							},
 				);
 
@@ -402,7 +394,6 @@ class StateManager {
 	) {
 		console.error("Updating status for user:", user);
 
-		// Update social state (friends)
 		this.updateState<SocialState>("social", (prev) => {
 			const updatedFriends = prev.friends.map((friend) =>
 				friend.id === user.id
@@ -432,7 +423,6 @@ class StateManager {
 			};
 		});
 
-		// Update conversations (chat members)
 		this.updateState<MessagesState>("messages", (prev) => ({
 			...prev,
 			conversations: prev.conversations.map((conv) => ({
@@ -543,9 +533,7 @@ class StateManager {
 					: conv,
 			);
 
-			// Sort conversations to put the updated one first
 			const sortedConversations = updatedConversations.sort((a, b) => {
-				// Check if this conversation was just updated
 				const aHasReceiver = a.members.find(
 					(member) => member.id === message.receiverId,
 				);
@@ -556,7 +544,6 @@ class StateManager {
 				if (aHasReceiver && !bHasReceiver) return -1;
 				if (!aHasReceiver && bHasReceiver) return 1;
 
-				// If neither or both have the receiver, sort by lastMessage timestamp
 				const aTime = new Date(a.lastMessage?.createdAt || 0).getTime();
 				const bTime = new Date(b.lastMessage?.createdAt || 0).getTime();
 				return bTime - aTime;

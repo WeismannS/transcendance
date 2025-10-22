@@ -18,7 +18,7 @@
 		"rules": {
 			"recommended": false,
 			"correctness": {
-				"noUnusedVariables": "error"
+				"noUnusedVariables": "error"			
 			},
 			"performance": {
 				"noBarrelFile": "warn"

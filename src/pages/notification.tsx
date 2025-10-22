@@ -12,13 +12,11 @@ const NotificationToast = ({
 	const timeoutRef = useRef<number | null>(null);
 
 	useEffect(() => {
-		// Trigger entrance animation
 		const timer = setTimeout(() => setIsVisible(true), 50);
 		return () => clearTimeout(timer);
 	}, []);
 
 	useEffect(() => {
-		// Auto-remove timer
 		if (notification.duration && notification.duration > 0) {
 			timeoutRef.current = setTimeout(() => {
 				handleClose();

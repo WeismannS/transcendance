@@ -55,13 +55,10 @@ const Routing = () => {
 		});
 	}, [isLoggedIn]);
 
-	// Initialize user data and WebSocket when logged in
 	useEffect(() => {
 		if (isLoggedIn && !userDataLoaded) {
-			// Initialize user data from API
 			const loadUserData = async () => {
 				try {
-					// Use your existing endpoints
 					const [userResponse, achievementsResponse, onlineCountResponse] =
 						await Promise.all([
 							fetch(API_URL + "/api/user-management/me", {
@@ -90,7 +87,6 @@ const Routing = () => {
 							onlineCountData.totalOnline + 1,
 						);
 
-						// Load conversations
 						await getAllConversations();
 
 						stateManager.setState("auth", { setIsLoggedIn, setUserDataLoaded });

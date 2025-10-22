@@ -7,7 +7,6 @@ import { stateManager } from "../../../store/StateManager.ts";
 import { Conversation, Message } from "../../../types/message";
 import { ProfileOverview } from "../../../types/profile";
 
-
 export default function ChatsSection() {
 	const messagesState = useMessages();
 	const currentUser = useUserProfile();
@@ -26,12 +25,10 @@ export default function ChatsSection() {
 		(conv) => conv.id === selectedConversationId,
 	);
 
-	// Auto-select conversation based on activeChat from state or first conversation
 	useEffect(() => {
 		const activeChat = messagesState?.activeChat;
 
 		if (conversations.length > 0 && !isInitialized) {
-			// If there's an activeChat set in state, use that, otherwise use first conversation
 			const targetConversationId =
 				activeChat && conversations.find((conv) => conv.id === activeChat)
 					? activeChat
@@ -40,7 +37,6 @@ export default function ChatsSection() {
 			setSelectedConversationId(targetConversationId);
 			setIsInitialized(true);
 
-			// Clear activeChat from state after using it
 			if (activeChat && messagesState) {
 				const { activeChat: _, ...restMessagesState } = messagesState;
 				stateManager.setState("messages", {
@@ -53,13 +49,11 @@ export default function ChatsSection() {
 			messagesState?.activeChat &&
 			!selectedConversationId
 		) {
-			// Handle case where activeChat is set but no conversation is selected yet
 			const targetConversation = conversations.find(
 				(conv) => conv.id === messagesState.activeChat,
 			);
 			if (targetConversation) {
 				setSelectedConversationId(targetConversation.id);
-				// Clear activeChat from state after using it
 				const { activeChat: _, ...restMessagesState } = messagesState;
 				stateManager.setState("messages", {
 					...restMessagesState,
@@ -120,7 +114,6 @@ export default function ChatsSection() {
 		return currentUser ? message.senderId === currentUser.id : false;
 	};
 
-	// Show loading if user profile is not loaded yet
 	if (!currentUser) {
 		return (
 			<div className="space-y-6">
@@ -144,7 +137,6 @@ export default function ChatsSection() {
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Conversations List */}
 				<div className="lg:col-span-1 space-y-4 max-h-[600px] overflow-y-auto">
 					{conversations.length === 0 ? (
 						<div className="text-center text-gray-400 py-8">
@@ -154,9 +146,7 @@ export default function ChatsSection() {
 					) : (
 						conversations.map((conversation) => {
 							const otherMember = getOtherMember(conversation);
-							// console.log("Other member:", otherMember);
 							if (!otherMember) return null;
-							//  console.log("Other member:", otherMember);
 							return (
 								<div
 									onClick={() => handleConversationSelect(conversation.id)}
@@ -221,18 +211,14 @@ export default function ChatsSection() {
 					)}
 				</div>
 
-				{/* Chat Interface */}
 				<div className="lg:col-span-2 bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-6">
 					{selectedConversation ? (
 						<>
-							{/* Chat Header */}
 							<div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-700">
 								<div className="flex items-center space-x-3">
 									{(() => {
 										const otherMember = getOtherMember(selectedConversation);
-										// console.log("Other member:", otherMember);
 										if (!otherMember) return null;
-										// console.log("Other member:", otherMember);
 										return (
 											<>
 												<div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
@@ -284,7 +270,6 @@ export default function ChatsSection() {
 								</div>
 							</div>
 
-							{/* Messages */}
 							<div className="space-y-4 mb-6 h-64 overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-cyan-500">
 								{selectedConversation.messages.length === 0 ? (
 									<div className="flex items-center justify-center h-full text-gray-400">
@@ -313,7 +298,6 @@ export default function ChatsSection() {
 								)}
 							</div>
 
-							{/* Message Input */}
 							<div className="flex space-x-3">
 								<input
 									type="text"

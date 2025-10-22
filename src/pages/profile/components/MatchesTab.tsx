@@ -11,7 +11,7 @@ export default function MatchesTab({ recentMatches }: MatchesTabProps) {
 			<h3 className="text-xl font-bold text-white mb-6">Recent Matches</h3>
 			<div className="space-y-4">
 				{recentMatches.map((match) => (
-					<div
+					<divP
 						key={match.id}
 						className="flex items-center justify-between p-4 bg-gray-700/30 rounded-xl hover:bg-gray-700/50 transition-all"
 					>
