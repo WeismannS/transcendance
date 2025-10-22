@@ -621,38 +621,6 @@ class StateManager {
 			unreadCount: prev.unreadCount + 1,
 		}));
 	}
-
-	private checkForAchievements(gameResult: any) {
-		const gameState = this.getState<GameState>("gameState");
-		const achievements = this.getState<AchievementsState>("achievements");
-
-		if (!gameState || !achievements) return;
-
-		// Example achievement checks
-		if (
-			gameState.stats.wins === 10 &&
-			!achievements.userAchievementIds.includes("1")
-		) {
-			const achievement = achievements.allAchievements.find(
-				(a) => a.id === "1",
-			);
-			if (achievement) {
-				this.emit("ACHIEVEMENT_UNLOCKED", achievement);
-			}
-		}
-
-		if (
-			gameState.stats.totalGames === 1 &&
-			!achievements.userAchievementIds.includes("2")
-		) {
-			const achievement = achievements.allAchievements.find(
-				(a) => a.id === "2",
-			);
-			if (achievement) {
-				this.emit("ACHIEVEMENT_UNLOCKED", achievement);
-			}
-		}
-	}
 }
 
 export const stateManager = new StateManager();
