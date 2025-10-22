@@ -190,10 +190,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					message: errorData.message || "Authentication failed",
 					type: "error",
 				});
-				setErrors((prev) => ({
-					...prev,
-					email: errorData.message || "Authentication failed",
-				}));
 			}
 		} catch (_err) {
 			setToast({ message: "Network error", type: "error" });
