@@ -4,11 +4,9 @@ import { formatTime, sendMessage } from "../../../services/api/chat";
 import { API_URL } from "../../../services/api/config";
 import { sendChallenge } from "../../../services/api/game";
 import { stateManager } from "../../../store/StateManager.ts";
-import type {
-	Conversation,
-	Message,
-	ProfileOverview,
-} from "../../../types/user.ts";
+import { Conversation, Message } from "../../../types/message";
+import { ProfileOverview } from "../../../types/profile";
+
 
 export default function ChatsSection() {
 	const messagesState = useMessages();

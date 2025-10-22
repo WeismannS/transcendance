@@ -9,7 +9,7 @@ import {
 	type UserIdentityState,
 	type UserProfileState,
 } from "../store/StateManager.ts";
-import { Tournament } from "../types/user";
+import { Tournament } from "../types/tournament";
 
 export function useUserIdentity() {
 	const [identity, setIdentity] = Miku.useState<UserIdentityState | null>(

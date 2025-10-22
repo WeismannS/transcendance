@@ -11,7 +11,7 @@ import {
 	stopTournament,
 } from "../../../services/api/tournament";
 import { stateManager } from "../../../store/StateManager";
-import type { Tournament } from "../../../types/user";
+import { Tournament } from "./types";
 
 // Use canonical Tournament type from src/types/user.ts
 

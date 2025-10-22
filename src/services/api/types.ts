@@ -1,7 +1,3 @@
-import type { Conversation, Notification, Profile } from "../../types/user";
-
-export type { Conversation, Profile, Notification };
-
 export interface GameUpdate {
 	type:
 		| "gameUpdate"

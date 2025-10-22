@@ -20,12 +20,9 @@ import type {
 	UserProfileState,
 } from "../../store/StateManager.ts";
 import { stateManager } from "../../store/StateManager.ts";
-import type {
-	Friend,
-	GameHistory,
-	Profile,
-	Achievement as UserAchievement,
-} from "../../types/user.ts";
+import { Friend } from "../../types/friend";
+import { GameHistory } from "../../types/game";
+import { Profile } from "../../types/profile";
 import AchievementsTab from "./components/AchievementsTab.tsx";
 import MatchesTab from "./components/MatchesTab.tsx";
 import OverviewTab from "./components/OverviewTab.tsx";
@@ -37,8 +34,8 @@ import {
 	type MutualMatch,
 	type ProfileUser,
 	type Tab,
+	Achievement as UserAchievement,
 } from "./components/types.ts";
-
 export default function UserProfilePage({
 	isLoggedIn,
 }: {
@@ -141,7 +138,9 @@ export default function UserProfilePage({
 		allAchievements: UserAchievement[],
 	): Achievement[] => {
 		return allAchievements.map((achievement) => ({
+			id: achievement.id,
 			name: achievement.title,
+			title: achievement.title,
 			icon: achievement.icon,
 			description: achievement.description,
 			unlocked: userAchievementIds.includes(achievement.id),

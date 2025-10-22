@@ -5,18 +5,13 @@ import {
 	initializeNotificationWs,
 	isOnline,
 } from "../services/api/notifications";
-import type {
-	Achievement,
-	Conversation,
-	Friend,
-	FriendRequest,
-	GameHistory,
-	GameStats,
-	Message,
-	ProfileOverview,
-	Tournament,
-	User,
-} from "../types/user.ts";
+import { Achievement } from "../types/achievement";
+import { Friend, FriendRequest } from "../types/friend";
+import { GameHistory, GameStats } from "../types/game";
+import { Conversation, Message } from "../types/message";
+import { ProfileOverview } from "../types/profile";
+import { Tournament } from "../types/tournament";
+import { User } from "../types/user";
 
 export interface UserIdentityState {
 	id: string;

@@ -4,7 +4,7 @@ import type {
 	GameState,
 	UserProfileState,
 } from "../../../store/StateManager.ts";
-import { type Achievement, GameHistory } from "../../../types/user.ts";
+import { Achievement } from "../../../types/achievement";
 
 interface EditableProfile {
 	displayName: string;
