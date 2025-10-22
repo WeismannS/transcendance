@@ -324,9 +324,9 @@ export default function UserProfilePage({
 		: [];
 
 	const tabs: Tab[] = [
-		{ id: "overview", label: "Overview", icon: "📊" },
-		{ id: "matches", label: "Recent Matches", icon: "🏓" },
-		{ id: "achievements", label: "Achievements", icon: "🏆" },
+		{ id: "overview", label: "Overview", icon: "" },
+		{ id: "matches", label: "Recent Matches", icon: "" },
+		{ id: "achievements", label: "Achievements", icon: "" },
 	];
 
 	useEffect(() => {
@@ -530,7 +530,7 @@ export default function UserProfilePage({
 									key="pensive-emoji"
 									className="text-8xl mb-6 animate-bounce"
 								>
-									😔
+									
 								</div>
 
 								<h1 key="error-title" className="text-4xl font-bold mb-4">
@@ -585,7 +585,7 @@ export default function UserProfilePage({
 										onClick={() => redirect("/dashboard")}
 										className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-lg"
 									>
-										🏠 Go to Dashboard
+										Go to Dashboard
 									</button>
 								</div>
 							</div>

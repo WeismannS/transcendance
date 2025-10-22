@@ -66,7 +66,7 @@ export default function ProfileSection({
 								onClick={handleSave}
 								className="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-2 rounded-full font-semibold hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg"
 							>
-								✓ Save Changes
+								Save Changes
 							</button>
 							<button
 								onClick={handleCancel}
@@ -80,7 +80,7 @@ export default function ProfileSection({
 							onClick={() => setIsEditMode(true)}
 							className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all"
 						>
-							✏️ Edit Profile
+							Edit Profile
 						</button>
 					)}
 				</div>
@@ -114,7 +114,7 @@ export default function ProfileSection({
 								>
 									<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">
 										<div className="bg-white/20 backdrop-blur-sm rounded-full p-2 mb-1">
-											<span className="text-white text-lg">📷</span>
+											<span className="text-white text-lg"></span>
 										</div>
 										<span className="text-white text-xs font-medium">
 											Change

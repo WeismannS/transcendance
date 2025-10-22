@@ -46,7 +46,7 @@ export default function OverviewTab({
 						<div className="flex justify-between items-center">
 							<span className="text-gray-400">Current Streak:</span>
 							<span className="text-cyan-400 font-bold flex items-center">
-								🔥 {profileUser.currentStreak} wins
+								{profileUser.currentStreak} wins
 							</span>
 						</div>
 						<div className="flex justify-between items-center">

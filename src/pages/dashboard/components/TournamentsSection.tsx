@@ -465,16 +465,16 @@ export default function TournamentsSection({}) {
 				<div className="flex items-center justify-between mb-6">
 					<h2 className="text-3xl font-bold text-white">
 						{selectedTournament?.status === "started"
-							? `🔴 Live: ${selectedTournament?.name || "Tournament"}`
+							? `${selectedTournament?.name || "Tournament"} (Live)`
 							: selectedTournament?.status === "completed"
-								? `🏆 Results: ${selectedTournament?.name || "Tournament"}`
+								? `Results: ${selectedTournament?.name || "Tournament"}`
 								: `Tournament Bracket`}
 					</h2>
 					<button
 						onClick={() => setShowBracket(false)}
 						className="text-gray-400 hover:text-white transition-colors text-2xl"
 					>
-						✕
+						[close]
 					</button>
 				</div>
 
@@ -487,7 +487,6 @@ export default function TournamentsSection({}) {
 					</div>
 				) : tournamentMatches.length === 0 ? (
 					<div className="text-center py-12">
-						<div className="text-6xl mb-4">🏓</div>
 						<h3 className="text-2xl font-bold text-gray-400 mb-2">
 							No matches found
 						</h3>
@@ -573,7 +572,7 @@ export default function TournamentsSection({}) {
 																		{player1Name}
 																		{isActuallyCompleted &&
 																			match.winnerId === match.player1Id && (
-																				<span className="ml-2">🏆</span>
+																				<span className="ml-2">[W]</span>
 																			)}
 																	</span>
 																</div>
@@ -594,7 +593,7 @@ export default function TournamentsSection({}) {
 																		{player2Name}
 																		{isActuallyCompleted &&
 																			match.winnerId === match.player2Id && (
-																				<span className="ml-2">🏆</span>
+																				<span className="ml-2">[W]</span>
 																			)}
 																	</span>
 																</div>
@@ -872,7 +871,7 @@ export default function TournamentsSection({}) {
 						onClick={() => setError("")}
 						className="ml-4 text-red-300 hover:text-red-100"
 					>
-						✕
+						[close]
 					</button>
 				</div>
 			)}
@@ -885,7 +884,6 @@ export default function TournamentsSection({}) {
 				</div>
 			) : (
 				<div className="text-center py-12">
-					<div className="text-6xl mb-4">🏓</div>
 					<h3 className="text-2xl font-bold text-gray-400 mb-2">
 						No tournaments found
 					</h3>
@@ -908,7 +906,7 @@ export default function TournamentsSection({}) {
 								onClick={() => setShowCreateModal(false)}
 								className="text-gray-400 hover:text-white transition-colors text-2xl"
 							>
-								✕
+								[close]
 							</button>
 						</div>
 

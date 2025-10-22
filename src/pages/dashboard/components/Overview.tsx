@@ -53,7 +53,7 @@ export default function Overview() {
 									: "Unranked"}
 							</p>
 						</div>
-						<div className="text-4xl">🏆</div>
+						<div className="text-4xl"></div>
 					</div>
 				</div>
 
@@ -63,7 +63,7 @@ export default function Overview() {
 							<p className="text-gray-400 text-sm">Win Rate</p>
 							<p className="text-3xl font-bold text-green-400">{winRate}%</p>
 						</div>
-						<div className="text-4xl">📈</div>
+						<div className="text-4xl"></div>
 					</div>
 				</div>
 
@@ -75,7 +75,7 @@ export default function Overview() {
 								{userStats.wins}
 							</p>
 						</div>
-						<div className="text-4xl">🎯</div>
+						<div className="text-4xl"></div>
 					</div>
 				</div>
 
@@ -87,7 +87,7 @@ export default function Overview() {
 								{onlineFriends.length}
 							</p>
 						</div>
-						<div className="text-4xl">👥</div>
+						<div className="text-4xl"></div>
 					</div>
 				</div>
 			</div>
@@ -129,7 +129,7 @@ export default function Overview() {
 						))
 					) : (
 						<div className="text-center text-gray-400 py-8">
-							<div className="text-6xl mb-4">🏓</div>
+							<div className="text-6xl mb-4"></div>
 							<p className="text-lg mb-2">No recent games</p>
 							<p className="text-sm">
 								Start playing to see your match history here!
@@ -154,7 +154,7 @@ export default function Overview() {
 								You have {notificationsState.unreadCount} unread notifications
 							</p>
 						</div>
-						<div className="text-4xl">🔔</div>
+						<div className="text-4xl"></div>
 					</div>
 				</div>
 			)}

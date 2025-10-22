@@ -70,7 +70,7 @@ export default function fUniversalHeader({
 						className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
 					>
 						<div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
-							<span className="text-white font-bold text-sm">🏓</span>
+							<span className="text-white font-bold text-sm"></span>
 						</div>
 						<span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
 							PingPong Pro
@@ -194,7 +194,7 @@ export default function fUniversalHeader({
 										className="w-8 h-8 rounded-full object-cover"
 									/>
 								) : (
-									<span className="text-white font-bold text-sm">👤</span>
+									<span className="text-white font-bold text-sm"></span>
 								)}
 							</div>
 							<span className="text-white font-semibold">
@@ -230,7 +230,7 @@ export default function fUniversalHeader({
 											to={"/profile/" + profile?.displayName}
 											className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-cyan-600/20 hover:text-cyan-300 transition-colors flex items-center space-x-2"
 										>
-											<span>👤</span>
+											<span></span>
 											<span>Profile</span>
 										</Link>
 										<hr className="border-cyan-500/30 my-1" />
@@ -238,7 +238,7 @@ export default function fUniversalHeader({
 											onClick={handleLogout}
 											className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-600/20 hover:text-red-300 transition-colors flex items-center space-x-2"
 										>
-											<span>🚪</span>
+											<span></span>
 											<span>Logout</span>
 										</button>
 									</div>

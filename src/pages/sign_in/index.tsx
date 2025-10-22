@@ -324,7 +324,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					onClick={() => setShowPassword(!showPassword)}
 					className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
 				>
-					{showPassword ? "👁️" : "👁️‍🗨️"}
+					{showPassword ? "Hide" : "Show"}
 				</button>
 			</div>
 			{errors.password && (
@@ -364,7 +364,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					onClick={() => setShowConfirmPassword(!showConfirmPassword)}
 					className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
 				>
-					{showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+					{showConfirmPassword ? "Hide" : "Show"}
 				</button>
 			</div>
 			{errors.confirmPassword && (
@@ -390,7 +390,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 							key="logo-icon"
 							className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center"
 						>
-							<span className="text-white font-bold text-sm">🏓</span>
+							<span className="text-white font-bold text-sm"></span>
 						</div>
 						<span
 							key="logo-text"

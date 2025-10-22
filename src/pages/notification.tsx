@@ -60,19 +60,19 @@ const NotificationToast = ({
 	const getIcon = () => {
 		switch (notification.type) {
 			case "success":
-				return "✅";
+				return "[success]";
 			case "error":
-				return "❌";
+				return "[error]";
 			case "warning":
-				return "⚠️";
+				return "[warning]";
 			case "info":
-				return "ℹ️";
+				return "[info]";
 			case "game_invite":
-				return "🎮";
+				return "[game]";
 			case "tournament_match":
-				return "🏆";
+				return "[tournament]";
 			default:
-				return "ℹ️";
+				return "[info]";
 		}
 	};
 

@@ -62,13 +62,12 @@ export default function ProfileHeader({
 						<p className="text-gray-400 mb-2">{profileUser.username}</p>
 						<div className="flex items-center space-x-4 text-sm text-gray-300">
 							<span className="flex items-center space-x-1">
-								<span>🏆</span>
+								<span></span>
 								<span>
 									Rank #{profileUser.rank ? profileUser.rank : "Unranked"}
 								</span>
 							</span>
 							<span className="flex items-center space-x-1">
-								<span>📅</span>
 								<span>Joined {profileUser.joinDate}</span>
 							</span>
 						</div>

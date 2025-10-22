@@ -193,7 +193,6 @@ export default function Friends({
 
 							{!searchQuery && (
 								<div className="text-center py-8">
-									<div className="text-4xl mb-2">👋</div>
 									<p className="text-gray-400">
 										Start typing to search for friends
 									</p>
@@ -596,7 +595,6 @@ export default function Friends({
 							</div>
 						) : (
 							<div className="text-center py-8">
-								<div className="text-4xl mb-2">👥</div>
 								<p className="text-gray-400">No pending requests</p>
 							</div>
 						)}

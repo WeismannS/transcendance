@@ -205,13 +205,6 @@ export default function GamePage() {
 			};
 		}
 	};
-
-	useEffect(() => {
-		console.log("🎮 GAMESTATE CHANGED:", gameState);
-		console.log("🎮 Current gameId:", gameId);
-		console.log("🎮 Current playerNumber:", playerNumber);
-	}, [gameState]);
-
 	useEffect(() => {
 		let interval: any;
 		if (gameState === "playing" && !isPaused) {
@@ -235,28 +228,28 @@ export default function GamePage() {
 		gameObjects.current.rightPaddle.height = PADDLE_HEIGHT;
 
 		console.log(
-			`🎮 Paddle positions set - Current player (backend player${playerNumber}): LEFT, Opponent: RIGHT`,
+			`Paddle positions set - Current player (backend player${playerNumber}): LEFT, Opponent: RIGHT`,
 		);
 	}, [playerNumber]);
 
 	useEffect(() => {
-		console.log("🎯 Setting up keyboard handlers");
+	console.log("Setting up keyboard handlers");
 
 		const handleKeyDown = (e: any) => {
-			console.log("🔽 Key pressed:", e.key);
+				console.log("Key pressed:", e.key);
 			switch (e.key) {
 				case "ArrowUp":
 				case "w":
 				case "W":
 					e.preventDefault();
-					console.log("🔼 Setting up key true");
+					console.log("Setting up key true");
 					setKeys((prev) => ({ ...prev, up: true }));
 					break;
 				case "ArrowDown":
 				case "s":
 				case "S":
 					e.preventDefault();
-					console.log("🔽 Setting down key true");
+					console.log("Setting down key true");
 					setKeys((prev) => ({ ...prev, down: true }));
 					break;
 				case " ":
@@ -271,20 +264,20 @@ export default function GamePage() {
 		};
 
 		const handleKeyUp = (e: any) => {
-			console.log("🔼 Key released:", e.key);
+			console.log("Key released:", e.key);
 			switch (e.key) {
 				case "ArrowUp":
 				case "w":
 				case "W":
 					e.preventDefault();
-					console.log("🔼 Setting up key false");
+					console.log("Setting up key false");
 					setKeys((prev) => ({ ...prev, up: false }));
 					break;
 				case "ArrowDown":
 				case "s":
 				case "S":
 					e.preventDefault();
-					console.log("🔽 Setting down key false");
+					console.log("Setting down key false");
 					setKeys((prev) => ({ ...prev, down: false }));
 					break;
 			}
@@ -311,13 +304,13 @@ export default function GamePage() {
 
 	useEffect(() => {
 		console.log(
-			"🔥 WEBSOCKET USEEFFECT RUNNING - gameId:",
+			"WEBSOCKET USEEFFECT RUNNING - gameId:",
 			gameId,
 			"currentUser:",
 			currentUser?.id,
 		);
 		console.log(
-			"🔥 Current gameSocket.current before logic:",
+			"Current gameSocket.current before logic:",
 			gameSocket.current,
 		);
 
@@ -326,7 +319,7 @@ export default function GamePage() {
 				gameSocket.current &&
 				gameSocket.current.readyState === WebSocket.OPEN
 			) {
-				console.log("🛑 Socket already connected, skipping new connection");
+					console.log("Socket already connected, skipping new connection");
 				return;
 			}
 
@@ -356,11 +349,11 @@ export default function GamePage() {
 				}
 
 				const connectToGame = async () => {
-					console.log("🚀 Starting WebSocket connection process");
+					console.log("Starting WebSocket connection process");
 					try {
 						const socket = await gameConnect(currentUser.id, gameId, {
 							onMessage: (data) => {
-								console.log("🎯 Received game message:", data.type, data);
+								console.log("Received game message:", data.type, data);
 
 								const message = data as any;
 
@@ -468,13 +461,13 @@ export default function GamePage() {
 										if (message.waitingForOpponent) {
 											setWaitingForOpponent(true);
 											console.log(
-												"🔄 Setting gameState to 'connecting' (waiting for opponent)",
+												"Setting gameState to 'connecting' (waiting for opponent)",
 											);
 											setGameState("connecting");
 										} else {
 											setWaitingForOpponent(false);
 											console.log(
-												"🎮 Setting gameState to 'playing' (game ready)",
+												"Setting gameState to 'playing' (game ready)",
 											);
 											setGameState("playing");
 										}
@@ -494,7 +487,7 @@ export default function GamePage() {
 									case "gameUpdate":
 										if (message.gameStarted) {
 											console.log(
-												"🎮 Game started, switching to playing state",
+												"Game started, switching to playing state",
 											);
 											setGameState("playing");
 											setWaitingForOpponent(false);
@@ -522,7 +515,7 @@ export default function GamePage() {
 										break;
 
 									case "gameEnd":
-										console.log("🏁 Game ended, setting state to 'finished'");
+										console.log("Game ended, setting state to 'finished'");
 										setGameState("finished");
 										if (message.finalScore && message.winner) {
 											const isPlayerWinner =
@@ -540,7 +533,7 @@ export default function GamePage() {
 
 									case "gameEnded":
 										console.log(
-											"🏁 Game ended due to timeout/disconnection:",
+											"Game ended due to timeout/disconnection:",
 											message,
 										);
 										setGameState("finished");
@@ -568,10 +561,10 @@ export default function GamePage() {
 										break;
 
 									case "reconnection":
-										console.log("🔄 Reconnected to game:", message.gameId);
+										console.log("Reconnected to game:", message.gameId);
 										if (message.playerNumber) {
 											console.log(
-												"🔄 Setting player number from reconnection:",
+												"Setting player number from reconnection:",
 												message.playerNumber,
 											);
 											setPlayerNumber(message.playerNumber);
@@ -599,7 +592,7 @@ export default function GamePage() {
 										if (message.opponent) {
 											const opponentId = message.opponent;
 											console.log(
-												`🔄 Fetching opponent profile for reconnection: ${opponentId}`,
+												`Fetching opponent profile for reconnection: ${opponentId}`,
 											);
 
 											getPlayerProfile(opponentId)
@@ -684,7 +677,7 @@ export default function GamePage() {
 											setIsPaused(false);
 											setPauseReason(null);
 											console.log(
-												"🎮 Setting gameState to 'playing' from reconnection",
+												"Setting gameState to 'playing' from reconnection",
 											);
 											setGameState("playing");
 										}
@@ -720,7 +713,7 @@ export default function GamePage() {
 										break;
 
 									case "playerDisconnected":
-										console.log("🔌 Player disconnected message:", message);
+										console.log("Player disconnected message:", message);
 
 										if (message.timeoutSeconds) {
 											console.log(
@@ -758,7 +751,7 @@ export default function GamePage() {
 
 									case "disconnectionCountdown":
 										console.log(
-											"⏰ Ignoring disconnection countdown - games end immediately",
+											"Ignoring disconnection countdown - games end immediately",
 										);
 										break;
 
@@ -767,12 +760,12 @@ export default function GamePage() {
 								}
 							},
 							onClose: (event?: CloseEvent) => {
-								console.log("🔴 WebSocket CLOSED - Event details:", event);
-								console.log("🔴 Close code:", event?.code);
-								console.log("🔴 Close reason:", event?.reason);
-								console.log("🔴 Was clean close:", event?.wasClean);
+								console.log("WebSocket CLOSED - Event details:", event);
+								console.log("Close code:", event?.code);
+								console.log("Close reason:", event?.reason);
+								console.log("Was clean close:", event?.wasClean);
 								console.log(
-									"🔴 GameSocket before setting to null:",
+									"GameSocket before setting to null:",
 									gameSocket.current,
 								);
 								console.log("Disconnected from game:", gameId);
@@ -782,22 +775,22 @@ export default function GamePage() {
 								gameSocket.current = null;
 							},
 							onOpen: () => {
-								console.log("✅ WebSocket OPENED successfully!");
-								console.log("✅ Connected to game:", gameId);
+								console.log("WebSocket OPENED successfully!");
+								console.log("Connected to game:", gameId);
 								console.log(
-									"✅ gameSocket.current at onOpen:",
+									"gameSocket.current at onOpen:",
 									gameSocket.current,
 								);
 								console.log(
-									"✅ WebSocket opened, readyState:",
+									"WebSocket opened, readyState:",
 									gameSocket.current?.readyState,
 								);
 								setConnectionError(null);
 							},
 							onError: (error) => {
-								console.error("❌ WebSocket ERROR from frontend:", error);
-								console.error("❌ Error type:", error.type);
-								console.error("❌ Error target:", error.target);
+								console.error("WebSocket ERROR from frontend:", error);
+								console.error("Error type:", error.type);
+								console.error("Error target:", error.target);
 								setConnectionError(
 									"WebSocket connection failed. Please try again.",
 								);
@@ -806,38 +799,38 @@ export default function GamePage() {
 
 						if (socket instanceof WebSocket) {
 							console.log(
-								"📝 ASSIGNING SOCKET - Before assignment, gameSocket.current:",
+								"ASSIGNING SOCKET - Before assignment, gameSocket.current:",
 								gameSocket.current,
 							);
 							gameSocket.current = socket;
 							console.log(
-								"📝 ASSIGNING SOCKET - After assignment, gameSocket.current:",
+								"ASSIGNING SOCKET - After assignment, gameSocket.current:",
 								gameSocket.current,
 							);
 							console.log(
-								"📝 Socket readyState after assignment:",
+								"Socket readyState after assignment:",
 								gameSocket.current.readyState,
 							);
-							console.log("📝 Socket URL:", gameSocket.current.url);
+							console.log("Socket URL:", gameSocket.current.url);
 
 							setTimeout(() => {
 								console.log(
-									"⏰ TIMEOUT CHECK - gameSocket.current:",
+									"TIMEOUT CHECK - gameSocket.current:",
 									gameSocket.current,
 								);
 								console.log(
-									"⏰ TIMEOUT CHECK - readyState:",
+									"TIMEOUT CHECK - readyState:",
 									gameSocket.current?.readyState,
 								);
 							}, 100);
 
 							const checkInterval = setInterval(() => {
 								console.log(
-									"🔄 PERIODIC CHECK - gameSocket.current:",
+									"PERIODIC CHECK - gameSocket.current:",
 									gameSocket.current,
 								);
 								console.log(
-									"🔄 PERIODIC CHECK - readyState:",
+									"PERIODIC CHECK - readyState:",
 									gameSocket.current?.readyState,
 								);
 								if (
@@ -845,7 +838,7 @@ export default function GamePage() {
 									gameSocket.current.readyState !== WebSocket.OPEN
 								) {
 									console.log(
-										"🔄 Socket lost or closed, stopping periodic check",
+										"Socket lost or closed, stopping periodic check",
 									);
 									clearInterval(checkInterval);
 								}
@@ -856,7 +849,7 @@ export default function GamePage() {
 							}, 10000);
 						} else {
 							console.error(
-								"🚫 gameConnect did not return a WebSocket:",
+								"gameConnect did not return a WebSocket:",
 								socket,
 							);
 							throw socket;
@@ -875,13 +868,13 @@ export default function GamePage() {
 
 			return () => {
 				console.log(
-					"🧹 USEEFFECT CLEANUP - Current socket:",
+					"USEEFFECT CLEANUP - Current socket:",
 					gameSocket.current,
 				);
 			};
 		} else if (gameId && !currentUser?.id) {
 			console.log(
-				"❌ Missing currentUser.id, cannot connect - checking if user data is loading",
+				"Missing currentUser.id, cannot connect - checking if user data is loading",
 			);
 			if (!connectionError) {
 				setGameState("connecting");
@@ -896,17 +889,17 @@ export default function GamePage() {
 			gameState === "connecting" &&
 			!gameSocket.current
 		) {
-			console.log("🔄 User data loaded, retrying WebSocket connection...");
+		console.log("User data loaded, retrying WebSocket connection...");
 		}
 	}, [currentUser, gameState, gameId]);
 
 	useEffect(() => {
-		console.log("🔍 Socket ref changed:", gameSocket.current);
-		console.log("🔍 Socket readyState:", gameSocket.current?.readyState);
+	console.log("Socket ref changed:", gameSocket.current);
+	console.log("Socket readyState:", gameSocket.current?.readyState);
 	});
 
 	useEffect(() => {
-		console.log("🎹 Keys state changed:", keys);
+	console.log("Keys state changed:", keys);
 	}, [keys]);
 
 	const updateGameFromServer = (gameBoard: GameBoard) => {
@@ -998,7 +991,7 @@ export default function GamePage() {
 
 	useEffect(() => {
 		console.log(
-			"🎮 GAME LOOP USEEFFECT - gameState:",
+			"GAME LOOP USEEFFECT - gameState:",
 			gameState,
 			"gameId:",
 			gameId,
@@ -1006,67 +999,67 @@ export default function GamePage() {
 
 		const handleMultiplayerLogic = () => {
 			if (isPaused) {
-				console.log("🔇 Game is paused, not handling input");
+				console.log("Game is paused, not handling input");
 				return;
 			}
 
 			let isMoving = false;
 			console.log("=== HANDLE MULTIPLAYER LOGIC ===");
-			console.log("🎮 Keys state:", keys);
+			console.log("Keys state:", keys);
 
 			console.log(
-				"📱 Current socket reference in handleMultiplayerLogic:",
+				"Current socket reference in handleMultiplayerLogic:",
 				gameSocket.current,
 			);
-			console.log("📱 Socket readyState:", gameSocket.current?.readyState);
+			console.log("Socket readyState:", gameSocket.current?.readyState);
 
 			if (keys.up) {
-				console.log("🔼 UP key pressed - sending command to server");
+				console.log("UP key pressed - sending command to server");
 				if (
 					gameSocket.current &&
 					gameSocket.current.readyState === WebSocket.OPEN
 				) {
-					console.log("🚀 Sending UP movement to server");
+					console.log("Sending UP movement to server");
 					sendPaddleMoveIfNeededDirectly("up");
 				} else {
-					console.log("❌ Cannot send UP - socket not ready");
-					console.log("❌ Socket exists:", !!gameSocket.current);
-					console.log("❌ Socket readyState:", gameSocket.current?.readyState);
-					console.log("❌ WebSocket.OPEN:", WebSocket.OPEN);
+					console.log("Cannot send UP - socket not ready");
+					console.log("Socket exists:", !!gameSocket.current);
+					console.log("Socket readyState:", gameSocket.current?.readyState);
+					console.log("WebSocket.OPEN:", WebSocket.OPEN);
 				}
 				isMoving = true;
 			}
 			if (keys.down) {
-				console.log("🔽 DOWN key pressed - sending command to server");
+				console.log("DOWN key pressed - sending command to server");
 				if (
 					gameSocket.current &&
 					gameSocket.current.readyState === WebSocket.OPEN
 				) {
-					console.log("🚀 Sending DOWN movement to server");
+					console.log("Sending DOWN movement to server");
 					sendPaddleMoveIfNeededDirectly("down");
 				} else {
-					console.log("❌ Cannot send DOWN - socket not ready");
+					console.log("Cannot send DOWN - socket not ready");
 				}
 				isMoving = true;
 			}
 
 			if (!isMoving && sendPaddleMoveThrottled.current.lastDirection !== null) {
-				console.log("🛑 Stopping paddle movement");
+				console.log("Stopping paddle movement");
 				if (
 					gameSocket.current &&
 					gameSocket.current.readyState === WebSocket.OPEN
 				) {
-					console.log("🚀 Sending STOP to server");
+					console.log("Sending STOP to server");
 					sendPaddleStopDirectly();
 				} else {
-					console.log("❌ Cannot send STOP - socket not ready");
+					console.log("Cannot send STOP - socket not ready");
 				}
 				sendPaddleMoveThrottled.current.lastDirection = null;
 			}
 		};
 
 		const gameLoop = () => {
-			console.log("🔄 GAME LOOP ITERATION - gameState:", gameState);
+			console.log("GAME LOOP ITERATION - gameState:", gameState);
 
 			if (gameState !== "playing") {
 				console.log("⏹️ Game not playing, stopping loop");
@@ -1078,33 +1071,33 @@ export default function GamePage() {
 
 			const canvas = canvasRef.current;
 			if (!canvas) {
-				console.log("❌ No canvas found");
+				console.log("No canvas found");
 				return;
 			}
 
 			const ctx = canvas.getContext("2d");
 			if (!ctx) {
-				console.log("❌ No canvas context");
+				console.log("No canvas context");
 				return;
 			}
 
 			if (gameId) {
 				const currentSocket = gameSocket.current;
-				console.log("🎮 RUNNING MULTIPLAYER LOGIC - Socket state:", {
+				console.log("RUNNING MULTIPLAYER LOGIC - Socket state:", {
 					hasSocket: !!currentSocket,
 					readyState: currentSocket?.readyState,
 					webSocketOpen: WebSocket.OPEN,
 				});
 
-				console.log("🔬 DEEP DEBUG:");
-				console.log("🔬 gameSocket ref object:", gameSocket);
-				console.log("🔬 gameSocket.current type:", typeof gameSocket.current);
+				console.log("DEEP DEBUG:");
+				console.log("gameSocket ref object:", gameSocket);
+				console.log("gameSocket.current type:", typeof gameSocket.current);
 				console.log(
-					"🔬 gameSocket.current constructor:",
+					"gameSocket.current constructor:",
 					gameSocket.current?.constructor?.name,
 				);
 				console.log(
-					"🔬 Is gameSocket.current a WebSocket?",
+					"Is gameSocket.current a WebSocket?",
 					gameSocket.current instanceof WebSocket,
 				);
 
@@ -1119,7 +1112,7 @@ export default function GamePage() {
 
 		if ((gameState === "playing" || gameState === "paused") && gameId) {
 			console.log(
-				"🎯 STARTING GAME LOOP - gameId:",
+				"STARTING GAME LOOP - gameId:",
 				gameId,
 				"gameState:",
 				gameState,
@@ -1128,12 +1121,12 @@ export default function GamePage() {
 			);
 			animationRef.current = requestAnimationFrame(gameLoop);
 		} else {
-			console.log("🚫 NOT STARTING GAME LOOP - gameState:", gameState);
+			console.log("NOT STARTING GAME LOOP - gameState:", gameState);
 		}
 
 		return () => {
 			if (animationRef.current) {
-				console.log("🎯 CLEANING UP GAME LOOP");
+				console.log("CLEANING UP GAME LOOP");
 				cancelAnimationFrame(animationRef.current);
 			}
 		};
@@ -1398,7 +1391,7 @@ export default function GamePage() {
 			<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-md w-full">
 				<div className="text-center mb-8">
 					<div className="text-6xl mb-4">
-						{matchResults?.result === "win" ? "🏆" : "😔"}
+						{matchResults?.result === "win" ? "[TROPHY]" : "[RESULT]"}
 					</div>
 					<h2 className="text-3xl font-bold mb-2">
 						<span

@@ -10,11 +10,11 @@ export default function Navigation({
 	setActiveSection,
 }: NavigationProps) {
 	const sections = [
-		{ id: "overview", label: "Overview", icon: "📊" },
-		{ id: "tournaments", label: "Tournaments", icon: "🏆" },
-		{ id: "chats", label: "Messages", icon: "💬" },
-		{ id: "friends", label: "Friends", icon: "👥" },
-		{ id: "profile", label: "Profile", icon: "👤" },
+		{ id: "overview", label: "Overview", icon: "" },
+		{ id: "tournaments", label: "Tournaments", icon: "" },
+		{ id: "chats", label: "Messages", icon: "" },
+		{ id: "friends", label: "Friends", icon: "" },
+		{ id: "profile", label: "Profile", icon: "" },
 	];
 
 	return (

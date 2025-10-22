@@ -9,17 +9,17 @@ export default function HomePage() {
 		{
 			title: "Real-time Multiplayer",
 			description: "Play against opponents worldwide with zero lag",
-			icon: "⚡",
+			icon: "",
 		},
 		{
 			title: "Tournament Mode",
 			description: "Compete in ranked tournaments and climb the leaderboard",
-			icon: "🏆",
+			icon: "",
 		},
 		{
 			title: "Custom Tables",
 			description: "Design your own ping pong tables and environments",
-			icon: "🎨",
+			icon: "",
 		},
 	];
 
@@ -32,21 +32,15 @@ export default function HomePage() {
 			<header className="relative z-10 px-6 py-8">
 				<nav className="flex items-center justify-between max-w-7xl mx-auto">
 					<div className="flex items-center space-x-2">
-						<div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
-							<span className="text-white font-bold text-sm">🏓</span>
-						</div>
+							<div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
+								<span className="text-white font-bold text-sm"></span>
+							</div>
 						<span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
 							PingPong Pro
 						</span>
 					</div>
 
 					<div className="hidden md:flex items-center space-x-8">
-						<Link
-							to="/Home"
-							className="text-gray-300 hover:text-white transition-colors"
-						>
-							Play
-						</Link>
 						<Link
 							to="/sign_in"
 							className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 rounded-full font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105"
@@ -114,47 +108,8 @@ export default function HomePage() {
 							))}
 						</div>
 					</div>
-
-					{/* CTA Section */}
-					<div className="text-center py-20 border-t border-gray-700">
-						<h2 className="text-4xl md:text-5xl font-bold mb-8">
-							Ready to{" "}
-							<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-								Dominate
-							</span>
-							?
-						</h2>
-						<p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-							Join thousands of players in the ultimate ping pong experience.
-							Your journey to becoming a champion starts now.
-						</p>
-						<Link
-							to="/sign_in"
-							className="bg-gradient-to-r from-cyan-500 to-blue-500 px-16 py-5 rounded-full text-2xl font-bold hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-2xl"
-						>
-							Start Playing
-						</Link>
-					</div>
 				</div>
 			</main>
-
-			{/* Footer */}
-			<footer className="relative z-10 border-t border-gray-700 px-6 py-12">
-				<div className="max-w-7xl mx-auto text-center">
-					<div className="flex items-center justify-center space-x-2 mb-6">
-						<div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
-							<span className="text-white font-bold text-xs">🏓</span>
-						</div>
-						<span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-							PingPong Pro
-						</span>
-					</div>
-					<p className="text-gray-400">
-						© 2024 PingPong Pro. All rights reserved. | The future of ping pong
-						is here.
-					</p>
-				</div>
-			</footer>
 		</div>
 	);
 }

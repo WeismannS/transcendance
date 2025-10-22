@@ -78,7 +78,7 @@ export async function gameConnect(
 		socket.onopen = onOpen;
 
 		socket.onerror = (error) => {
-			console.error("🔴 WebSocket ERROR:", error);
+			console.error("WebSocket ERROR:", error);
 			if (onError) onError(error);
 		};
 
