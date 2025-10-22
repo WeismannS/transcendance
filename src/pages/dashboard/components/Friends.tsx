@@ -13,7 +13,7 @@ import {
 import { sendChallenge } from "../../../services/api/game";
 import { searchProfiles } from "../../../services/api/profile";
 import { type SocialState, stateManager } from "../../../store/StateManager.ts";
-import type { ProfileOverview } from "../../../types/user.ts";
+import { ProfileOverview } from "../../../types/profile";
 import { useNotifications } from "../../use-notification.tsx";
 export default function Friends({
 	setActiveSection,

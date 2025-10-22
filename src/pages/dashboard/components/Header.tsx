@@ -8,7 +8,7 @@ import {
 	stateManager,
 	type UserProfileState,
 } from "../../../store/StateManager.ts";
-import type { ProfileOverview } from "../../../types/user.ts";
+import { ProfileOverview } from "../../../types/profile";
 
 interface HeaderProps {
 	profile: UserProfileState | null;

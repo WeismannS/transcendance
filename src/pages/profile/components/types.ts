@@ -29,16 +29,7 @@ export interface Match {
 	time: string;
 }
 
-export interface Achievement {
-	name: string;
-	icon: string;
-	description: string;
-	unlocked: boolean;
-}
-
-import type { Tournament } from "../../../types/user";
-
-export type { Tournament };
+export type { Achievement } from "../../../types/achievement";
 
 export interface MutualMatch {
 	id: number;

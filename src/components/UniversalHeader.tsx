@@ -4,7 +4,7 @@ import { API_URL } from "../services/api/config";
 import { sendFriendRequest } from "../services/api/friends";
 import { searchProfiles } from "../services/api/profile";
 import { type UserProfileState } from "../store/StateManager.ts";
-import type { ProfileOverview } from "../types/user.ts";
+import { ProfileOverview } from "../types/profile";
 
 interface UniversalHeaderProps {
 	profile: UserProfileState | null;
