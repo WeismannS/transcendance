@@ -10,8 +10,7 @@ import {
 	stopTournament,
 } from "../../../services/api/tournament";
 import { stateManager } from "../../../store/StateManager";
-import { Tournament } from "./types";
-
+import { Tournament } from "../../../types/tournament";
 
 export default function TournamentsSection({}) {
 	const userProfile = useUserProfile();
@@ -39,7 +38,6 @@ export default function TournamentsSection({}) {
 		name: "",
 		startTime: "",
 	});
-
 
 	const loadTournamentMatches = async (tournamentId: string) => {
 		try {
@@ -83,7 +81,6 @@ export default function TournamentsSection({}) {
 			);
 		}
 	};
-
 
 	const handleCreateTournament = async () => {
 		if (!userProfile || !newTournament.name.trim()) return;
@@ -637,25 +634,30 @@ export default function TournamentsSection({}) {
 		if (!showTournamentDetails || !selectedTournament) return null;
 
 		return (
-			<div className="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
-				<div className="bg-gray-800 rounded-xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-					<div className="flex justify-between items-center mb-6">
-						<h3 className="text-2xl font-bold text-white">
-							{selectedTournament.name} - Matches
+			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+				<div className="relative bg-white/80 dark:bg-gray-900/80 rounded-2xl shadow-2xl p-8 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-gray-300 dark:border-gray-700">
+					<button
+						onClick={() => setShowTournamentDetails(false)}
+						className="absolute top-4 right-4 text-gray-500 hover:text-blue-500 bg-white/60 dark:bg-gray-800/60 rounded-full p-2 shadow transition-all"
+						aria-label="Close"
+					>
+						<span className="text-2xl font-bold">×</span>
+					</button>
+					<div className="mb-8 text-center">
+						<h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+							{selectedTournament.name}{" "}
+							<span className="text-base font-normal text-gray-500 dark:text-gray-400">
+								- Matches
+							</span>
 						</h3>
-						<button
-							onClick={() => setShowTournamentDetails(false)}
-							className="text-gray-400 hover:text-white text-xl font-bold"
-						>
-							×
-						</button>
 					</div>
-
 					<div className="space-y-4">
 						{matchesLoading ? (
 							<div className="text-center py-8">
-								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-								<p className="text-gray-300 mt-4">Loading matches...</p>
+								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+								<p className="text-gray-500 dark:text-gray-300 mt-4">
+									Loading matches...
+								</p>
 							</div>
 						) : tournamentMatches.length > 0 ? (
 							<div className="space-y-6">
@@ -664,8 +666,11 @@ export default function TournamentsSection({}) {
 								)
 									.sort()
 									.map((round) => (
-										<div key={round} className="bg-gray-700 rounded-lg p-4">
-											<h4 className="text-lg font-semibold text-white mb-4">
+										<div
+											key={round}
+											className="bg-white/70 dark:bg-gray-800/70 rounded-xl p-5 shadow border border-gray-200 dark:border-gray-700"
+										>
+											<h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
 												{round === 1
 													? "Semi-Finals"
 													: round === 2
@@ -678,11 +683,11 @@ export default function TournamentsSection({}) {
 													.map((match) => (
 														<div
 															key={match.id}
-															className="bg-gray-800 rounded-lg p-4"
+															className="bg-white/90 dark:bg-gray-900/90 rounded-lg p-4 border border-gray-100 dark:border-gray-800 shadow-sm"
 														>
 															<div className="flex justify-between items-center mb-3">
 																<div className="text-center flex-1">
-																	<p className="text-white font-medium">
+																	<p className="text-gray-900 dark:text-white font-medium">
 																		{match.player1?.displayName || "TBD"}
 																	</p>
 																</div>
@@ -690,7 +695,7 @@ export default function TournamentsSection({}) {
 																	VS
 																</div>
 																<div className="text-center flex-1">
-																	<p className="text-white font-medium">
+																	<p className="text-gray-900 dark:text-white font-medium">
 																		{match.player2?.displayName || "TBD"}
 																	</p>
 																</div>
@@ -700,10 +705,10 @@ export default function TournamentsSection({}) {
 																<p
 																	className={`text-sm font-medium mb-2 ${
 																		match.status?.toLowerCase() === "completed"
-																			? "text-green-400"
+																			? "text-green-500"
 																			: match.status?.toLowerCase() ===
 																					"in_progress"
-																				? "text-yellow-400"
+																				? "text-yellow-500"
 																				: "text-gray-400"
 																	}`}
 																>
@@ -724,7 +729,7 @@ export default function TournamentsSection({}) {
 																			onClick={() =>
 																				handleTournamentChallenge(match)
 																			}
-																			className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-all font-medium"
+																			className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg transition-all font-medium shadow"
 																		>
 																			Challenge
 																		</button>
@@ -732,7 +737,7 @@ export default function TournamentsSection({}) {
 
 																{match.status?.toLowerCase() === "completed" &&
 																	match.winnerId && (
-																		<p className="text-sm text-blue-400">
+																		<p className="text-sm text-blue-500">
 																			Winner:{" "}
 																			{match.winnerId === match.player1Id
 																				? match.player1?.displayName
@@ -748,7 +753,7 @@ export default function TournamentsSection({}) {
 							</div>
 						) : (
 							<div className="text-center py-8">
-								<p className="text-gray-300">
+								<p className="text-gray-500 dark:text-gray-300">
 									No matches found for this tournament.
 								</p>
 							</div>

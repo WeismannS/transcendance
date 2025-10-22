@@ -1,6 +1,4 @@
-import type { Tournament } from "../../../types/user";
-
-export type { Tournament };
+import type { Tournament } from "../../../types/tournament";
 
 export interface Chat {
 	id: number;

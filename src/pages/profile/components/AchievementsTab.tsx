@@ -1,8 +1,8 @@
 import Miku from "Miku";
-import type { Achievement } from "./types.ts";
+import type { UserAchievement } from "./types.ts";
 
 interface AchievementsTabProps {
-	achievements: Achievement[];
+	achievements: UserAchievement[];
 }
 
 export default function AchievementsTab({

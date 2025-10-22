@@ -28,7 +28,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 	useEffect(() => {
 		setIsVisible(true);
 
-
 		const handleMessage = (event: MessageEvent) => {
 			if (
 				event.origin !== window.location.origin &&
@@ -244,7 +243,6 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 			name: "",
 		});
 	};
-
 
 	const formFields = [];
 

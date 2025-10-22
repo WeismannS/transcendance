@@ -6,7 +6,7 @@ import type {
 	GameState,
 	NotificationsState,
 	SocialState,
-	UserProfileState
+	UserProfileState,
 } from "../../../store/StateManager.ts";
 import { stateManager } from "../../../store/StateManager.ts";
 

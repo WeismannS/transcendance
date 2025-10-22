@@ -1,5 +1,5 @@
 import Miku, { useEffect, useState } from "Miku";
-import { Link, redirect } from "Miku/Router";
+import { redirect } from "Miku/Router";
 import AnimatedBackground from "../../components/AnimatedBackground";
 import UniversalHeader from "../../components/UniversalHeader.tsx";
 import { logOut } from "../../services/api/auth";
@@ -20,6 +20,7 @@ import type {
 	UserProfileState,
 } from "../../store/StateManager.ts";
 import { stateManager } from "../../store/StateManager.ts";
+import { Achievement } from "../../types/achievement";
 import { Friend } from "../../types/friend";
 import { GameHistory } from "../../types/game";
 import { Profile } from "../../types/profile";
@@ -29,12 +30,11 @@ import OverviewTab from "./components/OverviewTab.tsx";
 import ProfileHeader from "./components/ProfileHeader.tsx";
 import TabNavigation from "./components/TabNavigation.tsx";
 import {
-	type Achievement,
 	type Match,
 	type MutualMatch,
 	type ProfileUser,
 	type Tab,
-	Achievement as UserAchievement,
+	type UserAchievement,
 } from "./components/types.ts";
 export default function UserProfilePage({
 	isLoggedIn,
@@ -84,7 +84,7 @@ export default function UserProfilePage({
 
 	const transformProfileData = (
 		profile: Profile,
-		achievements: UserAchievement[],
+		achievements: Achievement[],
 	): ProfileUser => {
 		const winRate =
 			profile.gameStats.totalGames > 0
@@ -128,8 +128,8 @@ export default function UserProfilePage({
 
 	const transformAchievements = (
 		userAchievementIds: string[],
-		allAchievements: UserAchievement[],
-	): Achievement[] => {
+		allAchievements: Achievement[],
+	): UserAchievement[] => {
 		return allAchievements.map((achievement) => ({
 			id: achievement.id,
 			name: achievement.title,
@@ -444,7 +444,9 @@ export default function UserProfilePage({
 			case "matches":
 				return <MatchesTab recentMatches={recentMatches} />;
 			case "achievements":
-				return <AchievementsTab achievements={achievements} />;
+				return (
+					<AchievementsTab achievements={achievements as UserAchievement[]} />
+				);
 			default:
 				return (
 					<OverviewTab

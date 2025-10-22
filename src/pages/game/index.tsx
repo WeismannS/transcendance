@@ -225,7 +225,6 @@ export default function GamePage() {
 	}, [gameState, isPaused]);
 
 	useEffect(() => {
-
 		gameObjects.current.leftPaddle.x = PADDLE_WIDTH / 2;
 
 		gameObjects.current.rightPaddle.x = CANVAS_WIDTH - PADDLE_WIDTH * 1.5;
@@ -733,8 +732,7 @@ export default function GamePage() {
 											setIsPaused(true);
 											setPauseReason("disconnection");
 											setGameState("paused");
-										}
-										else if (message.winner && currentUser?.id) {
+										} else if (message.winner && currentUser?.id) {
 											console.log(
 												"Timeout reached, game ended with winner:",
 												message.winner,
@@ -932,7 +930,6 @@ export default function GamePage() {
 				y: ball.y * SCALE_Y,
 			};
 		}
-
 
 		if (player1) {
 			const serverY = player1.paddleY * SCALE_Y - PADDLE_HEIGHT / 2;
@@ -1211,8 +1208,6 @@ export default function GamePage() {
 		}
 	};
 
-
-
 	const render = (ctx: CanvasRenderingContext2D) => {
 		const { ball, leftPaddle, rightPaddle } = gameObjects.current;
 
@@ -1302,8 +1297,6 @@ export default function GamePage() {
 		const secs = seconds % 60;
 		return `${mins}:${secs.toString().padStart(2, "0")}`;
 	};
-
-
 
 	const renderGameUI = () => {
 		const leftPlayer = getLeftSidePlayer();
@@ -1396,7 +1389,6 @@ export default function GamePage() {
 						</div>
 					)}
 				</div>
-
 			</div>
 		);
 	};

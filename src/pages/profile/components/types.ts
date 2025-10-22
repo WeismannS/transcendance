@@ -1,3 +1,4 @@
+import type { Achievement } from "../../../types/achievement";
 export interface ProfileUser {
 	id: string;
 	avatar: string;
@@ -29,7 +30,10 @@ export interface Match {
 	time: string;
 }
 
-export type { Achievement } from "../../../types/achievement";
+export type UserAchievement = Achievement & {
+	unlocked: boolean;
+	name: string;
+};
 
 export interface MutualMatch {
 	id: number;
