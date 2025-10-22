@@ -18,7 +18,7 @@ export default function OverviewTab({
 					<h3 className="text-xl font-bold text-white mb-4">
 						Performance Stats
 					</h3>
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-2 gap-3">
 						<div className="text-center p-4 bg-gray-700/30 rounded-xl">
 							<div className="text-2xl font-bold text-green-400">
 								{profileUser.wins}
@@ -36,12 +36,6 @@ export default function OverviewTab({
 								{profileUser.winRate}%
 							</div>
 							<div className="text-gray-400 text-sm">Win Rate</div>
-						</div>
-						<div className="text-center p-4 bg-gray-700/30 rounded-xl">
-							<div className="text-2xl font-bold text-cyan-400">
-								{profileUser.tournamentsWon}
-							</div>
-							<div className="text-gray-400 text-sm">Tournaments Won</div>
 						</div>
 					</div>
 				</div>

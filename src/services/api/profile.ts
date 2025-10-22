@@ -23,11 +23,12 @@ export async function updateProfile(profileData: any) {
 		});
 
 		const res = await response.json();
+
+		if (!response.ok) throw new Error(`${res.error}`);
 		stateManager.emit("PROFILE_UPDATED", {
 			...profileData,
 			avatar: res.avatarUrl,
 		});
-		if (!response.ok) throw new Error(`${res.error}`);
 		return { success: true };
 	} catch (error) {
 		console.error("Failed to update profile:", error);

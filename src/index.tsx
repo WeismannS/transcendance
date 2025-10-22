@@ -1,17 +1,13 @@
 import Miku, { useEffect, workLoop } from "Miku";
 import { Router, redirect } from "Miku/Router";
-import HomePage from "./pages/app_home/index.tsx";
 import DashboardPage from "./pages/dashboard/index.tsx";
 import GamePage from "./pages/game/index.tsx";
+import HomePage from "./pages/home/index.tsx";
 import { NotificationContainer } from "./pages/notification.tsx";
 import UserHomePage from "./pages/profile/index.tsx";
 import SignInPage from "./pages/sign_in/index.tsx";
-import {
-	getAllConversations,
-	initializeChatWebSocket,
-} from "./services/api/chat";
+import { getAllConversations } from "./services/api/chat";
 import { API_URL } from "./services/api/config";
-import { initializeNotificationWs } from "./services/api/notifications";
 import { stateManager } from "./store/StateManager.ts";
 
 const aa = document.body.querySelector("#app");
@@ -88,17 +84,10 @@ const Routing = () => {
 						const achievementsData = await achievementsResponse.json();
 						const onlineCountData = await onlineCountResponse.json();
 
-						console.log("User data:", userData);
-						console.log("Achievements data:", achievementsData);
-
 						await stateManager.initializeFromUser(
 							userData,
 							achievementsData.achievements || [],
 							onlineCountData.totalOnline + 1,
-						);
-						console.log(
-							"State initialized with user data",
-							stateManager.getState("userProfile"),
 						);
 
 						// Load conversations

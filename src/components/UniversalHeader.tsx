@@ -9,12 +9,11 @@ import type { ProfileOverview } from "../types/user.ts";
 interface UniversalHeaderProps {
 	profile: UserProfileState | null;
 	onlineUsers: number;
-	notifications: number;
 	onLogout?: () => void;
 	onProfileClick?: () => void;
 }
 
-export default function UniversalHeader({
+export default function fUniversalHeader({
 	profile,
 	onlineUsers,
 	onLogout,

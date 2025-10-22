@@ -16,8 +16,7 @@ import ProfileSection from "./components/ProfileSection.tsx";
 import TournamentsSection from "./components/TournamentsSection.tsx";
 
 export default function DashboardPage() {
-	const { profile, gameState, social, achievements, notifications } =
-		useDashboardData();
+	const { profile, gameState, social, achievements } = useDashboardData();
 	const { addNotification } = useNotifications();
 	// Check if we should start with a specific section (e.g., from profile message button)
 	const initialSection =
@@ -40,7 +39,6 @@ export default function DashboardPage() {
 	}, []);
 
 	const [isVisible, setIsVisible] = useState(false);
-	const [ballPosition, setBallPosition] = useState({ x: 90, y: 10 });
 	const [userStats, setUserStats] = useState({
 		wins: gameState?.stats.wins ?? 0,
 		losses: gameState?.stats.losses ?? 0,
@@ -97,15 +95,8 @@ export default function DashboardPage() {
 			});
 		}
 
-		// Animated ping pong ball
-		const ballInterval = setInterval(() => {
-			setBallPosition((prev) => ({
-				x: Math.random() * 80 + 10,
-				y: Math.random() * 20 + 5,
-			}));
-		}, 4000);
-
-		return () => clearInterval(ballInterval);
+		// Animated background handled by AnimatedBackground component
+		return () => undefined;
 	}, [profile, gameState]);
 
 	// Profile Edit Handlers
@@ -161,14 +152,13 @@ export default function DashboardPage() {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
 			{/* Animated Background Elements */}
-			<AnimatedBackground ballPosition={ballPosition} />
+			<AnimatedBackground />
 
 			{/* Header */}
 			<UniversalHeader
 				onLogout={logOut}
 				profile={profile}
 				onlineUsers={social?.onlineUsers || 0}
-				notifications={notifications?.unreadCount || 0}
 			/>
 
 			{/* Navigation */}

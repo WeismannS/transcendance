@@ -1,12 +1,26 @@
-import Miku from "Miku";
+import Miku, { useEffect, useState } from "Miku";
 
 interface AnimatedBackgroundProps {
-	ballPosition: { x: number; y: number };
+	intervalMs?: number;
 }
 
 export default function AnimatedBackground({
-	ballPosition,
+	intervalMs,
 }: AnimatedBackgroundProps) {
+	const [ballPosition, setBallPosition] = useState({ x: 20, y: 80 });
+	const ms = intervalMs ?? 3500;
+
+	useEffect(() => {
+		const ballInterval = setInterval(() => {
+			setBallPosition(() => ({
+				x: Math.random() * 80 + 10,
+				y: Math.random() * 60 + 10,
+			}));
+		}, ms);
+
+		return () => clearInterval(ballInterval);
+	}, [ms]);
+
 	return (
 		<div className="absolute inset-0 overflow-hidden">
 			<div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>

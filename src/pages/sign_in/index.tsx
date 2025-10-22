@@ -19,7 +19,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		confirmPassword: "",
 		name: "",
 	});
-	const [ballPosition, setBallPosition] = useState({ x: 20, y: 30 });
+	// background animation handled by AnimatedBackground (customized timing below)
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [oauthLoading, setOauthLoading] = useState({
@@ -29,13 +29,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 	useEffect(() => {
 		setIsVisible(true);
 
-		// Animated ping pong ball
-		const interval = setInterval(() => {
-			setBallPosition((prev) => ({
-				x: Math.random() * 60 + 20,
-				y: Math.random() * 40 + 30,
-			}));
-		}, 3000);
+		// Animated background handled by AnimatedBackground component (no local interval needed)
 
 		// Listen for OAuth messages from popup
 		const handleMessage = (event: MessageEvent) => {
@@ -86,7 +80,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		window.addEventListener("message", handleMessage);
 
 		return () => {
-			clearInterval(interval);
+			// no local interval to clear
 			window.removeEventListener("message", handleMessage);
 		};
 	}, []);
@@ -404,7 +398,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 			className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden"
 		>
 			{/* Animated Background Elements */}
-			<AnimatedBackground ballPosition={ballPosition} />
+			<AnimatedBackground intervalMs={4500} />
 
 			{/* Header */}
 			<header key="header" className="relative z-10 px-6 py-8">

@@ -37,7 +37,6 @@ import {
 	type MutualMatch,
 	type ProfileUser,
 	type Tab,
-	type Tournament,
 } from "./components/types.ts";
 
 export default function UserProfilePage({
@@ -51,7 +50,6 @@ export default function UserProfilePage({
 		isLoggedIn,
 	);
 	const [isVisible, setIsVisible] = useState(false);
-	const [ballPosition, setBallPosition] = useState({ x: 20, y: 80 });
 	const [activeTab, setActiveTab] = useState("overview");
 	const [isFriend, setIsFriend] = useState(false);
 	const [isOnline, setIsOnline] = useState(false);
@@ -196,10 +194,7 @@ export default function UserProfilePage({
 				});
 
 				// Check if this is the current user's profile - match by ID
-				const isOwn =
-					currentUser &&
-					(currentUser.id === username || // Direct ID match
-						window.location.pathname === "/app_home"); // Always own profile for /app_home
+				const isOwn = currentUser && currentUser.id === username;
 				setIsOwnProfile(!!isOwn);
 
 				console.log("Is own profile:", isOwn);
@@ -361,17 +356,8 @@ export default function UserProfilePage({
 		if (!loading) {
 			setIsVisible(true);
 
-			// Animated ping pong ball
-			const ballInterval = setInterval(() => {
-				setBallPosition((prev) => ({
-					x: Math.random() * 70 + 15,
-					y: Math.random() * 60 + 20,
-				}));
-			}, 4000);
-
-			return () => {
-				clearInterval(ballInterval);
-			};
+			// animated background handled by AnimatedBackground component
+			return undefined;
 		}
 	}, [loading]);
 
@@ -506,26 +492,7 @@ export default function UserProfilePage({
 	if (loading) {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-				{/* Animated Background Elements */}
-				<div className="absolute inset-0 overflow-hidden">
-					<div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-					<div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-					<div className="absolute bottom-32 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
-
-					{/* Animated Ping Pong Ball */}
-					<div
-						className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
-						style={{
-							left: `${ballPosition.x}%`,
-							top: `${ballPosition.y}%`,
-							transform: "translate(-50%, -50%)",
-						}}
-					></div>
-
-					{/* Geometric shapes */}
-					<div className="absolute top-1/3 right-1/4 w-32 h-32 border border-cyan-500/10 rounded-full"></div>
-					<div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-blue-500/10 rounded-full"></div>
-				</div>
+				<AnimatedBackground />
 
 				<div className="relative z-10 flex items-center justify-center min-h-screen px-6">
 					<div className="text-center max-w-lg mx-auto">
@@ -584,26 +551,7 @@ export default function UserProfilePage({
 	if (error || !profileData || !profileUser) {
 		return (
 			<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-				{/* Animated Background Elements */}
-				<div className="absolute inset-0 overflow-hidden">
-					<div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-					<div className="absolute top-40 right-20 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-					<div className="absolute bottom-32 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
-
-					{/* Animated Ping Pong Ball */}
-					<div
-						className="absolute w-4 h-4 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full shadow-lg transition-all duration-4000 ease-in-out"
-						style={{
-							left: `${ballPosition.x}%`,
-							top: `${ballPosition.y}%`,
-							transform: "translate(-50%, -50%)",
-						}}
-					></div>
-
-					{/* Geometric shapes */}
-					<div className="absolute top-1/3 right-1/4 w-32 h-32 border border-cyan-500/10 rounded-full"></div>
-					<div className="absolute bottom-1/3 left-1/4 w-24 h-24 border border-blue-500/10 rounded-full"></div>
-				</div>
+				<AnimatedBackground />
 
 				<div className="relative z-10 flex items-center justify-center min-h-screen px-6">
 					<div className="text-center max-w-2xl mx-auto">
@@ -666,13 +614,6 @@ export default function UserProfilePage({
 											<span className="text-orange-400">•</span>
 											<span>Search for the user in the dashboard</span>
 										</div>
-										<div
-											key="suggestion-3"
-											className="flex items-center space-x-3"
-										>
-											<span className="text-orange-400">•</span>
-											<span>Browse the leaderboard to find players</span>
-										</div>
 									</div>
 								</div>
 
@@ -688,13 +629,6 @@ export default function UserProfilePage({
 									>
 										🏠 Go to Dashboard
 									</button>
-									<button
-										key="leaderboard-button"
-										onClick={() => redirect("/leaderboard")}
-										className="px-8 py-3 bg-gray-700 text-white rounded-xl font-semibold hover:bg-gray-600 transition-all transform hover:scale-105 shadow-lg"
-									>
-										🏆 View Leaderboard
-									</button>
 								</div>
 							</div>
 						</div>
@@ -706,14 +640,13 @@ export default function UserProfilePage({
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-			<AnimatedBackground ballPosition={ballPosition} />
+			<AnimatedBackground />
 
 			{/* Universal Header */}
 			<UniversalHeader
 				onLogout={logOut}
 				profile={currentUser}
 				onlineUsers={socialState?.onlineUsers || 0}
-				notifications={0}
 			/>
 
 			<main className="relative z-10 px-6 py-8">
