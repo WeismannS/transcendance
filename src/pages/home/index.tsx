@@ -16,11 +16,6 @@ export default function HomePage() {
 			description: "Compete in ranked tournaments and climb the leaderboard",
 			icon: "",
 		},
-		{
-			title: "Custom Tables",
-			description: "Design your own ping pong tables and environments",
-			icon: "",
-		},
 	];
 
 	return (
@@ -36,7 +31,7 @@ export default function HomePage() {
 								<span className="text-white font-bold text-sm"></span>
 							</div>
 						<span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-							PingPong Pro
+							Miku
 						</span>
 					</div>
 
@@ -57,7 +52,7 @@ export default function HomePage() {
 					<div className={`text-center py-20 transition-all duration-1000`}>
 						<h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
 							<span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-600 bg-clip-text text-transparent">
-								PING PONG
+								MIKU PONG
 							</span>
 							<br />
 							<span className="text-white">REVOLUTION</span>
@@ -86,7 +81,7 @@ export default function HomePage() {
 							</span>
 						</h2>
 
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 							{features.map((feature, index) => (
 								<div
 									key={index}

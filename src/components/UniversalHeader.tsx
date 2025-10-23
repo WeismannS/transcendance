@@ -73,7 +73,7 @@ export default function fUniversalHeader({
 							<span className="text-white font-bold text-sm"></span>
 						</div>
 						<span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-							PingPong Pro
+							Miku
 						</span>
 					</Link>
 

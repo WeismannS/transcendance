@@ -396,7 +396,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 							key="logo-text"
 							className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
 						>
-							PingPong Pro
+							Miku
 						</span>
 					</div>
 
