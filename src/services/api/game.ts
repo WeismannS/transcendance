@@ -1,5 +1,5 @@
 import { stateManager } from "../../store/StateManager";
-import { API_URL } from "./config";
+import { API_URL, WS_URL } from "./config";
 import type { GameUpdate } from "./types";
 
 export async function finishGame(gameResult: any) {
@@ -72,7 +72,7 @@ export async function gameConnect(
 ) {
 	try {
 		const socket = new WebSocket(
-			"ws://localhost:3006/ws?playerId=" + playerId + "&gameId=" + gameId,
+			 WS_URL + "/ws/game?playerId=" + playerId + "&gameId=" + gameId,
 		);
 
 		socket.onopen = onOpen;
