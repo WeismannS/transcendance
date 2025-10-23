@@ -31,7 +31,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		const handleMessage = (event: MessageEvent) => {
 			if (
 				event.origin !== window.location.origin &&
-				event.origin !== "http://localhost:3000"
+				event.origin !== API_URL
 			) {
 				console.log("Message rejected due to origin mismatch");
 				return;

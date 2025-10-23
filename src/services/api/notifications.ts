@@ -4,6 +4,7 @@ import { stateManager } from "../../store/StateManager";
 import { isNotificationType } from "../../types/notification";
 import { acceptChallenge, rejectChallenge } from "./game";
 import { sendTournamentChallenge } from "./tournament";
+import { API_URL, WS_URL } from "./config";
 
 export function initializeNotificationWs() {
 	const { addNotification } = useNotifications();
@@ -26,7 +27,7 @@ export function initializeNotificationWs() {
 	}
 
 	const ws = new WebSocket(
-		`ws://localhost:3005/ws/notifications/live?token=${encodeURIComponent(token)}`,
+		WS_URL + `/ws/notifications/live?token=${encodeURIComponent(token)}`,
 	);
 
 	ws.onmessage = (event) => {

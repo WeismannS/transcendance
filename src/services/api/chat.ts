@@ -1,6 +1,6 @@
 import { stateManager } from "../../store/StateManager";
 import { Conversation } from "../../types/message";
-import { API_URL } from "./config";
+import { API_URL, WS_URL } from "./config";
 
 export function initializeChatWebSocket() {
 	const extractTokenFromCookies = (): string | null => {
@@ -21,7 +21,7 @@ export function initializeChatWebSocket() {
 	}
 
 	const ws = new WebSocket(
-		`ws://localhost:3004/ws/chat/live?token=${encodeURIComponent(token)}`,
+		WS_URL + `/ws/chat/live?token=${encodeURIComponent(token)}`,
 	);
 
 	ws.onmessage = (event) => {

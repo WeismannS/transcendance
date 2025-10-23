@@ -68,7 +68,7 @@ const Routing = () => {
 							fetch(API_URL + "/api/user-management/allachievements", {
 								credentials: "include",
 							}),
-							fetch("http://localhost:3005/api/notifications/users/online", {
+							fetch(`${API_URL}/api/notifications/users/online`, {
 								credentials: "include",
 							}),
 						]);
