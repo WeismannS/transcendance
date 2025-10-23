@@ -233,10 +233,10 @@ export default function GamePage() {
 	}, [playerNumber]);
 
 	useEffect(() => {
-	console.log("Setting up keyboard handlers");
+		console.log("Setting up keyboard handlers");
 
 		const handleKeyDown = (e: any) => {
-				console.log("Key pressed:", e.key);
+			console.log("Key pressed:", e.key);
 			switch (e.key) {
 				case "ArrowUp":
 				case "w":
@@ -309,17 +309,14 @@ export default function GamePage() {
 			"currentUser:",
 			currentUser?.id,
 		);
-		console.log(
-			"Current gameSocket.current before logic:",
-			gameSocket.current,
-		);
+		console.log("Current gameSocket.current before logic:", gameSocket.current);
 
 		if (gameId && currentUser?.id) {
 			if (
 				gameSocket.current &&
 				gameSocket.current.readyState === WebSocket.OPEN
 			) {
-					console.log("Socket already connected, skipping new connection");
+				console.log("Socket already connected, skipping new connection");
 				return;
 			}
 
@@ -486,9 +483,7 @@ export default function GamePage() {
 
 									case "gameUpdate":
 										if (message.gameStarted) {
-											console.log(
-												"Game started, switching to playing state",
-											);
+											console.log("Game started, switching to playing state");
 											setGameState("playing");
 											setWaitingForOpponent(false);
 										}
@@ -837,9 +832,7 @@ export default function GamePage() {
 									!gameSocket.current ||
 									gameSocket.current.readyState !== WebSocket.OPEN
 								) {
-									console.log(
-										"Socket lost or closed, stopping periodic check",
-									);
+									console.log("Socket lost or closed, stopping periodic check");
 									clearInterval(checkInterval);
 								}
 							}, 1000);
@@ -848,10 +841,7 @@ export default function GamePage() {
 								clearInterval(checkInterval);
 							}, 10000);
 						} else {
-							console.error(
-								"gameConnect did not return a WebSocket:",
-								socket,
-							);
+							console.error("gameConnect did not return a WebSocket:", socket);
 							throw socket;
 						}
 					} catch (error) {
@@ -867,10 +857,7 @@ export default function GamePage() {
 			})();
 
 			return () => {
-				console.log(
-					"USEEFFECT CLEANUP - Current socket:",
-					gameSocket.current,
-				);
+				console.log("USEEFFECT CLEANUP - Current socket:", gameSocket.current);
 			};
 		} else if (gameId && !currentUser?.id) {
 			console.log(
@@ -889,17 +876,17 @@ export default function GamePage() {
 			gameState === "connecting" &&
 			!gameSocket.current
 		) {
-		console.log("User data loaded, retrying WebSocket connection...");
+			console.log("User data loaded, retrying WebSocket connection...");
 		}
 	}, [currentUser, gameState, gameId]);
 
 	useEffect(() => {
-	console.log("Socket ref changed:", gameSocket.current);
-	console.log("Socket readyState:", gameSocket.current?.readyState);
+		console.log("Socket ref changed:", gameSocket.current);
+		console.log("Socket readyState:", gameSocket.current?.readyState);
 	});
 
 	useEffect(() => {
-	console.log("Keys state changed:", keys);
+		console.log("Keys state changed:", keys);
 	}, [keys]);
 
 	const updateGameFromServer = (gameBoard: GameBoard) => {

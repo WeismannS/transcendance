@@ -529,9 +529,7 @@ export default function UserProfilePage({
 								<div
 									key="pensive-emoji"
 									className="text-8xl mb-6 animate-bounce"
-								>
-									
-								</div>
+								></div>
 
 								<h1 key="error-title" className="text-4xl font-bold mb-4">
 									<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">

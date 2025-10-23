@@ -38,8 +38,9 @@ const Routing = () => {
 			if (response.status === 200) {
 				setIsLoggedIn(true);
 				if (
-					window.location.pathname === "/sign_in" ||
-					window.location.pathname === "/"
+					!["dashboard", "game", "profile"].includes(
+						window.location.pathname.split("/")[0],
+					)
 				) {
 					redirect("/dashboard");
 				}
@@ -53,7 +54,7 @@ const Routing = () => {
 				}
 			}
 		});
-	}, [isLoggedIn]);
+	}, [isLoggedIn, window.location.href]);
 
 	useEffect(() => {
 		if (isLoggedIn && !userDataLoaded) {
