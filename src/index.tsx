@@ -23,6 +23,11 @@ const ProtectedRoutes = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
 				isLoggedIn={isLoggedIn}
 			/>
 			<Router path="/game/:gameId" Component={GamePage} />
+			<Router
+				path="/profile/"
+				Component={UserHomePage}
+				isLoggedIn={isLoggedIn}
+			/>
 		</>
 	);
 };
@@ -39,7 +44,7 @@ const Routing = () => {
 				setIsLoggedIn(true);
 				if (
 					!["dashboard", "game", "profile"].includes(
-						window.location.pathname.split("/")[0],
+						window.location.pathname.split("/")[1],
 					)
 				) {
 					redirect("/dashboard");
