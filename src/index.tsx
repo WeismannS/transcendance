@@ -52,11 +52,22 @@ const Routing = () => {
 			} else {
 				setIsLoggedIn(false);
 				if (
-					window.location.pathname !== "/" &&
-					window.location.pathname !== "/sign_in"
+					!["sign_in", "sign_up", ""].includes(
+						window.location.pathname.split("/")[1],
+					)
 				) {
 					redirect("/sign_in");
 				}
+			}
+		}).catch((error) => {
+			console.error("Error verifying authentication:", error);
+			setIsLoggedIn(false);
+			if (
+				!["sign_in", "sign_up", ""].includes(
+					window.location.pathname.split("/")[1],
+				)
+			) {
+				redirect("/sign_in");
 			}
 		});
 	}, [isLoggedIn, window.location.href]);
