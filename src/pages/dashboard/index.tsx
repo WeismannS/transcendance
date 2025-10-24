@@ -141,7 +141,14 @@ export default function DashboardPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+		<div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
+			{/* Miku PNG background */}
+			<img
+				src="/miku3.png"
+				alt="Miku"
+				className="pointer-events-none select-none absolute z-0 opacity-30 right-0 w-[500px] max-w-full h-auto"
+				style={{ filter: 'drop-shadow(0 0 10px #0ff)' }}
+			/>
 			<AnimatedBackground />
 
 			<UniversalHeader
