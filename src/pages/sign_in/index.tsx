@@ -222,19 +222,19 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 	};
 
 	const toggleAuthMode = () => {
-		setIsSignUp(!isSignUp);
-		setFormData({
-			email: "",
-			password: "",
-			confirmPassword: "",
-			name: "",
-		});
-		setErrors({
-			email: "",
-			password: "",
-			confirmPassword: "",
-			name: "",
-		});
+	       setIsSignUp(!isSignUp);
+	       setFormData((prev) => ({
+		       email: prev.email,
+		       password: prev.password,
+		       confirmPassword: "",
+		       name: "",
+	       }));
+	       setErrors({
+		       email: "",
+		       password: "",
+		       confirmPassword: "",
+		       name: "",
+	       });
 	};
 
 	const formFields = [];
