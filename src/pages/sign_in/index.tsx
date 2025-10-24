@@ -388,9 +388,10 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 					<div key="logo" className="flex items-center space-x-2">
 						<div
 							key="logo-icon"
-							className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center"
+							className="w-8 h-8 bg-gradient-to-r rounded-full flex items-center justify-center"
 						>
-							<span className="text-white font-bold text-sm"></span>
+							<img src="./miku-icon.png" className="scale-[1.2]">
+							</img>
 						</div>
 						<span
 							key="logo-text"

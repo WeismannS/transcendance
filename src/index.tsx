@@ -39,7 +39,7 @@ const Routing = () => {
 				setIsLoggedIn(true);
 				if (
 					!["dashboard", "game", "profile"].includes(
-						window.location.pathname.split("/")[0],
+						window.location.pathname.split("/")[1],
 					)
 				) {
 					redirect("/dashboard");

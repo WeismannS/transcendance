@@ -1378,7 +1378,7 @@ export default function GamePage() {
 			<div className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 rounded-2xl p-8 max-w-md w-full">
 				<div className="text-center mb-8">
 					<div className="text-6xl mb-4">
-						{matchResults?.result === "win" ? "[TROPHY]" : "[RESULT]"}
+						<img src="./miku-icon.png"></img>
 					</div>
 					<h2 className="text-3xl font-bold mb-2">
 						<span
