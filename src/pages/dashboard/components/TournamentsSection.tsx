@@ -915,15 +915,6 @@ export default function TournamentsSection({}) {
 								/>
 							</div>
 
-							<div>
-								<label className="block text-sm font-medium text-gray-300 mb-2">
-									Start Time (Optional)
-								</label>
-								<p className="text-gray-400 text-sm mt-1">
-									Leave empty for immediate availability
-								</p>
-							</div>
-
 							<div className="bg-gray-700 bg-opacity-30 p-4 rounded-xl">
 								<h3 className="text-white font-semibold mb-2">
 									Tournament Info
