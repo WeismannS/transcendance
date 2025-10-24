@@ -29,10 +29,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 		setIsVisible(true);
 
 		const handleMessage = (event: MessageEvent) => {
-			if (
-				event.origin !== window.location.origin &&
-				event.origin !== API_URL
-			) {
+			if (event.origin !== window.location.origin && event.origin !== API_URL) {
 				console.log("Message rejected due to origin mismatch");
 				return;
 			}
@@ -390,8 +387,7 @@ export default function AuthPage({ setIsLoggedIn }: any) {
 							key="logo-icon"
 							className="w-8 h-8 bg-gradient-to-r rounded-full flex items-center justify-center"
 						>
-							<img src="./miku-icon.png" className="scale-[1.2]">
-							</img>
+							<img src="./miku-icon.png" className="scale-[1.2]"></img>
 						</div>
 						<span
 							key="logo-text"

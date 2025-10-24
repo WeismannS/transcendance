@@ -326,7 +326,7 @@ export default function GamePage() {
 			(async () => {
 				try {
 					const res = await fetch(API_URL + `/api/game/${gameId}`, {
-						credentials : "include"
+						credentials: "include",
 					});
 					if (res.status === 404) {
 						console.log(`Game ${gameId} not found on server`);

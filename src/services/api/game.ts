@@ -72,7 +72,7 @@ export async function gameConnect(
 ) {
 	try {
 		const socket = new WebSocket(
-			 WS_URL + "/ws/game?playerId=" + playerId + "&gameId=" + gameId,
+			WS_URL + "/ws/game?playerId=" + playerId + "&gameId=" + gameId,
 		);
 
 		socket.onopen = onOpen;

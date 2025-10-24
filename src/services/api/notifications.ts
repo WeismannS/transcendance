@@ -2,9 +2,9 @@ import { redirect } from "Miku/Router";
 import { useNotifications } from "../../pages/use-notification";
 import { stateManager } from "../../store/StateManager";
 import { isNotificationType } from "../../types/notification";
+import { API_URL, WS_URL } from "./config";
 import { acceptChallenge, rejectChallenge } from "./game";
 import { sendTournamentChallenge } from "./tournament";
-import { API_URL, WS_URL } from "./config";
 
 export function initializeNotificationWs() {
 	const { addNotification } = useNotifications();
@@ -163,7 +163,7 @@ export function initializeNotificationWs() {
 export async function isOnline(userId: number): Promise<boolean> {
 	try {
 		const response = await fetch(
-			`http://localhost:3005/api/notifications/user/${userId}/online`,
+			`${API_URL}/api/notifications/user/${userId}/online`,
 			{
 				method: "GET",
 				credentials: "include",

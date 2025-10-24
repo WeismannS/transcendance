@@ -147,7 +147,7 @@ export default function DashboardPage() {
 				src="/miku3.png"
 				alt="Miku"
 				className="pointer-events-none select-none absolute z-0 opacity-30 right-0 w-[500px] max-w-full h-auto"
-				style={{ filter: 'drop-shadow(0 0 10px #0ff)' }}
+				style={{ filter: "drop-shadow(0 0 10px #0ff)" }}
 			/>
 			<AnimatedBackground />
 

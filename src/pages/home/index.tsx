@@ -20,14 +20,12 @@ export default function HomePage() {
 
 	return (
 		<div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
-<img
-	src="./overlay.png"
-	className="absolute  right-[-300px] bottom-[-600px] w-fit h-fit object-cover z-0 pointer-events-none" style={{scale : "1.4", 
-		filter: 'drop-shadow(0 0 10px #0ff)'
-	}}
-	alt="Overlay"
-	
-/>
+			<img
+				src="./overlay.png"
+				className="absolute  right-[-300px] bottom-[-600px] w-fit h-fit object-cover z-0 pointer-events-none"
+				style={{ scale: "1.4", filter: "drop-shadow(0 0 10px #0ff)" }}
+				alt="Overlay"
+			/>
 			{/* Animated Background Elements */}
 			<AnimatedBackground />
 
