@@ -427,20 +427,6 @@ export default function TournamentsSection({}) {
 						Watch Live
 					</button>
 				)}
-
-				{tournament.status === "completed" && (
-					<button
-						onClick={(e) => {
-							e.stopPropagation();
-							loadTournamentMatches(tournament.id);
-							setSelectedTournament(tournament);
-							setShowBracket(true);
-						}}
-						className="flex-1 py-3 bg-gray-600 bg-opacity-20 text-gray-400 border border-gray-600 border-opacity-30 rounded-xl hover:bg-gray-600 hover:bg-opacity-30 transition-all font-semibold"
-					>
-						Results
-					</button>
-				)}
 			</div>
 		</div>
 	);
