@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN sed -i '17s/\bfalse\b/true/g' biome.json
+RUN sed -i '24s/\boff\b/error/g' biome.json
 
 RUN bun install && bunx biome lint --unsafe --write \
  && bun run build \

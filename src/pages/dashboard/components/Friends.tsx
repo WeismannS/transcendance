@@ -463,12 +463,7 @@ export default function Friends({
 												onClick={async () => {
 													try {
 														const isAuthenticated = await checkAuthStatus();
-														if (!isAuthenticated) {
-															alert(
-																"You are not logged in. Please refresh the page and log in again.",
-															);
-															return;
-														}
+														if (!isAuthenticated) return;
 
 														await sendChallenge(friend.id);
 														console.log(
@@ -476,13 +471,6 @@ export default function Friends({
 														);
 													} catch (error) {
 														console.error("Failed to send challenge:", error);
-														const errorMessage =
-															error instanceof Error
-																? error.message
-																: "Unknown error occurred";
-														alert(
-															`Failed to send challenge to ${friend.displayName}: ${errorMessage}`,
-														);
 													}
 												}}
 												disabled={friend.status !== "online"}

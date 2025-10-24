@@ -61,24 +61,10 @@ export default function TournamentsSection({}) {
 					? match.player2Id
 					: match.player1Id;
 
-			const opponentName =
-				match.player1Id === String(userProfile.id)
-					? match.player2?.displayName
-					: match.player1?.displayName;
-
-			const result = await sendChallenge(opponentId, "tournament", match.id);
-
-			if (result && result.gameId) {
-				window.location.href = `/game/${result.gameId}`;
-			} else {
-				alert(`Tournament challenge sent to ${opponentName}!`);
-			}
+			await sendChallenge(opponentId, "tournament", match.id);
 		} catch (err: any) {
 			setError(err.message || "Failed to send tournament challenge");
 			console.error("Failed to send tournament challenge:", err);
-			alert(
-				`Failed to send tournament challenge: ${err.message || "Unknown error"}`,
-			);
 		}
 	};
 

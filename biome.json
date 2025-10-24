@@ -20,6 +20,9 @@
 			"correctness": {
 				"noUnusedVariables": "error"
 			},
+			"suspicious": {
+				"noConsole": "off"
+			},
 			"performance": {
 				"noBarrelFile": "warn"
 			}

@@ -6,3 +6,4 @@ src/input.css
 *.js
 bun.lock
 *.lock
+ssl.*
