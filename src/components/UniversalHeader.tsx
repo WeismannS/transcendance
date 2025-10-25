@@ -1,291 +1,253 @@
-import Miku, { useState } from "Miku"
-import { Link } from "Miku/Router"
-import { stateManager } from "../store/StateManager.ts"
-import { UserProfileState, SocialState, NotificationsState } from "../store/StateManager.ts"
-import { API_URL, logOut } from "../services/api.ts"
-import { redirect } from "Miku/Router"
+import { Link } from "Miku/Router";
+import Miku, { useEffect, useState } from "../Miku/src/index";
+import { API_URL } from "../services/api/config";
+import { sendFriendRequest } from "../services/api/friends";
+import { searchProfiles } from "../services/api/profile";
+import { type UserProfileState } from "../store/StateManager.ts";
+import { ProfileOverview } from "../types/profile";
 
 interface UniversalHeaderProps {
-  currentPage?: string
-  showOnlineUsers?: boolean
-  showNotifications?: boolean
-  showUserProfile?: boolean
+	profile: UserProfileState | null;
+	onlineUsers: number;
+	onLogout?: () => void;
+	onProfileClick?: () => void;
 }
 
-export default function UniversalHeader({ 
-  currentPage = "", 
-  showOnlineUsers = true, 
-  showNotifications = true,
-  showUserProfile = true 
+export default function fUniversalHeader({
+	profile,
+	onlineUsers,
+	onLogout,
 }: UniversalHeaderProps) {
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+	const [dropdownOpen, setDropdownOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [searchResults, setSearchResults] = useState<ProfileOverview[]>([]);
+	const [isSearching, setIsSearching] = useState(false);
+	const [showSearchResults, setShowSearchResults] = useState(false);
 
-  // Get user data from state manager
-  const userProfile = stateManager.getState<UserProfileState>('userProfile')
-  const socialState = stateManager.getState<SocialState>('social')
-  const notificationsState = stateManager.getState<NotificationsState>('notifications')
+	const handleLogout = () => {
+		setDropdownOpen(false);
+		onLogout?.();
+	};
 
-  const handleProfileClick = () => {
-    setDropdownOpen(false)
-    redirect('/app_home')
-  }
+	const handleSearch = () => {
+		if (!searchQuery.trim()) {
+			setSearchResults([]);
+			return;
+		}
 
-  const handleLogout = async () => {
-    setDropdownOpen(false)
-    await logOut()
-  }
+		setIsSearching(true);
 
-  const handleNavigation = (path: string) => {
-    setMobileMenuOpen(false)
-    redirect(path)
-  }
+		searchProfiles(searchQuery)
+			.then((profiles) => {
+				setSearchResults(profiles);
+			})
+			.catch((error) => {
+				console.error("Failed to search profiles:", error);
+			})
+			.finally(() => {
+				setIsSearching(false);
+			});
+	};
 
-  const navigationItems = [
-    { label: "Dashboard", path: "/dashboard", icon: "🏠" },
-    { label: "Profile", path: "/app_home", icon: "👤" },
-    { label: "Game", path: "/game", icon: "🏓" },
-    { label: "Tournaments", path: "/tournaments", icon: "🏆" },
-    { label: "Leaderboard", path: "/leaderboard", icon: "📊" },
-  ]
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			if (searchQuery) {
+				handleSearch();
+			} else {
+				setSearchResults([]);
+			}
+		}, 300);
 
-  const isActivePage = (path: string) => {
-    if (currentPage === "profile" && (path === "/app_home" || path.startsWith("/profile"))) return true
-    if (currentPage === "dashboard" && path === "/dashboard") return true
-    if (currentPage === "game" && path === "/game") return true
-    if (currentPage === "tournaments" && path === "/tournaments") return true
-    if (currentPage === "leaderboard" && path === "/leaderboard") return true
-    return false
-  }
+		return () => clearTimeout(timeoutId);
+	}, [searchQuery]);
 
-  return (
-    <header className="relative z-50 px-6 py-4 border-b border-gray-700/50 bg-gray-900/80 backdrop-blur-lg">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">🏓</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
-              PingPong Pro
-            </span>
-            {currentPage && (
-              <span className="text-xs text-gray-400 capitalize -mt-1">
-                {currentPage}
-              </span>
-            )}
-          </div>
-        </div>
+	return (
+		<header className="relative z-50 px-6 py-4 border-b border-gray-700/50">
+			<div className="max-w-7xl mx-auto flex items-center justify-between">
+				<div className="flex items-center space-x-2">
+					<Link
+						to="/dashboard"
+						className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+					>
+						<div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
+							<img src="./miku-icon.png"></img>
+						</div>
+						<span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+							Miku
+						</span>
+					</Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-1">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center space-x-2 ${
-                isActivePage(item.path)
-                  ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg transform scale-105"
-                  : "text-gray-300 hover:text-white hover:bg-gray-700/50"
-              }`}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
+					{/* Search Bar with Results */}
+					<div className="relative ml-6">
+						<div className="relative">
+							<input
+								type="text"
+								placeholder="Search friends..."
+								value={searchQuery}
+								onChange={(e) => {
+									setSearchQuery(e.target.value);
+									setShowSearchResults(true);
+								}}
+								onFocus={() => setShowSearchResults(true)}
+								className="px-3 py-1 rounded-lg bg-gray-800 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all w-64"
+							/>
+							<div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+								{isSearching ? (
+									<div className="animate-spin w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
+								) : (
+									<div className="text-gray-400">🔍</div>
+								)}
+							</div>
+						</div>
 
-        {/* Right Side */}
-        <div className="flex items-center space-x-4">
-          {/* Online Users (only if enabled and data available) */}
-          {showOnlineUsers && socialState?.onlineUsers && (
-            <div className="hidden sm:flex items-center space-x-2 text-gray-300">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm">{socialState.onlineUsers.toLocaleString()} online</span>
-            </div>
-          )}
+						{/* Search Results Dropdown */}
+						{showSearchResults && searchQuery && (
+							<>
+								{/* Overlay to close results when clicking outside */}
+								<div
+									className="fixed inset-0 z-40"
+									onClick={() => setShowSearchResults(false)}
+								/>
 
-          {/* Notifications (only if enabled and user is logged in) */}
-          {showNotifications && userProfile && (
-            <div className="relative">
-              <button 
-                onClick={() => redirect('/dashboard')}
-                className="text-gray-300 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-700/50"
-              >
-                <span className="text-xl">🔔</span>
-                {notificationsState?.unreadCount && notificationsState.unreadCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
-                    {notificationsState.unreadCount > 99 ? '99+' : notificationsState.unreadCount}
-                  </div>
-                )}
-              </button>
-            </div>
-          )}
+								{/* Results dropdown */}
+								<div className="absolute left-0 mt-2 w-96 bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-xl border border-cyan-500/30 z-50 max-h-96 overflow-y-auto">
+									{searchResults.length === 0 && !isSearching && (
+										<div className="text-center py-6">
+											<div className="text-2xl mb-2">🔍</div>
+											<p className="text-gray-400 text-sm">
+												No users found matching "{searchQuery}"
+											</p>
+										</div>
+									)}
 
-          {/* User Profile (only if enabled and user is logged in) */}
-          {showUserProfile && userProfile && (
-            <div className="relative">
-              <button 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center space-x-3 hover:bg-gray-700/50 rounded-xl px-3 py-2 transition-all"
-              >
-                <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
-                  {userProfile.avatar ? (
-                    <img 
-                      src={`${API_URL}/${userProfile.avatar}`} 
-                      alt={userProfile.displayName}
-                      className="w-full h-full object-cover" 
-                    />
-                  ) : (
-                    <span className="text-white font-bold text-sm">
-                      {userProfile.displayName?.split(" ").map(n => n[0]).join("") || "U"}
-                    </span>
-                  )}
-                </div>
-                <div className="hidden sm:flex flex-col items-start">
-                  <span className="text-white font-semibold text-sm">
-                    {userProfile.displayName || "User"}
-                  </span>
-                  <span className="text-gray-400 text-xs">
-                    Online
-                  </span>
-                </div>
-                <svg 
-                  className={`w-4 h-4 text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {dropdownOpen && (
-                <>
-                  {/* Overlay to close dropdown */}
-                  <div 
-                    className="fixed inset-0 z-40"
-                    onClick={() => setDropdownOpen(false)}
-                  />
-                  
-                  {/* Dropdown menu */}
-                  <div className="absolute right-0 mt-2 w-56 bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-700 z-50">
-                    <div className="py-2">
-                      <button
-                        onClick={handleProfileClick}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-orange-500/20 hover:text-orange-300 transition-colors flex items-center space-x-3"
-                      >
-                        <span className="text-lg">👤</span>
-                        <div>
-                          <div className="font-medium">View Profile</div>
-                          <div className="text-xs text-gray-500">Manage your profile</div>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setDropdownOpen(false)
-                          redirect('/dashboard')
-                        }}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-purple-500/20 hover:text-purple-300 transition-colors flex items-center space-x-3"
-                      >
-                        <span className="text-lg">⚙️</span>
-                      </button>
-                      <hr className="border-gray-700 my-2" />
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-3 text-sm text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors flex items-center space-x-3"
-                      >
-                        <span className="text-lg">🚪</span>
-                        <div>
-                          <div className="font-medium">Sign Out</div>
-                          <div className="text-xs text-red-500">See you later!</div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+									{searchResults.length > 0 && (
+										<div className="py-2">
+											{searchResults.map((user) => {
+												return (
+													<div
+														key={user.id}
+														className="flex items-center justify-between px-4 py-3 hover:bg-cyan-600/20 transition-colors"
+													>
+														<Link
+															to={"/profile/" + user.displayName}
+															className=""
+														>
+															<div className="flex items-center space-x-3">
+																<div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
+																	{user.avatar ? (
+																		<img
+																			src={API_URL + "/" + user.avatar}
+																			alt={user.displayName}
+																			className="w-full h-full object-cover"
+																		/>
+																	) : (
+																		<span className="text-white font-bold text-sm">
+																			{user.displayName
+																				.split(" ")
+																				.map((n) => n[0])
+																				.join("")
+																				.substring(0, 2)}
+																		</span>
+																	)}
+																</div>
+																<div>
+																	<h4 className="text-white font-semibold text-sm">
+																		{user.displayName}
+																	</h4>
+																	<div className="flex items-center space-x-2 text-xs text-gray-400">
+																		<span>Rank #{user.rank}</span>
+																		<span>•</span>
+																		<span>{user.status}</span>
+																	</div>
+																</div>
+															</div>
+														</Link>
+													</div>
+												);
+											})}
+										</div>
+									)}
+								</div>
+							</>
+						)}
+					</div>
+				</div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
+				<div className="flex items-center space-x-6">
+					<div className="flex items-center space-x-2 text-gray-300">
+						<div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+						<span className="text-sm">
+							{onlineUsers.toLocaleString()} online
+						</span>
+					</div>
 
-      {/* Mobile Navigation Menu */}
-      {mobileMenuOpen && (
-        <>
-          {/* Mobile overlay */}
-          <div 
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          
-          {/* Mobile menu */}
-          <div className="absolute top-full left-0 right-0 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700 lg:hidden z-50">
-            <div className="px-6 py-4 space-y-2">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => handleNavigation(item.path)}
-                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center space-x-3 ${
-                    isActivePage(item.path)
-                      ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white"
-                      : "text-gray-300 hover:text-white hover:bg-gray-700/50"
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              ))}
-              
-              {/* Mobile user info */}
-              {userProfile && (
-                <div className="pt-4 mt-4 border-t border-gray-700">
-                  <div className="flex items-center space-x-3 px-4 py-2">
-                    <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center overflow-hidden">
-                      {userProfile.avatar ? (
-                        <img 
-                          src={`${API_URL}/${userProfile.avatar}`} 
-                          alt={userProfile.displayName}
-                          className="w-full h-full object-cover" 
-                        />
-                      ) : (
-                        <span className="text-white font-bold">
-                          {userProfile.displayName?.split(" ").map(n => n[0]).join("") || "U"}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold">{userProfile.displayName || "User"}</div>
-                      <div className="text-gray-400 text-sm">Online</div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      handleLogout()
-                    }}
-                    className="w-full text-left px-4 py-3 text-red-300 hover:text-red-200 hover:bg-red-500/20 rounded-xl transition-colors flex items-center space-x-3 mt-2"
-                  >
-                    <span className="text-lg">🚪</span>
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
-    </header>
-  )
+					<div className="relative">
+						<button
+							onClick={() => setDropdownOpen(!dropdownOpen)}
+							className="flex items-center space-x-3 hover:bg-cyan-800/30 rounded-lg px-2 py-1 transition-colors"
+						>
+							<div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
+								{profile?.avatar ? (
+									<img
+										src={API_URL + "/" + profile.avatar}
+										alt="Avatar"
+										className="w-8 h-8 rounded-full object-cover"
+									/>
+								) : (
+									<span className="text-white font-bold text-sm"></span>
+								)}
+							</div>
+							<span className="text-white font-semibold">
+								{profile?.displayName || "John Doe"}
+							</span>
+							<svg
+								className={`w-4 h-4 text-cyan-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M19 9l-7 7-7-7"
+								/>
+							</svg>
+						</button>
+
+						{dropdownOpen && (
+							<>
+								{/* Overlay to close dropdown when clicking outside */}
+								<div
+									className="fixed inset-0 z-40"
+									onClick={() => setDropdownOpen(false)}
+								/>
+
+								{/* Dropdown menu */}
+								<div className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-xl border border-cyan-500/30 z-50">
+									<div className="py-1">
+										<Link
+											to={"/profile/" + profile?.displayName}
+											className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-cyan-600/20 hover:text-cyan-300 transition-colors flex items-center space-x-2"
+										>
+											<span></span>
+											<span>Profile</span>
+										</Link>
+										<hr className="border-cyan-500/30 my-1" />
+										<button
+											onClick={handleLogout}
+											className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-600/20 hover:text-red-300 transition-colors flex items-center space-x-2"
+										>
+											<span></span>
+											<span>Logout</span>
+										</button>
+									</div>
+								</div>
+							</>
+						)}
+					</div>
+				</div>
+			</div>
+		</header>
+	);
 }

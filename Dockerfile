@@ -1,30 +1,21 @@
-FROM oven/bun:latest
-
+FROM oven/bun:alpine
 
 WORKDIR /app
 
-COPY public /app/public
+COPY . /app
 
-COPY src /app/src
+RUN sed -i '24s/\boff\b/error/g' biome.json
 
-COPY package.json /app/
-
-
-COPY Miku /app/Miku
-
-COPY server.ts /app/
-
-COPY tsconfig.json /app/
-
-RUN bun install 
-RUN  bunx tsc  || true
-RUN bunx @tailwindcss/cli -i public/input.css -o public/output.css 
-
-
-
-
+RUN bun install && bunx biome lint --unsafe --write \
+ && bun run build \
+ && rm -rf node_modules src \
+ && bun pm cache rm
 
 EXPOSE 4000
 
-
-CMD ["bun", "server.ts"]
+CMD sh -c '\
+if [ -f "/run/secrets/ssl_cert" ] && [ -f "/run/secrets/ssl_key" ]; then \
+    exec bun run start --ssl-cert /run/secrets/ssl_cert --ssl-key /run/secrets/ssl_key ; \
+else \
+    exec bun run start; \
+fi'
