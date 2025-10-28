@@ -15,12 +15,10 @@ export default function ChatsSection() {
 		string | null
 	>(null);
 	const [newMessage, setNewMessage] = useState("");
-	console.log(newMessage);
 	const [isLoading, setIsLoading] = useState(false);
-	const [isInitialized, setIsInitialized] = useState(false);
+	const isInitializedRef = useRef(false);
 	const input_ref = useRef<HTMLInputElement | null>(null);
 	const conversations = messagesState?.conversations || [];
-	console.log("Conversations: ", conversations);
 	const selectedConversation = conversations.find(
 		(conv) => conv.id === selectedConversationId,
 	);
@@ -28,14 +26,15 @@ export default function ChatsSection() {
 	useEffect(() => {
 		const activeChat = messagesState?.activeChat;
 
-		if (conversations.length > 0 && !isInitialized) {
+		// Handle initialization or active chat change
+		if (conversations.length > 0 && (!isInitializedRef.current || activeChat)) {
 			const targetConversationId =
 				activeChat && conversations.find((conv) => conv.id === activeChat)
 					? activeChat
 					: conversations[0].id;
 
 			setSelectedConversationId(targetConversationId);
-			setIsInitialized(true);
+			isInitializedRef.current = true;
 
 			if (activeChat && messagesState) {
 				const { activeChat: _, ...restMessagesState } = messagesState;
@@ -44,24 +43,8 @@ export default function ChatsSection() {
 					activeChat: undefined,
 				});
 			}
-		} else if (
-			conversations.length > 0 &&
-			messagesState?.activeChat &&
-			!selectedConversationId
-		) {
-			const targetConversation = conversations.find(
-				(conv) => conv.id === messagesState.activeChat,
-			);
-			if (targetConversation) {
-				setSelectedConversationId(targetConversation.id);
-				const { activeChat: _, ...restMessagesState } = messagesState;
-				stateManager.setState("messages", {
-					...restMessagesState,
-					activeChat: undefined,
-				});
-			}
 		}
-	}, [conversations, selectedConversationId, isInitialized, messagesState]);
+	}, [conversations.length, messagesState?.activeChat]);
 
 	const handleConversationSelect = (conversationId: string) => {
 		setSelectedConversationId(conversationId);

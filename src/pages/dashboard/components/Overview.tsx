@@ -2,21 +2,18 @@
 
 import Miku from "Miku";
 import { redirect } from "Miku/Router";
-import type {
-	GameState,
-	NotificationsState,
-	SocialState,
-	UserProfileState,
-} from "../../../store/StateManager.ts";
-import { stateManager } from "../../../store/StateManager.ts";
+import {
+	useGameState,
+	useNotifications,
+	useSocialState,
+	useUserProfile,
+} from "../../../hooks/useStates.ts";
 
 export default function Overview() {
-	const userProfile = stateManager.getState<UserProfileState>("userProfile");
-	const gameState = stateManager.getState<GameState>("gameState");
-	const socialState = stateManager.getState<SocialState>("social");
-
-	const notificationsState =
-		stateManager.getState<NotificationsState>("notifications");
+	const userProfile = useUserProfile();
+	const gameState = useGameState();
+	const socialState = useSocialState();
+	const notificationsState = useNotifications();
 
 	const userStats = gameState?.stats || {
 		totalGames: 0,

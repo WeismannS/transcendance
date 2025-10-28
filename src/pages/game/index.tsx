@@ -2,10 +2,10 @@
 
 import Miku, { useEffect, useRef, useState } from "Miku";
 import { Link } from "Miku/Router";
+import { useUserProfile } from "../../hooks/useStates.ts";
 import { API_URL } from "../../services/api/config";
 import { gameConnect } from "../../services/api/game";
 import { getPlayerProfile } from "../../services/api/profile";
-import type { UserProfileState } from "../../store/StateManager.ts";
 import { stateManager } from "../../store/StateManager.ts";
 
 interface GameBoard {
@@ -75,7 +75,7 @@ export default function GamePage() {
 
 	const gameId = getGameId();
 
-	const currentUser = stateManager.getState<UserProfileState>("userProfile");
+	const currentUser = useUserProfile();
 
 	const [score, setScore] = useState({ player: 0, opponent: 0 });
 	const scoreRef = useRef(score);

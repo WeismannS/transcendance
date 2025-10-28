@@ -2,6 +2,13 @@ import Miku, { useEffect, useState } from "Miku";
 import { redirect } from "Miku/Router";
 import AnimatedBackground from "../../components/AnimatedBackground";
 import UniversalHeader from "../../components/UniversalHeader.tsx";
+import {
+	useAchievements,
+	useGameState,
+	useMessages,
+	useSocialState,
+	useUserProfile,
+} from "../../hooks/useStates.ts";
 import { logOut } from "../../services/api/auth";
 import { getOrCreateConversation } from "../../services/api/chat";
 import {
@@ -12,13 +19,6 @@ import {
 } from "../../services/api/friends";
 import { sendChallenge } from "../../services/api/game";
 import { getProfileByUsername } from "../../services/api/profile";
-import type {
-	AchievementsState,
-	GameState,
-	MessagesState,
-	SocialState,
-	UserProfileState,
-} from "../../store/StateManager.ts";
 import { stateManager } from "../../store/StateManager.ts";
 import { Achievement } from "../../types/achievement";
 import { Friend } from "../../types/friend";
@@ -41,11 +41,6 @@ export default function UserProfilePage({
 }: {
 	isLoggedIn: boolean;
 }) {
-	console.log(
-		"UserProfilePage rendered with isLoggedIn:",
-		stateManager.getState<SocialState>("social")?.friends,
-		isLoggedIn,
-	);
 	const [isVisible, setIsVisible] = useState(false);
 	const [activeTab, setActiveTab] = useState("overview");
 	const [isFriend, setIsFriend] = useState(false);
@@ -56,11 +51,11 @@ export default function UserProfilePage({
 	const [isOwnProfile, setIsOwnProfile] = useState(false);
 	const [hasPendingRequest, setHasPendingRequest] = useState(false);
 
-	const currentUser = stateManager.getState<UserProfileState>("userProfile");
-	const gameState = stateManager.getState<GameState>("gameState");
-	const socialState = stateManager.getState<SocialState>("social");
-	const achievementsState =
-		stateManager.getState<AchievementsState>("achievements");
+	const currentUser = useUserProfile();
+	const gameState = useGameState();
+	const socialState = useSocialState();
+	const achievementsState = useAchievements();
+	const messagesState = useMessages();
 
 	const getUsername = () => {
 		const pathSegments = window.location.pathname
@@ -377,10 +372,8 @@ export default function UserProfilePage({
 				const conversation = await getOrCreateConversation(profileUser.id);
 
 				if (conversation) {
-					const messagesState =
-						stateManager.getState<MessagesState>("messages");
 					if (messagesState) {
-						stateManager.setState<MessagesState>("messages", {
+						stateManager.setState("messages", {
 							...messagesState,
 							activeChat: conversation.id,
 						});
