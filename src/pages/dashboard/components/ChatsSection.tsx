@@ -19,13 +19,12 @@ export default function ChatsSection() {
 	const isInitializedRef = useRef(false);
 	const input_ref = useRef<HTMLInputElement | null>(null);
 	const conversations = messagesState?.conversations || [];
+	const activeChat = messagesState?.activeChat;
 	const selectedConversation = conversations.find(
 		(conv) => conv.id === selectedConversationId,
 	);
 
 	useEffect(() => {
-		const activeChat = messagesState?.activeChat;
-
 		// Handle initialization or active chat change
 		if (conversations.length > 0 && (!isInitializedRef.current || activeChat)) {
 			const targetConversationId =
@@ -44,7 +43,7 @@ export default function ChatsSection() {
 				});
 			}
 		}
-	}, [conversations.length, messagesState?.activeChat]);
+	}, [conversations.length, activeChat]);
 
 	const handleConversationSelect = (conversationId: string) => {
 		setSelectedConversationId(conversationId);
