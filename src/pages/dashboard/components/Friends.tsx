@@ -11,8 +11,9 @@ import {
 	sendFriendRequest,
 } from "../../../services/api/friends";
 import { sendChallenge } from "../../../services/api/game";
+import { useSocialState } from "../../../hooks/useStates.ts";
 import { searchProfiles } from "../../../services/api/profile";
-import { type SocialState, stateManager } from "../../../store/StateManager.ts";
+import { stateManager } from "../../../store/StateManager.ts";
 import { ProfileOverview } from "../../../types/profile";
 import { useNotifications } from "../../use-notification.tsx";
 export default function Friends({
@@ -28,9 +29,9 @@ export default function Friends({
 	const [showConfirmRemove, setShowConfirmRemove] = useState<string | null>(
 		null,
 	);
-	const social = stateManager.getState("social") as SocialState;
-	const friendRequests = social.friendRequests.received;
-	const friends = social.friends;
+	const social = useSocialState();
+	const friendRequests = social?.friendRequests.received || [];
+	const friends = social?.friends || [];
 	const { addNotification } = useNotifications();
 
 	function handleAddFriends() {
@@ -202,15 +203,12 @@ export default function Friends({
 							{searchResults.length > 0 && (
 								<div className="space-y-3">
 									{searchResults.map((user) => {
-										const socialState = stateManager.getState(
-											"social",
-										) as SocialState;
-										const isAlreadyFriend = socialState.friends.some(
+										const isAlreadyFriend = friends.some(
 											(f) => f.id === user.id,
 										);
-										const isRequestSent = socialState.friendRequests.sent.some(
+										const isRequestSent = social?.friendRequests.sent.some(
 											(e) => e.user.id === user.id,
-										);
+										) || false;
 
 										return (
 											<div

@@ -224,11 +224,6 @@ class StateManager {
 			unreadCount: 0,
 			activeChat: undefined,
 		});
-		this.setState("messages", {
-			conversations: [],
-			unreadCount: 0,
-			activeChat: undefined,
-		});
 
 		this.emit("USER_DATA_LOADED", { user, achievements });
 	}
@@ -382,10 +377,16 @@ class StateManager {
 				losses: prev.stats.losses + (gameResult.result === "loss" ? 1 : 0),
 			};
 
+			const updatedHistory = [...prev.history, gameResult];
+			// Keep only the last 50 games
+			const history = updatedHistory.length > 50 
+				? updatedHistory.slice(-50) 
+				: updatedHistory;
+
 			return {
 				...prev,
 				stats: newStats,
-				history: [...prev.history.slice(0, 49), gameResult],
+				history,
 			};
 		});
 	}
@@ -514,6 +515,28 @@ class StateManager {
 			...profileData,
 		}));
 	}
+
+	private sortConversationsByReceiverAndTime(
+		conversations: Conversation[],
+		receiverId: string,
+	): Conversation[] {
+		return conversations.sort((a, b) => {
+			const aHasReceiver = a.members.find(
+				(member) => member.id === receiverId,
+			);
+			const bHasReceiver = b.members.find(
+				(member) => member.id === receiverId,
+			);
+
+			if (aHasReceiver && !bHasReceiver) return -1;
+			if (!aHasReceiver && bHasReceiver) return 1;
+
+			const aTime = new Date(a.lastMessage?.createdAt || 0).getTime();
+			const bTime = new Date(b.lastMessage?.createdAt || 0).getTime();
+			return bTime - aTime;
+		});
+	}
+
 	private addMessage(message: Message) {
 		console.error("Adding sent message:", message);
 		this.updateState<MessagesState>("messages", (prev) => {
@@ -533,21 +556,10 @@ class StateManager {
 					: conv,
 			);
 
-			const sortedConversations = updatedConversations.sort((a, b) => {
-				const aHasReceiver = a.members.find(
-					(member) => member.id === message.receiverId,
-				);
-				const bHasReceiver = b.members.find(
-					(member) => member.id === message.receiverId,
-				);
-
-				if (aHasReceiver && !bHasReceiver) return -1;
-				if (!aHasReceiver && bHasReceiver) return 1;
-
-				const aTime = new Date(a.lastMessage?.createdAt || 0).getTime();
-				const bTime = new Date(b.lastMessage?.createdAt || 0).getTime();
-				return bTime - aTime;
-			});
+			const sortedConversations = this.sortConversationsByReceiverAndTime(
+				updatedConversations,
+				message.receiverId,
+			);
 
 			return {
 				...prev,
@@ -578,21 +590,10 @@ class StateManager {
 					: conv,
 			);
 
-			const sortedConversations = updatedConversations.sort((a, b) => {
-				const aHasReceiver = a.members.find(
-					(member) => member.id === payload.receiverId,
-				);
-				const bHasReceiver = b.members.find(
-					(member) => member.id === payload.receiverId,
-				);
-
-				if (aHasReceiver && !bHasReceiver) return -1;
-				if (!aHasReceiver && bHasReceiver) return 1;
-
-				const aTime = new Date(a.lastMessage?.createdAt || 0).getTime();
-				const bTime = new Date(b.lastMessage?.createdAt || 0).getTime();
-				return bTime - aTime;
-			});
+			const sortedConversations = this.sortConversationsByReceiverAndTime(
+				updatedConversations,
+				payload.receiverId,
+			);
 
 			return {
 				...prev,

@@ -79,7 +79,7 @@ export function useTournaments() {
 	Miku.useEffect(() => {
 		return stateManager.subscribe("tournaments", setTournaments);
 	}, []);
-	return [...(tournaments || [])];
+	return tournaments || [];
 }
 
 export function useNotifications() {
