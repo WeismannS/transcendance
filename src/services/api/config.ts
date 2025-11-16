@@ -1,5 +1,5 @@
-export const API_URL = "https://localhost:3000";
-export const WS_URL = "wss://localhost:3000";
+export const API_URL = process.env.API_URL
+export const WS_URL = process.env.WSS_URL
 
 export async function checkAuthStatus(): Promise<boolean> {
 	try {
