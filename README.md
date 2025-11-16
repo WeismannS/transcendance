@@ -1,5 +1,6 @@
 # Transcendance — Frontend
-<video controls src=".github/assets/transcendance.mp4" title="Title"></video>
+<video controls src="https://github.com/user-attachments/assets/89ccf654-f00b-473e-ac9e-316b53aac872" title="Title"></video>
+
 This repository is the frontend for the [Transcendance](https://github.com/N1ghtm4reee/ft_transcendence-x10) project. It is written in TypeScript using my custom [Miku](https://github.com/WeismannS/miku) framework with tailwindcss for styling, and Bun for bundling and running local development servers.
 
 ---
